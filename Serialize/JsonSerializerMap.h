@@ -116,6 +116,27 @@ class JsonContainerImportAction<SerializeInfo, std::map<std::string, V>, typenam
         virtual void doAction(ThorsAnvil::Json::ScannerSax&, ThorsAnvil::Json::Key const&, JsonValue const&)
         {}
 };
+
+/* This is a specialization for maps that have string values. I'm not sure why
+ * it doesn't work with the existing code, but we found that this fixed it */
+template<typename SerializeInfo>
+class JsonContainerImportAction<SerializeInfo, std::map<std::string,std::string>, typename std::map<std::string,std::string>::value_type, false, true>: public ThorsAnvil::Json::SaxAction
+{
+    std::map<std::string,std::string>&            destination;
+    public:
+        JsonContainerImportAction(std::map<std::string,std::string>& dst)
+            : destination(dst)
+        {}
+
+        virtual void doPreAction(ThorsAnvil::Json::ScannerSax&, ThorsAnvil::Json::Key const&)
+        {}
+        // Read fundamental type directly into the member
+        virtual void doAction(ThorsAnvil::Json::ScannerSax&, ThorsAnvil::Json::Key const& key, JsonValue const& value)
+        {
+            destination[key.mapKey] = value.getValue<std::string>();
+        }
+};
+
 template<typename V>
 struct JsonSerializeTraits<std::map<std::string, V> >
 {

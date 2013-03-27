@@ -52,6 +52,13 @@ TEST(JsonSerialize, JsonMapWithMapNotStringKey)
     ValidateSerializedStrings(input, result);
 }
 
+TEST(JsonSerialize, JsonMapWithStringValues)
+{
+    std::string input  = "{\"action\": \"foo\", \"widget\": \"bar\"}";
+    std::string result = testAction<std::map<std::string, std::string> >(input);
+    ValidateSerializedStrings(input, result);
+}
+
 TEST(JsonSerialize, JsonArrayOfPOD)
 {
     std::string input   = "[ 1, 2, 3, 4, 5, 6, 7]";
