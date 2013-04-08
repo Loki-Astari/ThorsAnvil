@@ -76,7 +76,7 @@
 #include <iostream>
 #include <sstream>
 
-#if(__cplusplus > 199711L)
+#ifdef DCLOUD_USE_CPLUSPLUS11
 
 /* In C++11 use Vardc macros to help reduce boilerplate */
 
