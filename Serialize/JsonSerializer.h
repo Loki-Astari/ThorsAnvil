@@ -76,7 +76,7 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef DCLOUD_USE_CPLUSPLUS11
+#ifdef CLOUD_USE_CPLUSPLUS11
 
 /* In C++11 use Vardc macros to help reduce boilerplate */
 
@@ -117,9 +117,9 @@ namespace Json       {                                  \
         typedef parent              ParentType;         \
         static JsonSerializeType const type = Map;      \
                                                         \
-        BUILD_SERIALIZE_TYPES(__VA_ARGS__)              \
+        THOR_BUILD_SERIALIZE_TYPES(__VA_ARGS__)         \
          typedef boost::mpl::vector<                    \
-        BUILD_SERIALIZE_INFO(__VA_ARGS__)               \
+        THOR_BUILD_SERIALIZE_INFO(__VA_ARGS__)          \
         > SerializeInfo;                                \
     };                                                  \
 }}} 
