@@ -93,7 +93,7 @@
 #define THOR_BUILD_SERIALIZE_CHAIN_INC(MACRO, MACRO_END, SIZE, ...) THOR_BUILD_SERIALIZE_CHAIN  ## SIZE (MACRO, MACRO_END, __VA_ARGS__)
 #define THOR_BUILD_SERIALIZE_CHAIN(MACRO, SIZE, ...)     THOR_BUILD_SERIALIZE_CHAIN_INC(THOR_BUILD_SERIALIZE_ ## MACRO, THOR_BUILD_SERIALIZE_ ## MACRO ## _END, SIZE, __VA_ARGS__)
 
-#define THOR_BUILD_SERIALIZE_COUNT_ARGS(...)             THOR_BUILD_SERIALIZE_COUNT_ARGS_ACT( __VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1 )
+#define THOR_BUILD_SERIALIZE_COUNT_ARGS(...)             THOR_BUILD_SERIALIZE_COUNT_ARGS_ACT( __VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 )
 #define THOR_BUILD_SERIALIZE_COUNT_ARGS_ACT(_1,_2,_3,_4,_5,_6,_7,_8,_9,N,...)   N
 
 #define THOR_BUILD_SERIALIZE_TYPES(...)                  THOR_BUILD_SERIALIZE_CHAIN(TYPES_VAL, THOR_BUILD_SERIALIZE_COUNT_ARGS( __VA_ARGS__), __VA_ARGS__ )
@@ -511,14 +511,14 @@ template<typename T>
 struct MemberScanner<T, T>
 {
     // A normal type with no SerializeInfo has no members thus no need to register callbacks.
-    void operator()(ThorsAnvil::Json::ScannerSax& scanner, T& destination)
+    void operator()(ThorsAnvil::Json::ScannerSax& /*scanner*/, T& /*destination*/)
     {}
 };
 template<typename T>
 struct MemberScanner<T, void>
 {
     // A normal type with no SerializeInfo has no members thus no need to register callbacks.
-    void operator()(ThorsAnvil::Json::ScannerSax& scanner, T& destination)
+    void operator()(ThorsAnvil::Json::ScannerSax& /*scanner*/, T& /*destination*/)
     {}
 };
 
@@ -556,7 +556,7 @@ struct MemberPrinter<T, T>
 template<typename T>
 struct MemberPrinter<T, void>
 {
-    void operator()(std::ostream& stream, T const& source)
+    void operator()(std::ostream& /*stream*/, T const& /*source*/)
     {}
 };
 

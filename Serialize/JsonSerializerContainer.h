@@ -44,7 +44,7 @@ class JsonContainerImportAction<SerializeInfo, C, CV, false, true>: public Thors
             : destination(dst)
         {}
 
-        virtual void doPreAction(ThorsAnvil::Json::ScannerSax& parser, ThorsAnvil::Json::Key const& key)
+        virtual void doPreAction(ThorsAnvil::Json::ScannerSax& parser, ThorsAnvil::Json::Key const& /*key*/)
         {
             boost::mpl::for_each<typename JsonSerializeTraits<ValueType>::SerializeInfo>(MPLForEachActivateItem<ValueType, ThorsAnvil::Json::ScannerSax>(parser, nextValue));
         }
@@ -65,10 +65,10 @@ class JsonContainerImportAction<SerializeInfo, C, CV, true, true>: public ThorsA
             : destination(dst)
         {}
 
-        virtual void doPreAction(ThorsAnvil::Json::ScannerSax& parser, ThorsAnvil::Json::Key const& key)
+        virtual void doPreAction(ThorsAnvil::Json::ScannerSax& /*parser*/, ThorsAnvil::Json::Key const& /*key*/)
         {}
         // Read fundamental type directly into the member
-        virtual void doAction(ThorsAnvil::Json::ScannerSax&, ThorsAnvil::Json::Key const& key, JsonValue const& value)
+        virtual void doAction(ThorsAnvil::Json::ScannerSax&, ThorsAnvil::Json::Key const& /*key*/, JsonValue const& value)
         {
             destination.insert(value.getValue<typename ContainerTraits<C>::DataType>());
         }
