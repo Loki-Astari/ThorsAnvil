@@ -91,7 +91,7 @@ class JsonContainerImportAction<SerializeInfo, std::map<std::string,V>, typename
             : destination(dst)
         {}
 
-        virtual void doPreAction(ThorsAnvil::Json::ScannerSax& parser, ThorsAnvil::Json::Key const& key)
+        virtual void doPreAction(ThorsAnvil::Json::ScannerSax& /*parser*/, ThorsAnvil::Json::Key const& /*key*/)
         {}
         // Read fundamental type directly into the member
         virtual void doAction(ThorsAnvil::Json::ScannerSax&, ThorsAnvil::Json::Key const& key, JsonValue const& value)
