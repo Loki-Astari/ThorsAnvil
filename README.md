@@ -78,7 +78,7 @@ https://gist.github.com/Loki-Astari/8201956
      */  
     JsonSerializeTraits_MAKE(void, MyClass, data1, data2, data3)
     
-This allaws us to import and export object of the abvove class really easily.
+This allows us to import and export object of the abvove class really easily.
 
     MyCLass   data;
     data.data1  = 56;
