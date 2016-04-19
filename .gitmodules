@@ -1,3 +1,3 @@
 [submodule "build"]
 	path = build
-	url = git@github.com:Loki-Astari/ThorMaker.git
+	url = https://github.com/Loki-Astari/ThorMaker.git
