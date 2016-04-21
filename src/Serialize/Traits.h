@@ -19,13 +19,6 @@
 #include <tuple>
 
 /*
- * Macros for counting the number of arguments
- * Currently set up for a max of 20.
- */
-#define NUM_ARGS(...)  NUM_ARGS_(0, __VA_ARGS__, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 09, 08, 07, 06, 05, 04, 03, 02, 01, 00, I)
-#define NUM_ARGS_(Zero, One, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, I16, I17, I18, I19, I20, A, ...)  A
-
-/*
  * Macros to quote the parameter
  * Used below by the actions.
  */
@@ -40,6 +33,13 @@
 #define EXPAND(Act, P1, P2)             EXPAND_(Act(P1, P2))
 
 /*
+ * Macros for counting the number of arguments
+ * Currently set up for a max of 20.
+ */
+#define NUM_ARGS(...)  EXPAND_(NUM_ARGS_(0, __VA_ARGS__, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 09, 08, 07, 06, 05, 04, 03, 02, 01, 00, I))
+#define NUM_ARGS_(Zero, One, I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, I16, I17, I18, I19, I20, A, ...)  A
+
+/*
  * Macros that that applies the action `Act` (a two parameter macro)
  * To P1 (first argument)
  * and a list of second arguments (placing a comma between each macro).
@@ -48,30 +48,29 @@
  */
 #define REP_N(Act, P1, ...)             REP_OF_N(Act, P1, NUM_ARGS(__VA_ARGS__), __VA_ARGS__)
 #define REP_OF_N(Act, P1, Count, ...)   REP_OF_N_(Act, P1, Count, __VA_ARGS__)
-#define REP_OF_N_(Act, P1, Count, ...)  REP_OF_ ## Count(Act, P1, __VA_ARGS__)
+#define REP_OF_N_(Act, P1, Count, ...)  EXPAND_(REP_OF_ ## Count(Act, P1, __VA_ARGS__))
 
-#define REP_OF_20(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_19(Act, P1, __VA_ARGS__)
-#define REP_OF_19(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_18(Act, P1, __VA_ARGS__)
-#define REP_OF_18(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_17(Act, P1, __VA_ARGS__)
-#define REP_OF_17(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_16(Act, P1, __VA_ARGS__)
-#define REP_OF_16(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_15(Act, P1, __VA_ARGS__)
-#define REP_OF_15(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_14(Act, P1, __VA_ARGS__)
-#define REP_OF_14(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_13(Act, P1, __VA_ARGS__)
-#define REP_OF_13(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_12(Act, P1, __VA_ARGS__)
-#define REP_OF_12(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_11(Act, P1, __VA_ARGS__)
-#define REP_OF_11(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_10(Act, P1, __VA_ARGS__)
-#define REP_OF_10(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_09(Act, P1, __VA_ARGS__)
-#define REP_OF_09(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_08(Act, P1, __VA_ARGS__)
-#define REP_OF_08(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_07(Act, P1, __VA_ARGS__)
-#define REP_OF_07(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_06(Act, P1, __VA_ARGS__)
-#define REP_OF_06(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_05(Act, P1, __VA_ARGS__)
-#define REP_OF_05(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_04(Act, P1, __VA_ARGS__)
-#define REP_OF_04(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_03(Act, P1, __VA_ARGS__)
-#define REP_OF_03(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_02(Act, P1, __VA_ARGS__)
-#define REP_OF_02(Act, P1, P2, ...)     EXPAND(Act, P1, P2), REP_OF_01(Act, P1, __VA_ARGS__)
+#define REP_OF_20(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_19(Act, P1, __VA_ARGS__))
+#define REP_OF_19(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_18(Act, P1, __VA_ARGS__))
+#define REP_OF_18(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_17(Act, P1, __VA_ARGS__))
+#define REP_OF_17(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_16(Act, P1, __VA_ARGS__))
+#define REP_OF_16(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_15(Act, P1, __VA_ARGS__))
+#define REP_OF_15(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_14(Act, P1, __VA_ARGS__))
+#define REP_OF_14(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_13(Act, P1, __VA_ARGS__))
+#define REP_OF_13(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_12(Act, P1, __VA_ARGS__))
+#define REP_OF_12(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_11(Act, P1, __VA_ARGS__))
+#define REP_OF_11(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_10(Act, P1, __VA_ARGS__))
+#define REP_OF_10(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_09(Act, P1, __VA_ARGS__))
+#define REP_OF_09(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_08(Act, P1, __VA_ARGS__))
+#define REP_OF_08(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_07(Act, P1, __VA_ARGS__))
+#define REP_OF_07(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_06(Act, P1, __VA_ARGS__))
+#define REP_OF_06(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_05(Act, P1, __VA_ARGS__))
+#define REP_OF_05(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_04(Act, P1, __VA_ARGS__))
+#define REP_OF_04(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_03(Act, P1, __VA_ARGS__))
+#define REP_OF_03(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_02(Act, P1, __VA_ARGS__))
+#define REP_OF_02(Act, P1, P2, ...)     EXPAND(Act, P1, P2), EXPAND_(REP_OF_01(Act, P1, __VA_ARGS__))
 #define REP_OF_01(Act, P1, P2, One)     EXPAND(Act, P1, P2)
-#define REP_OF_00(Act, P1, One)         Last_ ## Act(P1)
-
+#define REP_OF_00(Act, P1, One)         EXPAND_(Last_ ## Act(P1))
 
 /*
  * The actions we apply with REP_*
@@ -119,8 +118,16 @@ static_assert(                                                                  
     "The macro ThorsAnvil_MakeTrait must be used outside all namespace."                            \
 )
 
-#define ThorsAnvil_MakeTrait(...)                                       \
-    ThorsAnvil_MakeTrait_Base(, Map, __VA_ARGS__, 1)
+#ifdef _MSC_VER
+	#define LEFT_PARENTHESIS (
+	#define RIGHT_PARENTHESIS )
+	#define PASS_VAL(...) LEFT_PARENTHESIS __VA_ARGS__ RIGHT_PARENTHESIS
+	#define ThorsAnvil_MakeTrait(...)                                   \
+		ThorsAnvil_MakeTrait_Base PASS_VAL(, Map, __VA_ARGS__ , 1)
+#else
+	#define ThorsAnvil_MakeTrait(...)                                   \
+		ThorsAnvil_MakeTrait_Base(, Map, __VA_ARGS__ , 1)
+#endif
 
 #define ThorsAnvil_ExpandTrait_With_Ext(ParentType, DataType, ...)      \
     static_assert(                                                      \
@@ -233,4 +240,3 @@ template<> class Traits<std::string>            {public: static constexpr TraitT
 }
 
 #endif
-
