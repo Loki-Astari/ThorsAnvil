@@ -125,12 +125,12 @@ class PrinterInterface
 
 template<typename T>
 T scanValue(char const* buffer, char** end);
-template<>  inline short              scanValue<short>(char const* buffer, char** end)              {return std::strtol(buffer, end, 10);}
+template<>  inline short              scanValue<short>(char const* buffer, char** end)              {return (short)std::strtol(buffer, end, 10);}
 template<>  inline int                scanValue<int>(char const* buffer, char** end)                {return std::strtol(buffer, end, 10);}
 template<>  inline long               scanValue<long>(char const* buffer, char** end)               {return std::strtol(buffer, end, 10);}
 template<>  inline long long          scanValue<long long>(char const* buffer, char** end)          {return std::strtoll(buffer, end, 10);}
 
-template<>  inline unsigned short     scanValue<unsigned short>(char const* buffer, char** end)     {return std::strtoul(buffer, end, 10);}
+template<>  inline unsigned short     scanValue<unsigned short>(char const* buffer, char** end)     {return (short)std::strtoul(buffer, end, 10);}
 template<>  inline unsigned int       scanValue<unsigned int>(char const* buffer, char** end)       {return std::strtoul(buffer, end, 10);}
 template<>  inline unsigned long      scanValue<unsigned long>(char const* buffer, char** end)      {return std::strtoul(buffer, end, 10);}
 template<>  inline unsigned long long scanValue<unsigned long long>(char const* buffer, char** end) {return std::strtoull(buffer, end, 10);}
@@ -263,12 +263,14 @@ inline DeSerializer::DeSerializer(ParserInterface& parser, bool root)
 }
 inline DeSerializer::~DeSerializer()
 {
+#ifndef _MSC_VER	// Destructor shall not throw exception.
     if (root)
     {
         if (parser.getToken() != ParserToken::DocEnd)
         {   throw std::runtime_error("ThorsAnvil::Serialize::DeSerializer::~DeSerializer: Expected Doc End");
         }
     }
+#endif
 }
 
 /* ------------ Serializer ------------------------- */
@@ -298,4 +300,3 @@ inline Serializer::~Serializer()
 #endif
 
 #endif
-
