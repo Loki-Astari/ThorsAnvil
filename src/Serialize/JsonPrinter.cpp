@@ -23,7 +23,7 @@ namespace
             {}
             void printSeporator(std::ostream& stream, bool key) const
             {
-                char const*(&seporator)[] = (!key && state.second == TraitType::Map)
+                char const** seporator = (!key && state.second == TraitType::Map)
                                             ? colon
                                             : (state.first != 0) ? comma : space;
                 stream << seporator[static_cast<int>(characteristics)];
@@ -179,4 +179,3 @@ void JsonPrinter::addValue(std::string const& value)
 {
     output << PrefixValue(characteristics, state.size(), state.back()) << '"' << value << '"';
 }
-
