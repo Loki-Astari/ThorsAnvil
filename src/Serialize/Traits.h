@@ -220,7 +220,7 @@ namespace ThorsAnvil
     namespace Serialize
     {
 
-enum class TraitType {Invalid, Parent, Value, Map, Array, Enum};
+enum class TraitType {Invalid, Parent, Value, Map, Array, Enum, Optional, Dynamic};
 template<typename T>
 class Traits
 {

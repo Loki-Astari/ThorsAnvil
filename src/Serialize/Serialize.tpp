@@ -418,6 +418,19 @@ class SerializeMember<T, M, TraitType::Value>
             printer.addValue(*(memberInfo.second));
         }
 };
+template<typename T, typename M>
+class SerializeMember<T, M, TraitType::Optional>
+{
+    public:
+    SerializeMember(PrinterInterface& printer, T const& object, std::pair<char const*, M T::*> const& memberInfo)
+    {
+        if (object.*(memberInfo.second)) {
+            printer.addKey(memberInfo.first);
+            Serializer      serialzier(printer, false);
+            serialzier.print(*(object.*(memberInfo.second)));
+        }
+    }
+};
 
 template<typename T, typename M>
 SerializeMember<T, M> make_SerializeMember(PrinterInterface& printer, T const& object, std::pair<char const*, M*> const& memberInfo)
