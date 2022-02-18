@@ -510,7 +510,6 @@ ALT_REP_OF_N(THOR_CHECK_ASSERT, DataType, , , Count)
 #define ThorsAnvil_RegisterPolyMorphicType_Internal(DataType, ...)      \
     ThorsAnvil_RegisterPolyMorphicType(DataType)
 
-#pragma vera-pushoff
 #define ThorsAnvil_RegisterPolyMorphicType(DataType)                    \
 namespace ThorsAnvil { namespace Serialize {                            \
 namespace                                                               \
@@ -518,7 +517,6 @@ namespace                                                               \
     ThorsAnvil_InitPolyMorphicType<DataType>   THOR_UNIQUE_NAME ( # DataType); \
 }                                                                       \
 }}
-#pragma vera-pop
 
 #define ThorsAnvil_Parent(Count, ParentType, DataType, ...) using Parent = ParentType; \
                                                             using Root   = typename GetRootType<ParentType>::Root;

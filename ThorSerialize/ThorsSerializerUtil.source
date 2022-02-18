@@ -3,9 +3,7 @@
 #include "ThorsIOUtil/Utility.h"
 #include <string>
 
-#pragma vera-pushoff
 using namespace std::string_literals;
-#pragma vera-pop
 
 using namespace ThorsAnvil::Serialize;
 
