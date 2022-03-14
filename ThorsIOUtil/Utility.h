@@ -91,7 +91,7 @@ inline std::string errnoToName()
         THOR_CASE( ECONNABORTED );
         THOR_CASE( ECONNRESET );
         THOR_CASE( EDESTADDRREQ );
-        THOR_CASE( EDQUOT );
+        //THOR_CASE( EDQUOT );
         THOR_CASE( EEXIST );
         THOR_CASE( EFAULT );
         THOR_CASE( EFBIG );
