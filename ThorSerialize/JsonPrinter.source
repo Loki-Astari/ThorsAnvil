@@ -1,6 +1,7 @@
 #include "SerializeConfig.h"
 #include "JsonPrinter.h"
 #include "ThorsIOUtil/Utility.h"
+#include "ThorsLogging/ThorsLogging.h"
 #include <iomanip>
 #include <algorithm>
 
@@ -136,10 +137,9 @@ void JsonPrinter::closeMap()
 {
     if (state.back().second != TraitType::Map)
     {
-        throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::JsonPrinter", "closeMap",
-                                                               "Invalid call to closeMap(): Currently not in a map")
-                                                              );
+        ThorsLogAndThrow("ThorsAnvil::Serialize::JsonPrinter",
+                         "closeMap",
+                         "Invalid call to closeMap(): Currently not in a map");
     }
     state.pop_back();
     output << PrefixMapClose(config.characteristics, state.size(), state.back()) << "}";
@@ -155,10 +155,9 @@ void JsonPrinter::closeArray()
 {
     if (state.back().second != TraitType::Array)
     {
-        throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::JsonPrinter", "closeArray",
-                                                                "Invalid call to closeArray(): Currently not in an array")
-                                                              );
+        ThorsLogAndThrow("ThorsAnvil::Serialize::JsonPrinter",
+                         "closeArray",
+                         "Invalid call to closeArray(): Currently not in an array");
     }
     state.pop_back();
     output << PrefixArrayClose(config.characteristics, state.size(), state.back()) << "]";
@@ -169,10 +168,9 @@ void JsonPrinter::addKey(std::string const& key)
 {
     if (state.back().second != TraitType::Map)
     {
-        throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::JsonPrinter", "addKey",
-                                                               "Invalid call to addKey(): Currently not in a map")
-                                                              );
+        ThorsLogAndThrow("ThorsAnvil::Serialize::JsonPrinter",
+                         "addKey",
+                         "Invalid call to addKey(): Currently not in a map");
     }
     output << PrefixKey(config.characteristics, state.size(), state.back()) << '"' << key << '"';
 }
@@ -218,6 +216,7 @@ HEADER_ONLY_INCLUDE void JsonPrinter::addValue(long double value)           {out
 HEADER_ONLY_INCLUDE void JsonPrinter::addValue(bool value)                  {output << PrefixValue(config.characteristics, state.size(), state.back()) << std::boolalpha << value;}
 
 HEADER_ONLY_INCLUDE void JsonPrinter::addValue(std::string const& value)    {output << PrefixValue(config.characteristics, state.size(), state.back()) << '"' << EscapeString(value) << '"';}
+HEADER_ONLY_INCLUDE void JsonPrinter::addValue(std::string_view const&value){output << PrefixValue(config.characteristics, state.size(), state.back()) << '"' << EscapeString(value) << '"';}
 HEADER_ONLY_INCLUDE void JsonPrinter::addRawValue(std::string const& value) {output << PrefixValue(config.characteristics, state.size(), state.back()) << value;}
 
 HEADER_ONLY_INCLUDE void JsonPrinter::addNull()                             {output << PrefixValue(config.characteristics, state.size(), state.back()) << "null";}

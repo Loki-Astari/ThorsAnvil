@@ -3,6 +3,7 @@
 #include "JsonLexemes.h"
 #include "UnicodeIterator.h"
 #include "ThorsIOUtil/Utility.h"
+#include "ThorsLogging/ThorsLogging.h"
 
 #include <limits>
 #include <cstring>
@@ -142,10 +143,9 @@ std::string JsonManualLexer::getRawString()
             {
                 if (next < 0x20)
                 {
-                    throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serializer::JsonManualLexer", "getRawString",
-                                                               "Strings should not contain control characters.")
-                                                              );
+                    ThorsLogAndThrow("ThorsAnvil::Serializer::JsonManualLexer",
+                                     "getRawString",
+                                     "Strings should not contain control characters.");
                 }
                 result.push_back(next);
                 last = next;
@@ -160,10 +160,9 @@ std::string JsonManualLexer::getRawString()
         }
         default:
         {
-            throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serializer::JsonManualLexer", "getRawString",
-                                                               "Don't know how to retrieve the RAW data from the JSON input")
-                                                              );
+            ThorsLogAndThrow("ThorsAnvil::Serializer::JsonManualLexer",
+                             "getRawString",
+                             "Don't know how to retrieve the RAW data from the JSON input");
         }
     }
 }
@@ -186,10 +185,11 @@ bool JsonManualLexer::getLastBool()
             readFalse();
             return lastBool;
         default:
-            throw std::runtime_error(
-                            ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::JsonParser", "getLastBool",
-                                                                   "The last value was not a bool")
-                                                                  );
+        {
+            ThorsLogAndThrow("ThorsAnvil::Serialize::JsonParser",
+                             "getLastBool",
+                             "The last value was not a bool");
+        }
     }
 }
 
@@ -283,8 +283,7 @@ void JsonManualLexer::checkFixed(char const* check, std::size_t size)
 HEADER_ONLY_INCLUDE
 void JsonManualLexer::error()
 {
-    throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::JsonManualLexer", "error",
-                                                              "Invalid Character in Lexer")
-                                                              );
+    ThorsLogAndThrow("ThorsAnvil::Serialize::JsonManualLexer",
+                     "error",
+                     "Invalid Character in Lexer");
 }

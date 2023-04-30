@@ -2,6 +2,7 @@
 #define THORS_ANVIL_SERIALIZER_THORSSERIALIZERUTIL_H
 
 #include "ThorsIOUtil/Utility.h"
+#include "ThorsLogging/ThorsLogging.h"
 #include <type_traits>
 #include <string>
 #include <iostream>
@@ -16,13 +17,16 @@ namespace ThorsAnvil
 
 struct EscapeString
 {
-    std::string const& value;
+    std::string_view    value;
     EscapeString(std::string const& value)
+        : value(value)
+    {}
+    EscapeString(std::string_view const& value)
         : value(value)
     {}
     friend std::ostream& operator<<(std::ostream& stream, EscapeString const& data)
     {
-        std::string const& value = data.value;
+        std::string_view const& value = data.value;
 
         static auto isEscape = [](char c)
         {
@@ -108,10 +112,10 @@ extern std::string const defaultPolymorphicMarker;
 /*
  * Defines the generic type that all serialization types can expand on
  */
-enum class TraitType {Invalid, Parent, Value, Map, Array, Enum, Pointer, Custom_Depricated, Custom_Serialize};
+enum class TraitType {Invalid, Parent, Value, Map, Array, Enum, Pointer, Reference, Custom_Depricated, Custom_Serialize};
 enum class FormatType{Json, Yaml, Bson};
 
-template<typename T>
+template<typename T, typename SFINE = void>
 class Traits;
 
 template <typename, typename = void>
@@ -313,6 +317,7 @@ class PrinterInterface
         virtual void    addValue(bool)                  = 0;
 
         virtual void    addValue(std::string const&)    = 0;
+        virtual void    addValue(std::string_view const&) = 0;
 
         virtual void    addRawValue(std::string const&) = 0;
 
@@ -338,6 +343,7 @@ class PrinterInterface
         virtual std::size_t getSizeValue(long double)               {return 0;}
         virtual std::size_t getSizeValue(bool)                      {return 0;}
         virtual std::size_t getSizeValue(std::string const&)        {return 0;}
+        virtual std::size_t getSizeValue(std::string_view const&)   {return 0;}
         virtual std::size_t getSizeRaw(std::size_t)                 {return 0;}
 
         std::ostream& stream() {return output;}
@@ -542,17 +548,12 @@ auto tryGetSizeFromSerializeType(PrinterInterface& printer, T const& value, int)
     return printer.getSizeRaw(size);
 }
 
-class CriticalException: public std::runtime_error
-{
-    using runtime_error::runtime_error;
-};
 template<typename T>
 auto tryGetSizeFromSerializeType(PrinterInterface&, T const&, long) -> std::size_t
 {
-    throw CriticalException(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize", "tryGetSizeFromSerializeType",
-                                                               "BSON backward compatibility. See comments in function.")
-                                                              );
+    ThorsLogAndThrowCritical("ThorsAnvil::Serialize",
+                             "tryGetSizeFromSerializeType",
+                             "BSON backward compatibility. See comments in function.");
     // This function is needed for backward compatibility to make things compile without
     // requiring user code to be changed.
     //
@@ -593,5 +594,9 @@ auto tryGetSizeFromSerializeType(PrinterInterface&, T const&, long) -> std::size
 
     }
 }
+
+#if defined(HEADER_ONLY) && HEADER_ONLY == 1
+#include "ThorsSerializerUtil.source"
+#endif
 
 #endif

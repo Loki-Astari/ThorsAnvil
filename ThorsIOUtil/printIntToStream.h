@@ -7,8 +7,10 @@
 #include <ostream>
 #include <cmath>
 
-namespace ThorsAnvil::IOUtil
+namespace ThorsAnvil
 {
+    namespace IOUtil
+    {
 
 inline long long            absm(long long arg)            {return std::abs(arg);}
 inline long                 absm(long arg)                 {return std::abs(arg);}
@@ -129,6 +131,7 @@ void printIntToStream(std::ostream& s, T arg, FormatInfo const& info)
     }
 }
 
+    }
 }
 
 #endif

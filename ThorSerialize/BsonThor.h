@@ -17,6 +17,7 @@
 #include "Importer.h"
 #include "SerUtil.h"
 #include "ThorsIOUtil/Utility.h"
+#include "ThorsLogging/ThorsLogging.h"
 
 namespace ThorsAnvil
 {
@@ -48,6 +49,12 @@ struct BsonBaseTypeGetter<T, TraitType::Array>
     static void validate(T const&){}
 };
 template<typename T>
+struct BsonBaseTypeGetter<T, TraitType::Reference>
+{
+    static constexpr BsonContainer value = BsonContainer::Array;
+    static void validate(T const&){}
+};
+template<typename T>
 struct BsonBaseTypeGetter<T, TraitType::Pointer>
 {
     using ElementType = typename std::pointer_traits<T>::element_type;
@@ -56,10 +63,9 @@ struct BsonBaseTypeGetter<T, TraitType::Pointer>
     {
         if (!pointer)
         {
-            throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::BsonBaseTypeGetter<T, Pointer>", "validate",
-                                                               "Bson does not support serialization of null at the top level")
-                                                              );
+            ThorsLogAndThrow("ThorsAnvil::Serialize::BsonBaseTypeGetter<T, Pointer>",
+                             "validate",
+                             "Bson does not support serialization of null at the top level");
         }
     }
 };
@@ -99,6 +105,22 @@ Importer<Bson, T> bsonImporter(T& value, ParserInterface::ParserConfig config = 
     return Importer<Bson, T>(value, config);
 }
 
+// @function-api
+// @param value                     The object to be serialized.
+// @param config.characteristics    'Default': uses Config/Stream depending on global config. 'Config':  Is verbose and logical. 'Stream':  Remove all white space.
+// @param config.polymorphicMarker  Jason object name for holding the polymorphic class name of the type. Default: __type
+// @param config.catchExceptions    'false:    exceptions propogate.   'true':   parsing exceptions are stopped.
+// @return                          The size of the object that would be put on the stream in bytes.
+template<typename T>
+std::size_t bsonGetPrintSize(T const& value, PrinterInterface::PrinterConfig config = PrinterInterface::PrinterConfig{})
+{
+    config.parserInfo = static_cast<long>(BsonBaseTypeGetter<T>::value);
+    BsonBaseTypeGetter<T>::validate(value);
+
+    std::stringstream         fakeStream;
+    typename Bson::Printer    printer(fakeStream, config);
+    return Traits<T>::getPrintSize(printer, value, false);
+}
     }
 }
 

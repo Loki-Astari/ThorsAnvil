@@ -11,7 +11,6 @@
  *      std::cin  >> yamlImporter(object); // converts Yaml to a C++ object from an input stream
  */
 
-#ifdef HAVE_YAML
 
 #include "YamlParser.h"
 #include "YamlPrinter.h"
@@ -69,5 +68,4 @@ Importer<Yaml, T> yamlImport(T& value, ParserInterface::ParserConfig config = Pa
     }
 }
 
-#endif
 #endif

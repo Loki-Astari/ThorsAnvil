@@ -4,8 +4,10 @@
 #include "FormatInfo.h"
 #include <iostream>
 
-namespace ThorsAnvil::IOUtil
+namespace ThorsAnvil
 {
+    namespace IOUtil
+    {
 
 // @function-internal
 template<typename T>
@@ -21,6 +23,7 @@ void saveToStream(std::ostream& s, Dynamic pos, int const& size)
     s.iword(static_cast<int>(pos)) = size;
 }
 
+    }
 }
 
 #endif

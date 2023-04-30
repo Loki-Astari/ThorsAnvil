@@ -2,7 +2,6 @@
 #define THORS_ANVIL_SERIALIZE_YAML_PRINTER_H
 
 #include <functional>
-#ifdef  HAVE_YAML
 
 #include "Serialize.h"
 #include <yaml.h>
@@ -55,6 +54,7 @@ class YamlPrinter: public PrinterInterface
         virtual void addValue(bool value)                   override    {emit(value?"true":"false");}
 
         virtual void addValue(std::string const& value)     override    {emit(value);}
+        virtual void addValue(std::string_view const& value)override    {emit(std::string(value));}
 
         virtual void addRawValue(std::string const& value)  override    {emit(value);}
 
@@ -68,5 +68,4 @@ class YamlPrinter: public PrinterInterface
 #include "YamlPrinter.source"
 #endif
 
-#endif
 #endif

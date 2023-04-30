@@ -6,6 +6,7 @@
  */
 
 #include "Serialize.h"
+#include "ThorsLogging/ThorsLogging.h"
 
 namespace ThorsAnvil
 {
@@ -32,19 +33,33 @@ class Exporter
 
                 serializer.print(data.value);
             }
-            catch (ThorsAnvil::Serialize::CriticalException const&)
+            catch (ThorsAnvil::Logging::CriticalException const& e)
             {
+                ThorsCatchMessage("ThorsAnvil::Serialize::Exporter", "operator<<", e.what());
+                ThorsRethrowMessage("ThorsAnvil::Serialize::Exporter", "operator<<", e.what());
                 // This exception is thrown because you are using deprecated code
                 // that was not designed to be used with the bsonExporter
                 // This must be fixed. So we are forcing a re-throw becuase
                 // the generated binary object is probably bad.
                 throw;
             }
-            catch (...)
+            catch (std::exception const& e)
             {
+                ThorsCatchMessage("ThorsAnvil::Serialize::Exporter", "operator<<", e.what());
                 stream.setstate(std::ios::failbit);
                 if (!data.config.catchExceptions)
                 {
+                    ThorsRethrowMessage("ThorsAnvil::Serialize::Exporter", "operator<<", e.what());
+                    throw;
+                }
+            }
+            catch (...)
+            {
+                ThorsCatchMessage("ThorsAnvil::Serialize::Exporter", "operator<<", "UNKNOWN");
+                stream.setstate(std::ios::failbit);
+                if (!data.config.catchExceptions)
+                {
+                    ThorsRethrowMessage("ThorsAnvil::Serialize::Exporter", "operator>>", "UNKNOWN");
                     throw;
                 }
             }

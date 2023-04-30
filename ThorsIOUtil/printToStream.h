@@ -8,8 +8,10 @@
 #include <ostream>
 #include <type_traits>
 
-namespace ThorsAnvil::IOUtil
+namespace ThorsAnvil
 {
+    namespace IOUtil
+    {
 
 // @function-internal
 // Template method for everything apart from integers
@@ -78,7 +80,7 @@ void printToStream(std::ostream& s, char const* const& arg, FormatInfo const& in
     printStringToStream(s, arg, info);
 }
 
-
+    }
 }
 
 #endif

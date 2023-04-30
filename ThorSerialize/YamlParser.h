@@ -17,7 +17,6 @@
  *      will not cause an error.
  */
 
-#ifdef HAVE_YAML
 
 #include "Serialize.h"
 #include <yaml.h>
@@ -86,5 +85,4 @@ class YamlParser: public ParserInterface
 #include "YamlParser.source"
 #endif
 
-#endif
 #endif

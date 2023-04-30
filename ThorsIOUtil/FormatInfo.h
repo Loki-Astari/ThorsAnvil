@@ -4,18 +4,18 @@
 #include <iostream>
 #include <typeinfo>
 
-namespace ThorsAnvil::IOUtil
+namespace ThorsAnvil
 {
+    namespace IOUtil
+    {
 
 // Enum representing the Length, specifier and type information provided by the format string
-#pragma vera-pushoff
                                                                                 // printf doc http://www.cplusplus.com/reference/cstdio/printf/
 enum class Strictness{CPPTypeStrict, CTypeCompat};
 enum class Length    {none, hh, h, l, ll, j, z, t, L};                          // Use the same values as in printf documentation so it is easy to lookup
 enum class Specifier {d, i, u, o, x, X, f, F, e, E, g, G, a, A, c, s, p, n};    // Use the same values as in printf documentation so it is easy to lookup
 enum class Type      {Int, UInt, Float, Char, String, Pointer, Count};          // The type we are expecting
 enum class Dynamic   {None, Width, Precision, Both};                            // If width and/or precision are specified by parameter
-#pragma vera-pop
 
 using AllowedType = std::pair<std::type_info const*, int>;
 
@@ -53,6 +53,7 @@ struct FormatInfo
 
 };
 
+    }
 }
 
 #endif

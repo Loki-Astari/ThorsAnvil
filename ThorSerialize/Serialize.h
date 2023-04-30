@@ -32,8 +32,8 @@
  */
 
 #include "Traits.h"
-#include "CustomSerialization.h"
 #include "ThorsIOUtil/Utility.h"
+#include "ThorsLogging/ThorsLogging.h"
 #include <iostream>
 #include <utility>
 
@@ -133,7 +133,7 @@ class SerializeMemberValue
         SerializeMemberValue(Serializer& parent, PrinterInterface& printer, T const& object, std::pair<char const*, M T::*> const& memberInfo);
         SerializeMemberValue(Serializer& parent, PrinterInterface& printer, T const&, std::pair<char const*, M*> const& memberInfo);
     private:
-        void init(Serializer& parent, PrinterInterface& printer, char const* member, M const& object);
+        void init(Serializer& parent, PrinterInterface& printer, char const* member, T const& object, M const& value);
 };
 
 class Serializer
@@ -206,6 +206,12 @@ struct TraitsInfo<T, M, TraitType::Enum>
     using SerializeMember       = SerializeMemberValue<T, M, TraitType::Enum>;
 };
 template<typename T, typename M>
+struct TraitsInfo<T, M, TraitType::Reference>
+{
+    using DeSerializeMember     = DeSerializeMemberValue<T, M, TraitType::Reference>;
+    using SerializeMember       = SerializeMemberValue<T, M, TraitType::Reference>;
+};
+template<typename T, typename M>
 struct TraitsInfo<T, M, TraitType::Pointer>
 {
     using DeSerializeMember     = DeSerializeMemberValue<T, M, TraitType::Pointer>;
@@ -243,10 +249,9 @@ inline void ParserInterface::pushBackToken(ParserToken token)
 {
     if (pushBack != ParserToken::Error)
     {
-        throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::ParserInterface", "pushBackToken",
-                                                               "Push only allows for single push back. More than one token has been pushed back between reads.")
-                                                              );
+        ThorsLogAndThrow("ThorsAnvil::Serialize::ParserInterface",
+                         "pushBackToken",
+                         "Push only allows for single push back. More than one token has been pushed back between reads.");
     }
     pushBack    = token;
 }
@@ -266,10 +271,9 @@ inline DeSerializer::DeSerializer(ParserInterface& parser, bool root)
         //  We will get that in the next version
         if (parser.getToken() != ParserToken::DocStart)
         {
-            throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::DeSerializer", "DeSerializer"
-                                                               "Invalid Doc Start")
-                                                              );
+            ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializer",
+                             "DeSerializer",
+                             "Invalid Doc Start");
         }
     }
 }
@@ -279,10 +283,9 @@ inline DeSerializer::~DeSerializer() noexcept(false)
     {
         if (parser.getToken() != ParserToken::DocEnd)
         {
-            throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::DeSerializer", "~DeSerializer",
-                                                               "Expected Doc End")
-                                                              );
+            ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializer",
+                             "~DeSerializer",
+                             "Expected Doc End");
         }
     }
 }
@@ -309,12 +312,6 @@ inline Serializer::~Serializer()
     }
 }
 
-#if defined(HEADER_ONLY) && HEADER_ONLY == 1
-#include "Serialize.source"
-#endif
-
-#ifndef COVERAGE_TEST
 #include "Serialize.tpp"
-#endif
 
 #endif

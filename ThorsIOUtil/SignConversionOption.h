@@ -1,8 +1,10 @@
 #ifndef THORSANVIL_IOUTIL_SIGNCONVERSIONOPTION_H
 #define THORSANVIL_IOUTIL_SIGNCONVERSIONOPTION_H
 
-namespace ThorsAnvil::IOUtil
+namespace ThorsAnvil
 {
+    namespace IOUtil
+    {
 
 // @class-internal
 // When handling integer types some
@@ -145,6 +147,7 @@ struct SignConversionOption<unsigned long long>
     static int truncate(unsigned long long const&, int) {return 0;};
 };
 
+    }
 }
 
 #endif

@@ -4,8 +4,10 @@
 #include "FormatInfo.h"
 #include "printToStream.h"
 
-namespace ThorsAnvil::IOUtil
+namespace ThorsAnvil
 {
+    namespace IOUtil
+    {
 
 // @function-internal
 // Given an argument `arg` and a format `info` serialize it to the stream `s`
@@ -44,6 +46,7 @@ void printStringToStream(std::ostream& s, char const* const& arg, FormatInfo con
     }
 }
 
+    }
 }
 
 #endif

@@ -9,8 +9,11 @@
 // See: https://codereview.stackexchange.com/questions/81922/macro-to-build-type-declaration
 // For details about the Traits type and how it is built.
 
-namespace ThorsAnvil::FileSystem
+namespace ThorsAnvil
 {
+    namespace FileSystem
+    {
+
     using iostate   = std::ios_base::iostate;
     static constexpr iostate const& goodbit   = std::ios_base::goodbit;
     static constexpr iostate const& badbit    = std::ios_base::badbit;
@@ -33,6 +36,8 @@ namespace ThorsAnvil::FileSystem
         static bool      isFileOpenable(std::string const& path, openmode mode);
         static bool      removeFileOrDirectory(std::string const& path);
     };
+
+    }
 }
 
 #endif

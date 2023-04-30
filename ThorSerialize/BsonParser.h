@@ -20,6 +20,7 @@
 #include "Serialize.h"
 #include "BsonUtil.h"
 #include "ThorsIOUtil/Utility.h"
+#include "ThorsLogging/ThorsLogging.h"
 #include <GitUtility/ieee754_types.h>
 #include <boost/endian/conversion.hpp>
 #include <istream>
@@ -30,9 +31,17 @@ namespace ThorsAnvil
 {
     namespace Serialize
     {
+        class BsonParser;
+        namespace MongoUtility
+        {
+            class UTCDateTime;
+            BsonParser& operator>>(BsonParser& parser, MongoUtility::UTCDateTime& data);
+        }
 
 class BsonParser: public ParserInterface
 {
+    friend BsonParser& MongoUtility::operator>>(BsonParser& parser, MongoUtility::UTCDateTime& data);
+
     std::vector<BsonContainer>  currentContainer;
     std::vector<std::size_t>    dataLeft;
     std::vector<std::size_t>    dataSize;
@@ -64,9 +73,9 @@ class BsonParser: public ParserInterface
         virtual void    getValue(double& value)                 override    {value = getFloatValue<8, double>();}
         virtual void    getValue(long double& value)            override    {value = getFloatValue<8, long double>();}
 
-        virtual void    getValue(bool& value)                   override    {if (nextType != '\x08')    {badType();}value = readBool();}
+        virtual void    getValue(bool& value)                   override    {if (nextType != '\x08')    {badType("Bool", nextType);}value = readBool();}
 
-        virtual void    getValue(std::string& value)            override    {if (nextType != '\x02')    {badType();}value = readString();}
+        virtual void    getValue(std::string& value)            override    {if (nextType != '\x02')    {badType("String", nextType);}value = readString();}
 
         virtual bool    isValueNull()                           override    {return (nextType == '\x0A');}
 
@@ -118,12 +127,89 @@ class BsonParser: public ParserInterface
         std::string readBinary();
 
         [[noreturn]]
-        void badType()                                      {throw std::runtime_error(
-                                                                    ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::BsonParser", "badType"
-                                                                                                          "Trying to read a type that we can can't convert.")
-                                                                                                          );
-                                                            }
+        void badType(std::string const& expected, unsigned char got)
+        {
+            std::string gotName;
+            switch (got)
+            {
+                case 0x01: gotName = "double";                     break;
+                case 0x02: gotName = "string";                     break;
+                case 0x03: gotName = "map";                        break;
+                case 0x04: gotName = "array";                      break;
+                case 0x05: gotName = "binary";                     break;
+                case 0x06: gotName = "Value - Deprecated";         break;
+                case 0x07: gotName = "ObjectId";                   break;
+                case 0x08: gotName = "Boolean";                    break;
+                case 0x09: gotName = "UTC datetime";               break;
+                case 0x0A: gotName = "Null";                       break;
+                case 0x0B: gotName = "Regular expression";         break;
+                case 0x0C: gotName = "DBPointer — Deprecated";     break;
+                case 0x0D: gotName = "JavaScript code";            break;
+                case 0x0E: gotName = "Symbol";                     break;
+                case 0x0F: gotName = "JavaScript Deprecated";      break;
+                case 0x10: gotName = "int32";                      break;
+                case 0x11: gotName = "Timestamp";                  break;
+                case 0x12: gotName = "int64";                      break;
+                case 0x13: gotName = "decimal128";                 break;
+                case 0xFF: gotName = "Min key";                    break;
+                case 0x7F: gotName = "Max key";                    break;
+                default:
+                    gotName = "Unknown";
+            }
+            ThorsLogAndThrow("ThorsAnvil::Serialize::BsonParser",
+                             "badType",
+                             "Trying to read a type that we can can't convert.",
+                             "Expected: ", expected, " Got: ", gotName, " : ", got);
+        }
 };
+
+template<std::size_t size, typename Int>
+inline Int BsonParser::readSize()
+{
+    return readLE<size, Int>();
+}
+
+template<std::size_t size, typename Int>
+inline Int BsonParser::readInt()
+{
+    dataLeft.back() -= size;
+    return readLE<size, Int>();
+}
+
+template<std::size_t size>
+inline IEEE_754::_2008::Binary<size * 8> BsonParser::readFloat()
+{
+    IEEE_754::_2008::Binary<size * 8> result;
+    if (input.read(reinterpret_cast<char*>(&result), size))
+    {
+        dataLeft.back() -= size;
+        return result;
+    }
+    ThorsLogAndThrow("ThorsAnvil::Serialize::BsonParser",
+                     "readFloat",
+                     "Failed to read Float Value. Size: ", size);
+}
+
+template<std::size_t Size, typename Int>
+inline Int BsonParser::getIntValue()
+{
+    if (nextType == '\x10')     {VLOG_S(5) << "Int-32"; return readInt<4, std::int32_t>();}
+    if (nextType == '\x12')     {VLOG_S(5) << "Int-64"; return readInt<8, std::int64_t>();}
+    badType("Int(32 or 64)", nextType);
+}
+
+template<std::size_t Size, typename Float>
+inline Float BsonParser::getFloatValue()
+{
+    if (nextType == '\x10')     {VLOG_S(5) << "Double-32";return readInt<4, std::int32_t>();}
+    if (nextType == '\x12')     {VLOG_S(5) << "Double-64";return readInt<8, std::int64_t>();}
+    if (nextType == '\x01')     {VLOG_S(5) << "Double-128";return readFloat<8>();}
+#if 0
+    if (nextType == '\x13')     {return readFloat<16>();}
+#endif
+    badType("Float", nextType);
+}
+
     }
 }
 

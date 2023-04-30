@@ -7,6 +7,7 @@
 
 #include "Serialize.h"
 #include "BsonUtil.h"
+#include "GitUtility/ieee754_types.h"
 #include <boost/endian/conversion.hpp>
 #include <vector>
 #include <iostream>
@@ -15,9 +16,21 @@ namespace ThorsAnvil
 {
     namespace Serialize
     {
+        class BsonPrinter;
+        namespace MongoUtility
+        {
+            class UTCDateTime;
+            BsonPrinter& operator<<(BsonPrinter& printer, MongoUtility::UTCDateTime const& data);
+        }
+
+using IntTypes = std::tuple<std::int32_t, std::int64_t>;
+extern char  intKey[];
+extern char  floatKey[];
 
 class BsonPrinter: public PrinterInterface
 {
+    friend BsonPrinter& MongoUtility::operator<<(BsonPrinter& printer, MongoUtility::UTCDateTime const& data);
+
     std::string currentKey;
     std::vector<BsonContainer>  currentContainer;
     std::vector<std::size_t>    arrayIndex;
@@ -53,6 +66,7 @@ class BsonPrinter: public PrinterInterface
         virtual void addValue(bool value)                           override    {writeBool(value);}
 
         virtual void addValue(std::string const& value)             override    {writeString(value);}
+        virtual void addValue(std::string_view const& value)        override    {writeString(std::string(value));}
 
         virtual void addRawValue(std::string const& value)          override    {writeBinary(value);}
 
@@ -76,6 +90,7 @@ class BsonPrinter: public PrinterInterface
         virtual std::size_t getSizeValue(long double)               override    {return 8;}
         virtual std::size_t getSizeValue(bool)                      override    {return 1;}
         virtual std::size_t getSizeValue(std::string const& value)  override    {return 4 + value.size() + 1;}
+        virtual std::size_t getSizeValue(std::string_view const& v) override    {return 4 + std::size(v) + 1;}
         virtual std::size_t getSizeRaw(std::size_t size)            override    {return 4 + 1 + size;}
 
     public:
@@ -106,6 +121,30 @@ class BsonPrinter: public PrinterInterface
         void writeBinary(std::string const& value);
 
 };
+
+template<std::size_t size, typename Int>
+inline void BsonPrinter::writeSize(Int value)
+{
+    writeLE<size>(value);
+}
+
+template<std::size_t Size, typename Int>
+inline void BsonPrinter::writeInt(Int value)
+{
+    using IntType = typename std::tuple_element<Size/4 - 1, IntTypes>::type;
+
+    IntType             output = value;
+    writeKey(intKey[Size/4 - 1], Size);
+    writeLE<Size, IntType>(output);
+}
+
+template<std::size_t Size, typename Float>
+inline void BsonPrinter::writeFloat(Float value)
+{
+    IEEE_754::_2008::Binary<Size * 8>   outputValue = value;
+    writeKey(floatKey[Size/8 - 1], Size);
+    output.write(reinterpret_cast<char*>(&outputValue), Size);
+}
 
     }
 }

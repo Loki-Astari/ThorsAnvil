@@ -37,14 +37,6 @@ struct DefaultCustomSerializer
     }
 }
 
-#if defined(HEADER_ONLY) && HEADER_ONLY == 1
-#include "CustomSerialization.source"
-#endif
-
-#ifndef COVERAGE_TEST
-#ifndef THORS_ANVIL_SERIALIZE_SERIALIZE_H
 #include "CustomSerialization.tpp"
-#endif
-#endif
 
 #endif

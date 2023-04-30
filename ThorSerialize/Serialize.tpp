@@ -4,6 +4,7 @@
 #include "SerUtil.h"
 #include "ThorsSerializerUtil.h"
 #include "ThorsIOUtil/Utility.h"
+#include "ThorsLogging/ThorsLogging.h"
 #include <algorithm>
 #include <sstream>
 #include <type_traits>
@@ -90,10 +91,9 @@ struct HeedAllValues
     {
         if (membersFound.find(member.first) == std::end(membersFound))
         {
-            throw std::runtime_error(
-                Utility::buildErrorMessage("ThorsAnvil::Serialize::HeedAllValues", "checkAMember"
-                                           "Did not fine: ", member.first)
-                                    );
+            ThorsLogAndThrow("ThorsAnvil::Serialize::HeedAllValues",
+                             "checkAMember"
+                             "Did not fine: ", member.first);
         }
         return 0;
     }
@@ -179,10 +179,9 @@ class DeSerializationForBlock
 
             if (tokenType != ParserInterface::ParserToken::MapStart)
             {
-                throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::DeSerializationForBlock<Map>", "DeSerializationForBlock",
-                                                               "Invalid Object Start")
-                                                              );
+                ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Map>",
+                                 "DeSerializationForBlock",
+                                 "Invalid Object Start");
             }
         }
 
@@ -214,10 +213,9 @@ class DeSerializationForBlock
             {
                 if (tokenType != ParserInterface::ParserToken::Key)
                 {
-                    throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::DeSerializationForBlock<Map>", "hasMoreValue",
-                                                               "Expecting key token")
-                                                              );
+                    ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Map>",
+                                     "hasMoreValue",
+                                     "Expecting key token");
                 }
                 key = parser.getKey();
             }
@@ -246,10 +244,9 @@ class DeSerializationForBlock<TraitType::Value, T>
             ParserInterface::ParserToken    tokenType = parser.getToken();
             if (tokenType != ParserInterface::ParserToken::Value)
             {
-                throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::DeSerializationForBlock<Value>", "DeSerializationForBlock",
-                                                               "Invalid Object")
-                                                              );
+                ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Value>",
+                                 "DeSerializationForBlock",
+                                 "Invalid Object");
             }
             parser.getValue(object);
         }
@@ -270,10 +267,9 @@ DeSerializationForBlock<TraitType::Custom_Depricated, T>
             ParserInterface::ParserToken    tokenType = parser.getToken();
             if (tokenType != ParserInterface::ParserToken::Value)
             {
-                throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::DeSerializationForBlock<Serialize>", "DeSerializationForBlock",
-                                                               "Invalid Object")
-                                                              );
+                ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Serialize>",
+                                 "DeSerializationForBlock",
+                                 "Invalid Object");
             }
             std::stringstream valueStream(parser.getRawValue());
             valueStream >> object;
@@ -294,10 +290,9 @@ class DeSerializationForBlock<TraitType::Custom_Serialize, T>
             ParserInterface::ParserToken    tokenType = parser.getToken();
             if (tokenType != ParserInterface::ParserToken::Value)
             {
-                throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::DeSerializationForBlock<Value>", "DeSerializationForBlock",
-                                                               "Invalid Object")
-                                                              );
+                ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Value>",
+                                 "DeSerializationForBlock",
+                                 "Invalid Object");
             }
             using SerializingType = typename Traits<T>::SerializingType;
             SerializingType info;
@@ -330,38 +325,34 @@ auto tryParsePolyMorphicObject(DeSerializer& parent, ParserInterface& parser, T&
     tokenType = parser.getToken();
     if (tokenType != ParserInterface::ParserToken::MapStart)
     {
-        throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize", "tryParsePolyMorphicObject",
-                                                               "Invalid Object. Expecting MapStart")
-                                                              );
+        ThorsLogAndThrow("ThorsAnvil::Serialize",
+                         "tryParsePolyMorphicObject",
+                         "Invalid Object. Expecting MapStart");
     }
 
     tokenType = parser.getToken();
     if (tokenType != ParserInterface::ParserToken::Key)
     {
-        throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize", "tryParsePolyMorphicObject",
-                                                               "Invalid Object. Expecting Key")
-                                                              );
+        ThorsLogAndThrow("ThorsAnvil::Serialize",
+                         "tryParsePolyMorphicObject",
+                         "Invalid Object. Expecting Key");
     }
 
 
     std::string keyValue;
     if (parser.getKey() != parser.config.polymorphicMarker)
     {
-        throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize", "tryParsePolyMorphicObject",
-                                                               "Invalid PolyMorphic Object. Expecting Key Name ", parser.config.polymorphicMarker)
-                                                              );
+        ThorsLogAndThrow("ThorsAnvil::Serialize",
+                         "tryParsePolyMorphicObject",
+                         "Invalid PolyMorphic Object. Expecting Key Name ", parser.config.polymorphicMarker);
     }
 
     tokenType = parser.getToken();
     if (tokenType != ParserInterface::ParserToken::Value)
     {
-        throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize", "tryParsePolyMorphicObject",
-                                                               "Invalid Object. Expecting Value")
-                                                              );
+        ThorsLogAndThrow("ThorsAnvil::Serialize",
+                         "tryParsePolyMorphicObject",
+                         "Invalid Object. Expecting Value");
     }
 
     std::string className;
@@ -426,6 +417,23 @@ class DeSerializationForBlock<TraitType::Pointer, T>
             tryParsePolyMorphicObject(parent, parser, object, 0);
         }
 };
+template<typename T>
+class DeSerializationForBlock<TraitType::Reference, T>
+{
+    DeSerializer&       parent;
+    ParserInterface&    parser;
+    public:
+        DeSerializationForBlock(DeSerializer& parent, ParserInterface& parser)
+            : parent(parent)
+            , parser(parser)
+        {}
+        void scanObject(T& object)
+        {
+            using RefType = typename Traits<T>::RefType;
+            DeSerializationForBlock<Traits<RefType>::type, RefType>    deserializer(parent, parser);
+            deserializer.scanObject(object.get());
+        }
+};
 /*
  * Specialization for Enum.
  * This is only used at the top level.
@@ -446,10 +454,9 @@ class DeSerializationForBlock<TraitType::Enum, T>
             ParserInterface::ParserToken    tokenType = parser.getToken();
             if (tokenType != ParserInterface::ParserToken::Value)
             {
-                throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::DeSerializationForBlock<Enum>", "DeSerializationForBlock",
-                                                               "Invalid Object")
-                                                              );
+                ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Enum>",
+                                 "DeSerializationForBlock",
+                                 "Invalid Object");
             }
             std::string     objectValue;
             parser.getValue(objectValue);
@@ -480,10 +487,9 @@ class DeSerializationForBlock<TraitType::Array, T>
 
             if (tokenType != ParserInterface::ParserToken::ArrayStart)
             {
-                throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::DeSerializationForBlock<Array>", "DeSerializationForBlock",
-                                                               "Invalid Object Start")
-                                                              );
+                ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Array>",
+                                 "DeSerializationForBlock",
+                                 "Invalid Object Start");
             }
         }
 
@@ -512,7 +518,7 @@ class DeSerializationForBlock<TraitType::Array, T>
 template<typename T, typename M>
 DeSerializeMemberContainer<T, M>::DeSerializeMemberContainer(DeSerializer&, ParserInterface& parser, std::string const& key, T& object, std::pair<char const*, M T::*> const& memberInfo)
 {
-    if (key.compare(memberInfo.first) == 0)
+    if (key.compare(ThorsAnvil::Serialize::Override<T>::nameOverride(memberInfo.first)) == 0)
     {
         used = true;
         DeSerializer    deSerializer(parser, false);
@@ -535,7 +541,7 @@ DeSerializeMemberValue<T, M, Type>::DeSerializeMemberValue(DeSerializer& parent,
 template<typename T, typename M, TraitType Type>
 void DeSerializeMemberValue<T, M, Type>::init(DeSerializer& parent, ParserInterface& parser, std::string const& key, char const* name, M& object)
 {
-    if (key.compare(name) == 0)
+    if (key.compare(ThorsAnvil::Serialize::Override<T>::nameOverride(name)) == 0)
     {
         used = true;
         DeSerializationForBlock<Type, M>    deserializer(parent, parser);
@@ -603,9 +609,18 @@ inline void DeSerializer::parse(T& object)
         DeSerializationForBlock<Traits<T>::type, T>     block(*this, parser);
         block.scanObject(object);
     }
+    catch (std::exception const& e)
+    {
+        root = false;
+        ThorsCatchMessage("ThorsAnvil::Serialize::DeSerializer", "parse", e.what());
+        ThorsRethrowMessage("ThorsAnvil::Serialize::DeSerializer", "parse", e.what());
+        throw;
+    }
     catch (...)
     {
         root = false;
+        ThorsCatchMessage("ThorsAnvil::Serialize::DeSerializer", "parse", "UNKNOWN");
+        ThorsRethrowMessage("ThorsAnvil::Serialize::DeSerializer", "parse", "UNKNOWN");
         throw;
     }
 }
@@ -781,6 +796,26 @@ class SerializerForBlock<TraitType::Pointer, T>
             }
         }
 };
+template<typename T>
+class SerializerForBlock<TraitType::Reference, T>
+{
+    Serializer&         parent;
+    PrinterInterface&   printer;
+    T const&            object;
+    public:
+        SerializerForBlock(Serializer& parent, PrinterInterface& printer,T const& object, bool /*poly*/ = false)
+            : parent(parent)
+            , printer(printer)
+            , object(object)
+        {}
+        ~SerializerForBlock()   {}
+        void printMembers()
+        {
+            using RefType = typename Traits<T>::RefType;
+            SerializerForBlock<Traits<RefType>::type, RefType>        serializer(parent, printer, object.get());
+            serializer.printMembers();
+        }
+};
 
 template<typename T>
 class SerializerForBlock<TraitType::Enum, T>
@@ -797,7 +832,7 @@ class SerializerForBlock<TraitType::Enum, T>
         ~SerializerForBlock()   {}
         void printMembers()
         {
-            printer.addValue(Traits<T>::getValues().find(object)->second);
+            Traits<T>::serializeForBlock(printer, object);
         }
 };
 
@@ -835,30 +870,36 @@ class SerializerForBlock<TraitType::Array, T>
 template<typename T, typename M>
 SerializeMemberContainer<T, M>::SerializeMemberContainer(Serializer&, PrinterInterface& printer, T const& object, std::pair<char const*, M T::*> const& memberInfo)
 {
-    printer.addKey(memberInfo.first);
+    if (ThorsAnvil::Serialize::Filter<T>::filter(object, memberInfo.first))
+    {
+        printer.addKey(ThorsAnvil::Serialize::Override<T>::nameOverride(memberInfo.first));
 
-    Serializer      serialzier(printer, false);
-    serialzier.print(object.*(memberInfo.second));
+        Serializer      serialzier(printer, false);
+        serialzier.print(object.*(memberInfo.second));
+    }
 }
 
 template<typename T, typename M, TraitType Type>
 SerializeMemberValue<T, M, Type>::SerializeMemberValue(Serializer& parent, PrinterInterface& printer, T const& object, std::pair<char const*, M T::*> const& memberInfo)
 {
-    init(parent, printer, memberInfo.first, object.*(memberInfo.second));
+    init(parent, printer, memberInfo.first, object, object.*(memberInfo.second));
 }
 
 template<typename T, typename M, TraitType Type>
-SerializeMemberValue<T, M, Type>::SerializeMemberValue(Serializer& parent, PrinterInterface& printer, T const&, std::pair<char const*, M*> const& memberInfo)
+SerializeMemberValue<T, M, Type>::SerializeMemberValue(Serializer& parent, PrinterInterface& printer, T const& object, std::pair<char const*, M*> const& memberInfo)
 {
-    init(parent, printer, memberInfo.first, *(memberInfo.second));
+    init(parent, printer, memberInfo.first, object, *(memberInfo.second));
 }
 
 template<typename T, typename M, TraitType Type>
-void SerializeMemberValue<T, M, Type>::init(Serializer& parent, PrinterInterface& printer, char const* member, M const& object)
+void SerializeMemberValue<T, M, Type>::init(Serializer& parent, PrinterInterface& printer, char const* member, T const& object, M const& value)
 {
-    printer.addKey(member);
-    SerializerForBlock<Type, M>  serializer(parent, printer, object);
-    serializer.printMembers();
+    if (ThorsAnvil::Serialize::Filter<T>::filter(object, member))
+    {
+        printer.addKey(ThorsAnvil::Serialize::Override<T>::nameOverride(member));
+        SerializerForBlock<Type, M>  serializer(parent, printer, value);
+        serializer.printMembers();
+    }
 }
 
 template<typename T, typename M, TraitType Type = Traits<typename std::remove_cv<M>::type>::type>
@@ -931,12 +972,12 @@ struct IndexType<TraitType::Parent>
 template<typename T>
 inline void Serializer::printObjectMembers(T const& object)
 {
-    using IndexInfoType = typename IndexType<Traits<T>::type>::IndexInfoType;
+    printMembers(object, Traits<T>::getMembers());
 
+    using IndexInfoType = typename IndexType<Traits<T>::type>::IndexInfoType;
     ApplyActionToParent<Traits<T>::type, T, IndexInfoType>     parentPrinter;
 
     parentPrinter.printParentMembers(*this, object);
-    printMembers(object, Traits<T>::getMembers());
 }
 
     }

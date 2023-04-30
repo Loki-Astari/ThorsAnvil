@@ -53,6 +53,7 @@ class StreamFormatterNoChange
 };
 
 template<typename... Args>
+inline
 void print(std::ostream& s, Args&... args)
 {
     using Expander = int[];
@@ -61,6 +62,7 @@ void print(std::ostream& s, Args&... args)
 }
 
 template<typename... Args>
+inline
 std::string buildStringFromParts(Args const&... args)
 {
     std::stringstream msg;
@@ -69,13 +71,30 @@ std::string buildStringFromParts(Args const&... args)
 }
 
 // @function
-template<typename... Args>
-std::string buildErrorMessage(char const* className, char const* method, Args const&... args)
+inline
+std::size_t getUniqueErrorId()
 {
-    return buildStringFromParts(className, "::", method, ": ", args...);
+    static std::size_t  errorMessageId = 0;
+    return errorMessageId++;
 }
 
-inline std::string errnoToName()
+// @function
+template<typename... Args>
+inline
+std::string buildErrorMessage(char const* className, char const* method, Args const&... args)
+{
+    return buildStringFromParts("id: ", getUniqueErrorId(), " ", className, "::", method, ": ", args...);
+}
+
+template<typename... Args>
+inline
+std::string buildBugReport(Args const& ...a)
+{
+    return buildErrorMessage(a..., "\nPlease File a Bug Report: ");
+}
+
+inline
+std::string errnoToName()
 {
     switch (errno)
     {

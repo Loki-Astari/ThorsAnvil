@@ -19,6 +19,11 @@
  *
  *      ThorsAnvil_MakeTraitCustomSerialize(Type, SerializableType)
  *
+ *      ThorsAnvil_MakeOverride(DataType, { <From>, <To>}... )
+ *      ThorsAnvil_Template_MakeOverride(Count, DataType, { <From>, <To>}... )
+ *
+ *      ThorsAnvil_MakeFilter(DataType, filter)
+ *      ThorsAnvil_Template_MakeFilter(Count, DataType, filter)
  *
  * --------------------------------------------------------------------------
  *
@@ -84,11 +89,25 @@
  *
  *      The code will link with the most appropriate version:
  *
+ * Sometimes you can not use the key names you want (they are reserved words or contain
+ * symbols that are not valid in identifiers in C++). So we provide a way to override
+ * the member names supplied in the ThorsAnvil_MakeTrait() so they will be mapped to
+ * the appropriate key value in the JSON/BSON/YAML file.
+ *
+ *      ThorsAnvil_MakeOverride(DataType, { <From>, <To>}... )
+ *      ThorsAnvil_Template_MakeOverride(Count, DataType, { <From>, <To>}... )
+ *
+ * Normally you would use ThorsAnvil_MakeOverride but if "DataType" is a template
+ * type then you will need to use the ThorsAnvil_Template_MakeOverride and specify
+ * the number of template parameters in "Count".
+ *
+ *          DataType:               The type we are overrideing
+ *              { <From>, <To>}:    A set of mappings.
+ *                                      From: The C++ identifier.
+ *                                      To:   The Key used in the JSON/BSON/YAML file.
  *
  * --------------------------------------------------------------------------
- */
-#if 0
-#pragma vera-pushoff
+ *
  *      Examples:
  *
  *      Bank.h
@@ -130,7 +149,7 @@
  *
  *                  // generic version we simply stream the integer value.
  *                  static constexpr std::size_t sizeOfID = 12;
- *                  virtual  std::size_t getPrintSizeBson(ThorsAnvil::Serialize::BsonPrinter& /*printer*/, ID const& /*object*/) override
+ *                  virtual  std::size_t getPrintSizeBson(ThorsAnvil::Serialize::BsonPrinter& printer, ID const& object) override
  *                  {
  *                      return sizeOfID;
  *                  }
@@ -140,7 +159,7 @@
  *                      printer.stream().write(reinterpret_cast<char const*>(&object.id), sizeof(object.id));
  *                      printer.stream().write("            ", sizeOfID - sizeof(object.id));
  *                  }
- *                  virtual void readBson(ThorsAnvil::Serialize::BsonParser& parser, char /*byteMarker*/, ID& object)             override
+ *                  virtual void readBson(ThorsAnvil::Serialize::BsonParser& parser, char byteMarker, ID& object)             override
  *                  {
  *                      parser.stream().read(reinterpret_cast<char*>(&object.id), sizeof(object.id));
  *                      parser.stream().ignore(sizeOfID - sizeof(object.id));
@@ -237,12 +256,11 @@
  *          ThorsAnvil_RegisterPolyMorphicType(OnLineBank::CurrentAccount);
  *          ThorsAnvil_RegisterPolyMorphicType(OnLineBank::DepositAccount);
  *
- *
-#pragma vera-pop
-#endif
+ */
 
 #include "ThorsSerializerUtil.h"
 #include "ThorsIOUtil/Utility.h"
+#include "ThorsLogging/ThorsLogging.h"
 #include <string>
 #include <tuple>
 #include <map>
@@ -253,6 +271,7 @@
 #include <stdexcept>
 #include <cstddef>
 #include <cstring>
+#include <numeric>
 
 /*
  * Macros for counting the number of arguments
@@ -401,9 +420,11 @@
 
 #define THOR_TYPENAMEPARAMACTION(Ex, Id)        typename T ## Id
 #define THOR_TYPENAMEVALUEACTION(Ex, Id)        T ## Id
+#define THOR_TYPE_INT_VALUE(Ex, Id)             ThorsAnvil::Serialize::Fake ## Id
 #define THOR_CHECK_ASSERT(Ex, Id)
 #define LAST_THOR_TYPENAMEPARAMACTION(Ex, Id)
 #define LAST_THOR_TYPENAMEVALUEACTION(Ex, Id)
+#define LAST_THOR_TYPE_INT_VALUE(Ex, Id)
 #define LAST_THOR_CHECK_ASSERT(Ex, Id)          DO_ASSERT(Ex)
 
 
@@ -415,9 +436,10 @@
  * Defines a trait for a user defined type.
  * Lists the members of the type that can be serialized.
  */
-#define DO_ASSERT(DataType)                                             \
+#define DO_ASSERT(DataType)             DO_ASSERT_WITH_TEMPLATE(DataType, 00)
+#define DO_ASSERT_WITH_TEMPLATE(DataType, Count)                        \
 static_assert(                                                          \
-    ::ThorsAnvil::Serialize::Traits<DataType>::type != ThorsAnvil::Serialize::TraitType::Invalid,   \
+    ::ThorsAnvil::Serialize::Traits<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPE_INT_VALUE, Count) >::type != ThorsAnvil::Serialize::TraitType::Invalid,   \
     "The macro ThorsAnvil_MakeTrait must be used outside all namespace."\
 )
 
@@ -432,6 +454,71 @@ class Traits<DataType*>                                                 \
         static void release(T* p)   {ActionObj::release(p);}            \
 };                                                                      \
 }}
+
+#define ThorsAnvil_MakeOverride(...)                                    \
+    ThorsAnvil_MakeOverride_Base(00,     __VA_ARGS__, {"", ""})
+#define ThorsAnvil_Template_MakeOverride(Count, ...)                    \
+    ThorsAnvil_MakeOverride_Base(Count, __VA_ARGS__, {"", ""})
+
+
+#define ThorsAnvil_MakeOverride_Base(Count, DataType, ...)              \
+namespace ThorsAnvil { namespace Serialize {                            \
+template<BUILDTEMPLATETYPEPARAM(THOR_TYPENAMEPARAMACTION, Count)>       \
+class Override<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > \
+{                                                                       \
+    public:                                                             \
+        static char const* nameOverride(char const* name)               \
+        {                                                               \
+            static auto hashCString = [](char const* str)               \
+            {                                                           \
+                std::hash<std::string_view>  viewHash;                  \
+                return viewHash(std::string_view(str));                 \
+            };                                                          \
+            static auto cmpCString = [](char const* lhs, char const* rhs)\
+            {                                                           \
+                return std::strcmp(lhs, rhs) == 0;                      \
+            };                                                          \
+            using OverrideMap = std::unordered_map<char const*, char const*, decltype(hashCString), decltype(cmpCString)>;   \
+            static OverrideMap overrideMap =                            \
+            {                                                           \
+                {__VA_ARGS__},                                          \
+                101 /* Prime */,                                        \
+                hashCString,                                            \
+                cmpCString                                              \
+            };                                                          \
+            auto find = overrideMap.find(name);                         \
+            if (find == overrideMap.end()) {                            \
+                return name;                                            \
+            }                                                           \
+            return find->second;                                        \
+        }                                                               \
+};                                                                      \
+}}                                                                      \
+static_assert(true, "")
+
+
+#define ThorsAnvil_MakeFilter(DataType, member)                         \
+    ThorsAnvil_MakeFilter_Base(00,    DataType, member)
+#define ThorsAnvil_Template_MakeFilter(Count, DataType, member)         \
+    ThorsAnvil_MakeFilter_Base(Count, DataType, member)
+
+
+#define ThorsAnvil_MakeFilter_Base(Count, DataType, member)             \
+namespace ThorsAnvil { namespace Serialize {                            \
+template<BUILDTEMPLATETYPEPARAM(THOR_TYPENAMEPARAMACTION, Count)>       \
+class Filter<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > \
+{                                                                       \
+    public:                                                             \
+        static bool filter(DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) const& object, char const* name)    \
+        {                                                               \
+            auto find = object.member.find(name);                       \
+            return find == object.member.end() ? true : find->second;   \
+        }                                                               \
+};                                                                      \
+}}                                                                      \
+static_assert(true, "")
+
+
 #define ThorsAnvil_MakeTrait_Base(ParentType, TType, Count, DataType, ...)  \
 namespace ThorsAnvil { namespace Serialize {                            \
 template<BUILDTEMPLATETYPEPARAM(THOR_TYPENAMEPARAMACTION, Count)>       \
@@ -472,28 +559,33 @@ class Traits<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > 
             return Traits<MemberType>::getPrintSize(printer, object.*memPtr, false);\
         }                                                               \
                                                                         \
+        template<typename M>                                            \
+        static std::pair<std::size_t, std::size_t> addSizeEachMemberItem(PrinterInterface& printer, MyType const& object, M item) \
+        {                                                               \
+            if (!Filter<MyType>::filter(object, item.first)) {          \
+                return std::make_pair(0UL,0UL);                         \
+            }                                                           \
+            auto partSize   = addSizeOneMember(printer, object, item.second);           \
+            auto nameSize   = std::strlen(Override<MyType>::nameOverride(item.first));  \
+            return std::make_pair(partSize + nameSize, 1);              \
+        }                                                               \
         template<std::size_t... Seq>                                    \
-        static std::size_t addSizeEachMember(PrinterInterface& printer, MyType const& object, std::index_sequence<Seq...> const&) \
+        static std::pair<std::size_t, std::size_t> addSizeEachMember(PrinterInterface& printer, MyType const& object, std::index_sequence<Seq...> const&) \
         {                                                               \
             Members const& members = getMembers();                      \
-            std::size_t result = 0;                                     \
-            auto partSize = {std::size_t(0), addSizeOneMember(printer, object, std::get<Seq>(members).second)...};\
-            auto nameSize = {std::size_t(0), std::strlen(std::get<Seq>(members).first)...};\
-            for (auto val: partSize)                                     \
-            {                                                           \
-                result += val;                                          \
-            }                                                           \
-            for (auto val: nameSize)                                     \
-            {                                                           \
-                result += val;                                          \
-            }                                                           \
-            return result;                                              \
+            std::initializer_list<std::pair<std::size_t, std::size_t>>  sizeData = {    \
+                std::make_pair(std::size_t{0}, std::size_t{0}),                         \
+                addSizeEachMemberItem(printer, object, std::get<Seq>(members))...       \
+            };                                                          \
+            return std::accumulate(std::begin(sizeData), std::end(sizeData), std::make_pair(0UL, 0UL),                                  \
+                                   [](auto lhs, auto rhs){return std::make_pair(lhs.first + rhs.first, lhs.second + rhs.second);});     \
         }                                                               \
                                                                         \
         static std::size_t getPrintSizeTotal(PrinterInterface& printer, MyType const& object, std::size_t& count, std::size_t& memberSize)\
         {                                                               \
-            count       += std::tuple_size_v<Members>;                  \
-            memberSize  += addSizeEachMember(printer, object, std::make_index_sequence<std::tuple_size_v<Members>>());\
+            auto r = addSizeEachMember(printer, object, std::make_index_sequence<std::tuple_size_v<Members>>());\
+            memberSize  += r.first;                                     \
+            count       += r.second;                                    \
                                                                         \
             CalcSizeHelper<MyType>  calcHelper;                         \
             return calcHelper.getPrintSize(printer, object, count, memberSize);\
@@ -505,7 +597,7 @@ class Traits<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > 
         }                                                               \
 };                                                                      \
 }}                                                                      \
-ALT_REP_OF_N(THOR_CHECK_ASSERT, DataType, , , Count)
+DO_ASSERT_WITH_TEMPLATE(DataType, Count)
 
 #define ThorsAnvil_RegisterPolyMorphicType_Internal(DataType, ...)      \
     ThorsAnvil_RegisterPolyMorphicType(DataType)
@@ -520,15 +612,16 @@ namespace                                                               \
 }}
 #pragma vera-pop
 
-#define ThorsAnvil_Parent(Count, ParentType, DataType, ...) using Parent = ParentType; \
-                                                            using Root   = typename GetRootType<ParentType>::Root;
+#define ThorsAnvil_Parent(Count, ParentType, DataType, ...)             \
+        using Parent = ParentType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count); \
+        using Root   = typename GetRootType<ParentType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) >::Root;
 
 #define ThorsAnvil_Template_MakeTrait(Count, ...)                       \
-    ThorsAnvil_MakeTrait_Base( , Map, Count, __VA_ARGS__, 1)            \
+    ThorsAnvil_MakeTrait_Base( , Map, Count, __VA_ARGS__, 1);           \
     static_assert(true, "")
 
 #define ThorsAnvil_MakeTrait(...)                                       \
-    ThorsAnvil_MakeTrait_Base( , Map, 00, __VA_ARGS__, 1);               \
+    ThorsAnvil_MakeTrait_Base( , Map, 00, __VA_ARGS__, 1);              \
     ThorsAnvil_RegisterPolyMorphicType_Internal(__VA_ARGS__, 1)         \
     static_assert(true, "")
 
@@ -564,7 +657,11 @@ class Traits<DataType>                                                  \
             case FormatType::Json:  /* Fall Through */                  \
             case FormatType::Yaml:  /* Fall Through */                  \
             default:                                                    \
-                throw CriticalException("Bad");                         \
+            {                                                           \
+                ThorsLogAndThrowCritical("ThorsAnivl::Seriaizlize::Traits<DataType>",   \
+                                         "getPrintSize",                \
+                                         "Should not get here");        \
+            }                                                           \
         }                                                               \
     }                                                                   \
 };                                                                      \
@@ -572,7 +669,11 @@ class Traits<DataType>                                                  \
 DO_ASSERT(DataType)
 
 #define ThorsAnvil_Template_ExpandTrait(Count, ParentType, ...)         \
-    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(Count, ParentType, __VA_ARGS__, 1), Parent, Count, __VA_ARGS__, 1) \
+    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(00, ParentType, __VA_ARGS__, 1), Parent, Count, __VA_ARGS__, 1); \
+    static_assert(true, "")
+
+#define ThorsAnvil_Template_ExpandTemplate(Count, ParentCount, ParentType, ...)         \
+    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(ParentCount, ParentType, __VA_ARGS__, 1), Parent, Count, __VA_ARGS__, 1); \
     static_assert(true, "")
 
 #define ThorsAnvil_ExpandTrait(ParentType, ...)                     ThorsAnvil_ExpandTrait_Base(ParentType, __VA_ARGS__, 1)
@@ -584,9 +685,47 @@ DO_ASSERT(DataType)
         ::ThorsAnvil::Serialize::Traits<ParentType>::type != ThorsAnvil::Serialize::TraitType::Invalid, \
         "Parent type must have Serialization Traits defined"            \
     );                                                                  \
-    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(0, ParentType, DataType, __VA_ARGS__), Parent, 00, DataType, __VA_ARGS__); \
+    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(00, ParentType, DataType, __VA_ARGS__), Parent, 00, DataType, __VA_ARGS__); \
     ThorsAnvil_RegisterPolyMorphicType_Internal(DataType, 1)            \
     static_assert(true, "")
+
+#include <magic_enum.hpp>
+namespace ThorsAnvil
+{
+    namespace Serialize
+    {
+template<typename EnumName>
+class Traits<EnumName, std::enable_if_t<std::is_enum<EnumName>::value>>
+{
+    public:
+        static constexpr    TraitType       type = TraitType::Enum;
+        static std::size_t getSize()
+        {
+            return magic_enum::enum_count<EnumName>();
+        }
+        static EnumName getValue(std::string const& val, std::string const&)
+        {
+            auto enumDecode = magic_enum::enum_cast<EnumName>(val);
+            if (enumDecode.has_value())
+            {
+                return enumDecode.value();
+            }
+            ThorsLogAndThrow("ThorsAnvil::Serialize::Traits<EnumName>",
+                             "getValue",
+                             "Invalid Enum Value");
+        }
+        static std::size_t getPrintSize(PrinterInterface& printer, EnumName const& value, bool)
+        {
+            auto enumName = magic_enum::enum_name(value);
+            return printer.getSizeValue(enumName);
+        }
+        static void serializeForBlock(PrinterInterface& printer, EnumName const& object)
+        {
+            printer.addValue(magic_enum::enum_name(object));
+        }
+};
+    }
+}
 
 #include <map>
 #include <string>
@@ -610,7 +749,7 @@ class Traits<EnumName>                                                  \
         {                                                               \
             return NUM_ARGS(__VA_ARGS__, 1);                            \
         }                                                               \
-        static EnumName getValue(std::string const& val, std::string const& msg) \
+        static EnumName getValue(std::string const& val, std::string const&) \
         {                                                               \
             std::map<EnumName, std::string> const& values = getValues();\
             for (auto const& value: values)                             \
@@ -619,16 +758,64 @@ class Traits<EnumName>                                                  \
                     return value.first;                                 \
                 }                                                       \
             }                                                           \
-            throw std::runtime_error(msg + " Invalid Enum Value");      \
+            ThorsLogAndThrow("ThorsAnvil::Serialize::Traits<EnumName>", \
+                             "getValue",                                \
+                             "Invalid Enum Value");                     \
         }                                                               \
         static std::size_t getPrintSize(PrinterInterface& printer, EnumName const& value, bool)\
         {                                                               \
             auto find = getValues().find(value);                        \
             return printer.getSizeValue(find->second);                  \
         }                                                               \
+        static void serializeForBlock(PrinterInterface& printer, EnumName const& object) \
+        {                                                               \
+            printer.addValue(getValues().find(object)->second);         \
+        }                                                               \
 };                                                                      \
 }}                                                                      \
 DO_ASSERT(EnumName)
+
+// This type is not useful for JSON or other serialization
+// But it can be useful to dump an enum that is a flag based enum.
+// Its interface is not advertised above deliberately
+#define ThorsAnvil_MakeEnumFlag(EnumName, ...)                          \
+inline EnumName operator&(EnumName lhs, EnumName rhs){return static_cast<EnumName>(static_cast<unsigned int>(lhs) & static_cast<unsigned int>(rhs));}\
+inline EnumName operator|(EnumName lhs, EnumName rhs){return static_cast<EnumName>(static_cast<unsigned int>(lhs) | static_cast<unsigned int>(rhs));}\
+inline EnumName operator^(EnumName lhs, EnumName rhs){return static_cast<EnumName>(static_cast<unsigned int>(lhs) ^ static_cast<unsigned int>(rhs));}\
+inline EnumName operator&=(EnumName& lhs, EnumName rhs){lhs = lhs & rhs; return lhs;}\
+inline EnumName operator|=(EnumName& lhs, EnumName rhs){lhs = lhs | rhs; return lhs;}\
+inline EnumName operator^=(EnumName& lhs, EnumName rhs){lhs = lhs ^ rhs; return lhs;}\
+inline std::ostream& operator<<(std::ostream& stream, EnumName const& value)    \
+{                                                                               \
+    if (value == EnumName::empty)                                               \
+    {                                                                           \
+        stream << "empty";                                                      \
+    }                                                                           \
+    else                                                                        \
+    {                                                                           \
+        using std::string_literals::operator""s;                                \
+        static const std::map<EnumName, std::string> values =                   \
+        {                                                                       \
+            REP_N(THOR_NAMEACTION, 0, EnumName, __VA_ARGS__, 1)                 \
+        };                                                                      \
+        bool                first = true;                                       \
+        for (int loop = 0; loop < 32; ++loop)                                   \
+        {                                                                       \
+            EnumName flag = static_cast<EnumName>(1 << loop);                   \
+            if ((value & flag) != EnumName::empty)                              \
+            {                                                                   \
+                if (!first)                                                     \
+                {                                                               \
+                    stream << " | ";                                            \
+                }                                                               \
+                first = false;                                                  \
+                stream << values.find(flag)->second;                            \
+            }                                                                   \
+        }                                                                       \
+    }                                                                           \
+    return stream;                                                              \
+}                                                                               \
+static_assert(true)
 
 /*
  * Defined the virtual function needed by tryPrintPolyMorphicObject()
@@ -666,7 +853,7 @@ namespace ThorsAnvil
  * The traits type.
  * Specialized for each type we want to serialize
  */
-template<typename T>
+template<typename T, typename SFINE>
 class Traits
 {
     public:
@@ -690,7 +877,19 @@ class Traits
         // which can be defined in-line within the traits class and
         // does not need a separate declaration in a compilation unit.
 };
+template<typename T>
+class Override
+{
+    public:
+        static char const* nameOverride(char const* name) {return name;}
+};
 
+template<typename T>
+class Filter
+{
+    public:
+        static constexpr bool filter(T const& /*object*/, char const* /*name*/)   {return true;}
+};
 
 /*
  * For object that are serialized as Json Array
@@ -754,10 +953,9 @@ class PolyMorphicRegistry
             auto     find       = cont.find(name);
             if (find == cont.end())
             {
-                throw std::runtime_error(
-                        ThorsAnvil::Utility::buildErrorMessage("ThorsAnvil::Serialize::PolyMorphicRegistry", "getNamedTypeConvertedTo",
-                                                               "Non polymorphic type")
-                                                              );
+                ThorsLogAndThrow("ThorsAnvil::Serialize::PolyMorphicRegistry",
+                                 "getNamedTypeConvertedTo",
+                                 "Non polymorphic type");
             }
             void*       data        = find->second();
             AllocType*  dataBase    = reinterpret_cast<AllocType*>(data);
@@ -804,6 +1002,62 @@ struct ThorsAnvil_InitPolyMorphicType<T, false>
 {
     ThorsAnvil_InitPolyMorphicType(char const*){}
 };
+
+struct Fake1{};
+struct Fake2{};
+struct Fake3{};
+struct Fake4{};
+struct Fake5{};
+struct Fake6{};
+struct Fake7{};
+struct Fake8{};
+struct Fake9{};
+struct Fake10{};
+struct Fake11{};
+struct Fake12{};
+struct Fake13{};
+struct Fake14{};
+struct Fake15{};
+struct Fake16{};
+struct Fake17{};
+struct Fake18{};
+struct Fake19{};
+struct Fake20{};
+struct Fake21{};
+struct Fake22{};
+struct Fake23{};
+struct Fake24{};
+struct Fake25{};
+struct Fake26{};
+struct Fake27{};
+struct Fake28{};
+struct Fake29{};
+struct Fake30{};
+struct Fake31{};
+struct Fake32{};
+struct Fake33{};
+struct Fake34{};
+struct Fake35{};
+struct Fake36{};
+struct Fake37{};
+struct Fake38{};
+struct Fake39{};
+struct Fake40{};
+struct Fake41{};
+struct Fake42{};
+struct Fake43{};
+struct Fake44{};
+struct Fake45{};
+struct Fake46{};
+struct Fake47{};
+struct Fake48{};
+struct Fake49{};
+struct Fake50{};
+struct Fake51{};
+struct Fake52{};
+struct Fake53{};
+struct Fake54{};
+struct Fake55{};
 
 
     }

@@ -5,8 +5,13 @@
 #include <iostream>
 #include <string_view>
 
-namespace ThorsAnvil::FileSystem::ColumnFormat
+namespace ThorsAnvil
 {
+    namespace FileSystem
+    {
+        namespace ColumnFormat
+        {
+
     namespace Impl
     {
         /*
@@ -521,6 +526,9 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         index.seekp(off, dir);
         streampos pos = index.tellp();
         seekp(pos);
+    }
+
+        }
     }
 }
 
