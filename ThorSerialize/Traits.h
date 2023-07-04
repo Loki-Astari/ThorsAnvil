@@ -602,7 +602,6 @@ DO_ASSERT_WITH_TEMPLATE(DataType, Count)
 #define ThorsAnvil_RegisterPolyMorphicType_Internal(DataType, ...)      \
     ThorsAnvil_RegisterPolyMorphicType(DataType)
 
-#pragma vera-pushoff
 #define ThorsAnvil_RegisterPolyMorphicType(DataType)                    \
 namespace ThorsAnvil { namespace Serialize {                            \
 namespace                                                               \
@@ -610,7 +609,6 @@ namespace                                                               \
     ThorsAnvil_InitPolyMorphicType<DataType>   THOR_UNIQUE_NAME ( # DataType); \
 }                                                                       \
 }}
-#pragma vera-pop
 
 #define ThorsAnvil_Parent(Count, ParentType, DataType, ...)             \
         using Parent = ParentType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count); \
@@ -928,6 +926,20 @@ struct GetAllocationType<std::unique_ptr<T>>
 {
     using AllocType = T;
 };
+#ifdef  SCGRROT_SHARED_PTR_SUPPRT
+/*
+ * This will work for shared pointers at a very basic level.
+ *
+ * But is conditionally included as it does not support one object used by multiple shared pointer
+ * in the same object. Serializing and de-serializing will result in multiple versions of the
+ * object in the new object.
+ */
+template<typename T>
+struct GetAllocationType<std::shared_ptr<T>>
+{
+    using AllocType = T;
+};
+#endif
 
 /*
  */
