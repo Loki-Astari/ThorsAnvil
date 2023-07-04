@@ -1,5 +1,3 @@
-#include "SerializeConfig.h"
-#include "BsonParser.h"
 #include "JsonLexemes.h"
 #include "UnicodeIterator.h"
 #include "ThorsIOUtil/Utility.h"
@@ -8,7 +6,8 @@
 #include <cstdlib>
 #include <cstring>
 
-using namespace ThorsAnvil::Serialize;
+namespace ThorsAnvil::Serialize
+{
 using ParserToken = ParserInterface::ParserToken;
 
 
@@ -140,10 +139,11 @@ ParserToken BsonParser::getNextToken()
                              "Invalid state reached in switch");
         }
     }
-    VLOG_S(5) << getTokenTypeAsString(result);
+    ThorsMessage(5, "BsonParser", "getNextToken", getTokenTypeAsString(result));
     return result;
 }
 
+HEADER_ONLY_INCLUDE
 char const* getTokenTypeAsString(ParserToken result)
 {
     switch (result)
@@ -171,15 +171,15 @@ void BsonParser::ignoreDataValue()
     }
     switch (nextType)
     {
-        case '\x01':    input.ignore(8);    dataLeft.back() -= 8;   VLOG_S(5) << "Double-64";   break;
-        case '\x13':    input.ignore(16);   dataLeft.back() -= 16;  VLOG_S(5) << "Double-128";  break;
-        case '\x10':    input.ignore(4);    dataLeft.back() -= 4;   VLOG_S(5) << "Int-32";      break;
-        case '\x12':    input.ignore(8);    dataLeft.back() -= 8;   VLOG_S(5) << "Int-64";      break;
-        case '\x07':    input.ignore(12);   dataLeft.back() -= 12;  VLOG_S(5) << "Obj-ID";      break;
-        case '\x08':    input.ignore(1);    dataLeft.back() -= 1;   VLOG_S(5) << "Bool";        break;
-        case '\x0A':                                                VLOG_S(5) << "NULL";        break;
-        case '\x02':    {std::size_t size = readSize<4, std::int32_t>();input.ignore(size);      dataLeft.back() -= (size + 4);  VLOG_S(5) << "String";break;}
-        case '\x05':    {std::size_t size = readSize<4, std::int32_t>();input.ignore(size + 1);  dataLeft.back() -= (size + 5);  VLOG_S(5) << "Binary";break;}
+        case '\x01':    input.ignore(8);    dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Double-64");   break;
+        case '\x13':    input.ignore(16);   dataLeft.back() -= 16;  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Double-128");  break;
+        case '\x10':    input.ignore(4);    dataLeft.back() -= 4;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Int-32");      break;
+        case '\x12':    input.ignore(8);    dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Int-64");      break;
+        case '\x07':    input.ignore(12);   dataLeft.back() -= 12;  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Obj-ID");      break;
+        case '\x08':    input.ignore(1);    dataLeft.back() -= 1;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Bool");        break;
+        case '\x0A':                                                ThorsMessage(5, "BsonParser", "ignoreDataValue", "NULL");        break;
+        case '\x02':    {std::size_t size = readSize<4, std::int32_t>();input.ignore(size);      dataLeft.back() -= (size + 4);  ThorsMessage(5, "BsonParser", "ignoreDataValue", "String");break;}
+        case '\x05':    {std::size_t size = readSize<4, std::int32_t>();input.ignore(size + 1);  dataLeft.back() -= (size + 5);  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Binary");break;}
         default:
         {
             ThorsLogAndThrow("ThorsAnvil::Serialize::BsonParser",
@@ -192,7 +192,7 @@ void BsonParser::ignoreDataValue()
 HEADER_ONLY_INCLUDE
 bool BsonParser::isEndOfContainer(std::size_t excess)
 {
-    VLOG_S(5) << "isEndOfContainer: dataLeft.back(): " << dataLeft.back() << " Excess: " <<  excess;
+    ThorsMessage(5, "BsonParser", "isEndOfContainer", "isEndOfContainer: dataLeft.back(): ", dataLeft.back(), " Excess: ",  excess);
     if (dataLeft.back() - excess  == 1)
     {
         switch (currentContainer.back())
@@ -234,7 +234,7 @@ void BsonParser::readKey()
 {
     if (input.read(&nextType, 1) && std::getline(input, nextKey, '\0'))
     {
-        VLOG_S(5) << "Key: " << nextKey;
+        ThorsMessage(5, "BsonParser", "readKey", "Key: ", nextKey);
         dataLeft.back() -= (1 + nextKey.size() + 1);
         return;
     }
@@ -327,21 +327,21 @@ std::string BsonParser::getRawValue()
 {
     switch (nextType)
     {
-        case '\x10':            VLOG_S(5) << "Double-32";return std::to_string(readInt<4, std::int32_t>());
-        case '\x12':            VLOG_S(5) << "Double-64";return std::to_string(readInt<8, std::int64_t>());
-        case '\x01':            VLOG_S(5) << "Double-128";return std::to_string(readFloat<8>());
+        case '\x10':            ThorsMessage(5, "BsonParser", "getRawValue", "Double-32");return std::to_string(readInt<4, std::int32_t>());
+        case '\x12':            ThorsMessage(5, "BsonParser", "getRawValue", "Double-64");return std::to_string(readInt<8, std::int64_t>());
+        case '\x01':            ThorsMessage(5, "BsonParser", "getRawValue", "Double-128");return std::to_string(readFloat<8>());
 #if 0
-        case '\x13':            VLOG_S(5) << "Int-64";return std::to_string(readFloat<16>());
+        case '\x13':            ThorsMessage(5, "BsonParser", "getRawValue", "Int-64");return std::to_string(readFloat<16>());
 #endif
-        case '\x08':            VLOG_S(5) << "Bool";return readBool() ? "true" : "false";
-        case '\x0A':            VLOG_S(5) << "Null";readNull(); return "null";
+        case '\x08':            ThorsMessage(5, "BsonParser", "getRawValue", "Bool");return readBool() ? "true" : "false";
+        case '\x0A':            ThorsMessage(5, "BsonParser", "getRawValue", "Null");readNull(); return "null";
         case '\x02':
         {
             using std::string_literals::operator""s;
-            VLOG_S(5) << "String";
+            ThorsMessage(5, "BsonParser", "getRawValue", "String");
             return "\""s + readString() + "\"";
         }
-        case '\x05':         VLOG_S(5) << "Binary";return readBinary();
+        case '\x05':         ThorsMessage(5, "BsonParser", "getRawValue", "Binary");return readBinary();
         default:
         {
             ThorsLogAndThrow("ThorsAnvil::Serialize::BsonParser",
@@ -350,3 +350,5 @@ std::string BsonParser::getRawValue()
         }
     }
 }
+}
+

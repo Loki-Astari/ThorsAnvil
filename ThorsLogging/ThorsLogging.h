@@ -1,6 +1,9 @@
 #ifndef THORS_ANVIL_LOGGING_THORS_LOGGING_H
 #define THORS_ANVIL_LOGGING_THORS_LOGGING_H
 
+#include "ThorsLoggingConfig.h"
+
+
 #ifndef LOGURU_WITH_STREAMS
 #define LOGURU_WITH_STREAMS 1
 #endif

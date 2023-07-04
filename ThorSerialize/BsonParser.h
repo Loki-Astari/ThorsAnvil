@@ -17,6 +17,7 @@
  *      will not cause an error.
  */
 
+#include "SerializeConfig.h"
 #include "Serialize.h"
 #include "BsonUtil.h"
 #include "ThorsIOUtil/Utility.h"
@@ -193,17 +194,17 @@ inline IEEE_754::_2008::Binary<size * 8> BsonParser::readFloat()
 template<std::size_t Size, typename Int>
 inline Int BsonParser::getIntValue()
 {
-    if (nextType == '\x10')     {VLOG_S(5) << "Int-32"; return readInt<4, std::int32_t>();}
-    if (nextType == '\x12')     {VLOG_S(5) << "Int-64"; return readInt<8, std::int64_t>();}
+    if (nextType == '\x10')     {ThorsMessage(5, "BsonParser", "getIntValue", "Int-32"); return readInt<4, std::int32_t>();}
+    if (nextType == '\x12')     {ThorsMessage(5, "BsonParser", "getIntValue", "Int-64"); return readInt<8, std::int64_t>();}
     badType("Int(32 or 64)", nextType);
 }
 
 template<std::size_t Size, typename Float>
 inline Float BsonParser::getFloatValue()
 {
-    if (nextType == '\x10')     {VLOG_S(5) << "Double-32";return readInt<4, std::int32_t>();}
-    if (nextType == '\x12')     {VLOG_S(5) << "Double-64";return readInt<8, std::int64_t>();}
-    if (nextType == '\x01')     {VLOG_S(5) << "Double-128";return readFloat<8>();}
+    if (nextType == '\x10')     {ThorsMessage(5, "BsonParser", "getFloatValue", "Double-32");return readInt<4, std::int32_t>();}
+    if (nextType == '\x12')     {ThorsMessage(5, "BsonParser", "getFloatValue", "Double-64");return readInt<8, std::int64_t>();}
+    if (nextType == '\x01')     {ThorsMessage(5, "BsonParser", "getFloatValue", "Double-128");return readFloat<8>();}
 #if 0
     if (nextType == '\x13')     {return readFloat<16>();}
 #endif

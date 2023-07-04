@@ -1,6 +1,7 @@
 #ifndef THORS_ANVIL_SERIALIZE_MONGO_UTILITY_H
 #define THORS_ANVIL_SERIALIZE_MONGO_UTILITY_H
 
+#include "SerializeConfig.h"
 #include "BsonParser.h"
 #include "BsonPrinter.h"
 #include "Exporter.h"
@@ -245,9 +246,119 @@ class BsonTimeStamp
         }
     }
 }
+namespace ThorsAnvil::Serialize::MongoUtility
+{
+    inline
+    BsonPrinter& operator<<(BsonPrinter& printer, ObjectID const& data)
+    {
+        printer.writeBE<4>(data.timestamp);
+        printer.writeBE<5>(data.random);
+        printer.writeBE<3>(data.counter);
+        return printer;
+    }
+
+    inline
+    JsonPrinter& operator<<(JsonPrinter& printer, ObjectID const& data)
+    {
+        printer.stream() << ThorsAnvil::Utility::StreamFormatterNoChange{}
+                         << "\""
+                         << std::hex << std::setfill('0')
+                         << std::setw( 8) << data.timestamp << "-"
+                         << std::setw(10) << data.random    << "-"
+                         << std::setw( 6) << data.counter
+                         << "\"";
+        return printer;
+    }
+
+    inline
+    BsonParser& operator>>(BsonParser& parser, ObjectID& data)
+    {
+        data.timestamp = parser.readBE<4, std::int32_t>();
+        data.random    = parser.readBE<5, std::int64_t>();
+        data.counter   = parser.readBE<3, std::int32_t>();
+        return parser;
+    }
+
+    inline
+    JsonParser& operator>>(JsonParser& parser, ObjectID& data)
+    {
+        char x1, x2, x3, x4;
+        parser.stream() >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> x1 >> data.timestamp >> x2 >> data.random >> x3 >> data.counter >> x4;
+        return parser;
+    }
+
+    inline
+    BsonPrinter& operator<<(BsonPrinter& printer, UTCDateTime const& data)
+    {
+        printer.writeLE<8, std::int64_t>(data.datetime);
+        return printer;
+    }
+
+    inline
+    JsonPrinter& operator<<(JsonPrinter& printer, UTCDateTime const& data)
+    {
+        printer.stream() << ThorsAnvil::Utility::StreamFormatterNoChange{} << std::hex << std::setw(16) << std::setfill('0') << data.datetime;
+        return printer;
+    }
+
+    inline
+    BsonParser& operator>>(BsonParser& parser, UTCDateTime& data)
+    {
+        data.datetime = parser.readLE<8, std::int64_t>();
+        return parser;
+    }
+
+    inline
+    JsonParser& operator>>(JsonParser& parser, UTCDateTime& data)
+    {
+        parser.stream() >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> data.datetime;
+        return parser;
+    }
+
+    inline
+    BsonPrinter& operator<<(BsonPrinter& printer, BsonTimeStamp const& data)
+    {
+        printer.writeBE<4, std::int32_t>(data.increment);
+        printer.writeBE<4, std::int32_t>(data.timestamp);
+        return printer;
+    }
+
+    inline
+    JsonPrinter& operator<<(JsonPrinter& printer, BsonTimeStamp const& data)
+    {
+        printer.stream() << ThorsAnvil::Utility::StreamFormatterNoChange{}
+                         << "\""
+                         << std::hex << std::setw(8) << std::setfill('0')
+                         << data.timestamp << "-"
+                         << data.increment
+                         << "\"";
+        return printer;
+    }
+
+    inline
+    BsonParser& operator>>(BsonParser& parser, BsonTimeStamp& data)
+    {
+        data.increment = parser.readBE<4, std::int32_t>();
+        data.timestamp = parser.readBE<4, std::int32_t>();
+        return parser;
+    }
+
+    inline
+    JsonParser& operator>>(JsonParser& parser, BsonTimeStamp& data)
+    {
+        char x1, x2, x3;
+        parser.stream() >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> x1 >> data.timestamp >> x2 >> data.increment >> x3;
+        return parser;
+    }
+}
+
 
 ThorsAnvil_MakeTraitCustomSerialize(ThorsAnvil::Serialize::MongoUtility::ObjectID,       ThorsAnvil::Serialize::MongoUtility::ObjectIDSerializer<ThorsAnvil::Serialize::MongoUtility::ObjectID>);
 ThorsAnvil_MakeTraitCustomSerialize(ThorsAnvil::Serialize::MongoUtility::UTCDateTime,    ThorsAnvil::Serialize::MongoUtility::DataTimeSerializer<ThorsAnvil::Serialize::MongoUtility::UTCDateTime>);
 ThorsAnvil_MakeTraitCustomSerialize(ThorsAnvil::Serialize::MongoUtility::BsonTimeStamp,  ThorsAnvil::Serialize::MongoUtility::TimeStampSerializer<ThorsAnvil::Serialize::MongoUtility::BsonTimeStamp>);
+
+#if defined(HEADER_ONLY) && HEADER_ONLY == 1
+#include "MongoUtility.source"
+#endif
 
 #endif

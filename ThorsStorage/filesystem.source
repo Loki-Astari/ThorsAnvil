@@ -1,11 +1,10 @@
-#include "ThorsStorageConfig.h"
-#include "filesystem.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
 
-using namespace ThorsAnvil::FileSystem;
+namespace ThorsAnvil::FileSystem
+{
 
 // File System Stuff
 HEADER_ONLY_INCLUDE
@@ -60,3 +59,5 @@ bool FileSystem::removeFileOrDirectory(std::string const& path)
     int state = remove(path.c_str());
     return state == 0;
 }
+}
+

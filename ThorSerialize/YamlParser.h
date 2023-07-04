@@ -18,6 +18,7 @@
  */
 
 
+#include "SerializeConfig.h"
 #include "Serialize.h"
 #include <yaml.h>
 #include <istream>

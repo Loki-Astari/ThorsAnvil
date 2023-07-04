@@ -1,5 +1,3 @@
-#include "SerializeConfig.h"
-#include "JsonParser.h"
 #include "JsonLexemes.h"
 #include "UnicodeIterator.h"
 #include "ThorsIOUtil/Utility.h"
@@ -9,7 +7,8 @@
 #include <cstring>
 
 // enum class ParserToken {Error, MapStart, MapEnd, ArrayStart, ArrayEnd, Key, Value};
-using namespace ThorsAnvil::Serialize;
+namespace ThorsAnvil::Serialize
+{
 using ParserToken = ParserInterface::ParserToken;
 
 HEADER_ONLY_INCLUDE
@@ -207,3 +206,5 @@ std::string JsonParser::getRawValue()
 {
     return getRawString();
 }
+}
+

@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_IOUTIL_FORMAT_INFO_H
 #define THORSANVIL_IOUTIL_FORMAT_INFO_H
 
+#include "ThorsIOUtilConfig.h"
 #include <iostream>
 #include <typeinfo>
 

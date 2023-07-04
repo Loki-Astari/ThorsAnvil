@@ -1,6 +1,8 @@
 #ifndef THORSANVIL_IOUTIL_SIGNCONVERSIONOPTION_H
 #define THORSANVIL_IOUTIL_SIGNCONVERSIONOPTION_H
 
+#include "ThorsIOUtilConfig.h"
+
 namespace ThorsAnvil
 {
     namespace IOUtil

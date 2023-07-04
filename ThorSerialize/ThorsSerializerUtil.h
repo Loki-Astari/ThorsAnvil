@@ -1,6 +1,7 @@
 #ifndef THORS_ANVIL_SERIALIZER_THORSSERIALIZERUTIL_H
 #define THORS_ANVIL_SERIALIZER_THORSSERIALIZERUTIL_H
 
+#include "SerializeConfig.h"
 #include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"
 #include <type_traits>
@@ -14,6 +15,18 @@ namespace ThorsAnvil
 {
     namespace Serialize
     {
+
+        namespace Private
+        {
+
+inline
+std::string const& getDefaultPolymorphicMarker()
+{
+    using std::string_literals::operator""s;
+    static std::string const defaultPolymorphicMarker = "__type"s;
+    return defaultPolymorphicMarker;
+}
+        }
 
 struct EscapeString
 {
@@ -107,8 +120,6 @@ struct EscapeString
     }
 };
 
-extern std::string const defaultPolymorphicMarker;
-
 /*
  * Defines the generic type that all serialization types can expand on
  */
@@ -159,7 +170,7 @@ class ParserInterface
         struct ParserConfig
         {
             ParserConfig(ParseType parseStrictness = ParseType::Weak,
-                         std::string const& polymorphicMarker = defaultPolymorphicMarker,
+                         std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
                          bool catchExceptions = true)
                 : parseStrictness(parseStrictness)
                 , polymorphicMarker(polymorphicMarker)
@@ -174,13 +185,13 @@ class ParserInterface
             {}
             ParserConfig(bool catchExceptions)
                 : parseStrictness(ParseType::Weak)
-                , polymorphicMarker(defaultPolymorphicMarker)
+                , polymorphicMarker(Private::getDefaultPolymorphicMarker())
                 , catchExceptions(catchExceptions)
                 , parserInfo(0)
             {}
             ParserConfig(ParseType parseStrictness, bool catchExceptions)
                 : parseStrictness(parseStrictness)
-                , polymorphicMarker(defaultPolymorphicMarker)
+                , polymorphicMarker(Private::getDefaultPolymorphicMarker())
                 , catchExceptions(catchExceptions)
                 , parserInfo(0)
             {}
@@ -247,7 +258,7 @@ class PrinterInterface
         struct PrinterConfig
         {
             PrinterConfig(OutputType characteristics = OutputType::Default,
-                          std::string const& polymorphicMarker = defaultPolymorphicMarker,
+                          std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
                           bool catchExceptions = true)
                 : characteristics(characteristics)
                 , polymorphicMarker(polymorphicMarker)
@@ -263,13 +274,13 @@ class PrinterInterface
             {}
             PrinterConfig(bool catchExceptions)
                 : characteristics(OutputType::Default)
-                , polymorphicMarker(defaultPolymorphicMarker)
+                , polymorphicMarker(Private::getDefaultPolymorphicMarker())
                 , catchExceptions(catchExceptions)
                 , parserInfo(0)
             {}
             PrinterConfig(OutputType characteristic, bool catchExceptions)
                 : characteristics(characteristic)
-                , polymorphicMarker(defaultPolymorphicMarker)
+                , polymorphicMarker(Private::getDefaultPolymorphicMarker())
                 , catchExceptions(catchExceptions)
                 , parserInfo(0)
             {}

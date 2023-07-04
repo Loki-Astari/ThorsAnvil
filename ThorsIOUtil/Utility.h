@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_NISSE_CORE_UTILITY_UTILITY_H
 #define THORSANVIL_NISSE_CORE_UTILITY_UTILITY_H
 
+#include "ThorsIOUtilConfig.h"
 #include <string>
 #include <sstream>
 #include <ostream>

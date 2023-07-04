@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_IOUTIL_FORMATTER_H
 #define THORSANVIL_IOUTIL_FORMATTER_H
 
+#include "ThorsIOUtilConfig.h"
 #include "printToStream.h"
 #include "saveToStream.h"
 #include "FormatInfo.h"

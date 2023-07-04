@@ -1,5 +1,3 @@
-#include "SerializeConfig.h"
-#include "JsonManualLexer.h"
 #include "JsonLexemes.h"
 #include "UnicodeIterator.h"
 #include "ThorsIOUtil/Utility.h"
@@ -8,7 +6,8 @@
 #include <limits>
 #include <cstring>
 
-using namespace ThorsAnvil::Serialize;
+namespace ThorsAnvil::Serialize
+{
 
 HEADER_ONLY_INCLUDE
 JsonManualLexer::JsonManualLexer(std::istream& str)
@@ -287,3 +286,5 @@ void JsonManualLexer::error()
                      "error",
                      "Invalid Character in Lexer");
 }
+}
+

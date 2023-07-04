@@ -258,6 +258,7 @@
  *
  */
 
+#include "SerializeConfig.h"
 #include "ThorsSerializerUtil.h"
 #include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"

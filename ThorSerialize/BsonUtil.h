@@ -5,6 +5,7 @@
  *  See documentation in BsonParser.h
  */
 
+#include "SerializeConfig.h"
 #include "Serialize.h"
 #include <vector>
 

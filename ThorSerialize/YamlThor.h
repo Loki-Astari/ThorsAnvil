@@ -12,6 +12,7 @@
  */
 
 
+#include "SerializeConfig.h"
 #include "YamlParser.h"
 #include "YamlPrinter.h"
 #include "Exporter.h"

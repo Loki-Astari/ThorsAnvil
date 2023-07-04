@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_FILESYSTEM_COLUMNFORMAT_FILE_H
 #define THORSANVIL_FILESYSTEM_COLUMNFORMAT_FILE_H
 
+#include "ThorsStorageConfig.h"
 #include "filesystem.h"
 #include <ThorSerialize/Traits.h>
 #include <string>

@@ -17,6 +17,7 @@
  *      will not cause an error.
  */
 
+#include "SerializeConfig.h"
 #include "Serialize.h"
 #include "JsonManualLexer.h"
 #include <istream>

@@ -1,9 +1,8 @@
-#include "SerializeConfig.h"
-#include "YamlParser.h"
 #include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"
 
-using namespace ThorsAnvil::Serialize;
+namespace ThorsAnvil::Serialize
+{
 
 extern "C"
 {
@@ -252,3 +251,5 @@ std::string YamlParser::getRawValue()
 {
     return getString();
 }
+}
+

@@ -1,6 +1,7 @@
 #ifndef THORS_ANVIL_SERIALIZE_JSON_LEXEMES_H
 #define THORS_ANVIL_SERIALIZE_JSON_LEXEMES_H
 
+#include "SerializeConfig.h"
 #include "Serialize.h"
 #include <string>
 

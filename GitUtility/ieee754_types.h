@@ -15,6 +15,7 @@
 #error This file requires C++17
 #endif
 
+#include "GitUtilityConfig.h"
 #include <climits>
 #include <limits>
 #include <type_traits>

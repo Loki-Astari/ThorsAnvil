@@ -1,9 +1,8 @@
-#include "ThorsIOUtilConfig.h"
-#include "Example.h"
 #include "Format.h"
 #include <iostream>
 
-using namespace ThorsAnvil::IOUtil;
+namespace ThorsAnvil::IOUtil
+{
 
 int main()
 {
@@ -23,3 +22,5 @@ int main()
 
     //std::cout << Fmt::make_cppformat("Integer Variable: %hhd\n", i5);
 }
+}
+

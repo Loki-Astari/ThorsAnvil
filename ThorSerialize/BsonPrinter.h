@@ -5,6 +5,7 @@
  *  See documentation in BsonParser.h
  */
 
+#include "SerializeConfig.h"
 #include "Serialize.h"
 #include "BsonUtil.h"
 #include "GitUtility/ieee754_types.h"
@@ -24,8 +25,6 @@ namespace ThorsAnvil
         }
 
 using IntTypes = std::tuple<std::int32_t, std::int64_t>;
-extern char  intKey[];
-extern char  floatKey[];
 
 class BsonPrinter: public PrinterInterface
 {
@@ -131,6 +130,7 @@ inline void BsonPrinter::writeSize(Int value)
 template<std::size_t Size, typename Int>
 inline void BsonPrinter::writeInt(Int value)
 {
+    static char  intKey[]      = {'\x10', '\x12'};
     using IntType = typename std::tuple_element<Size/4 - 1, IntTypes>::type;
 
     IntType             output = value;
@@ -141,6 +141,8 @@ inline void BsonPrinter::writeInt(Int value)
 template<std::size_t Size, typename Float>
 inline void BsonPrinter::writeFloat(Float value)
 {
+    static char  floatKey[]    = {'\x01', '\x13'};
+
     IEEE_754::_2008::Binary<Size * 8>   outputValue = value;
     writeKey(floatKey[Size/8 - 1], Size);
     output.write(reinterpret_cast<char*>(&outputValue), Size);

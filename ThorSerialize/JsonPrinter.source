@@ -1,11 +1,10 @@
-#include "SerializeConfig.h"
-#include "JsonPrinter.h"
 #include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"
 #include <iomanip>
 #include <algorithm>
 
-using namespace ThorsAnvil::Serialize;
+namespace ThorsAnvil::Serialize
+{
 
 namespace
 {
@@ -220,3 +219,5 @@ HEADER_ONLY_INCLUDE void JsonPrinter::addValue(std::string_view const&value){out
 HEADER_ONLY_INCLUDE void JsonPrinter::addRawValue(std::string const& value) {output << PrefixValue(config.characteristics, state.size(), state.back()) << value;}
 
 HEADER_ONLY_INCLUDE void JsonPrinter::addNull()                             {output << PrefixValue(config.characteristics, state.size(), state.back()) << "null";}
+}
+

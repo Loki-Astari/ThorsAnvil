@@ -11,6 +11,7 @@
  *      std::cin  >> bsonImporter(object); // converts Bson to a C++ object from an input stream
  */
 
+#include "SerializeConfig.h"
 #include "BsonParser.h"
 #include "BsonPrinter.h"
 #include "Exporter.h"

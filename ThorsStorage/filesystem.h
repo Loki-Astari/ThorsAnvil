@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_FILESYSTEM_FILESYSTEM_H
 #define THORSANVIL_FILESYSTEM_FILESYSTEM_H
 
+#include "ThorsStorageConfig.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <string>
@@ -39,5 +40,9 @@ namespace ThorsAnvil
 
     }
 }
+
+#if defined(HEADER_ONLY) && HEADER_ONLY == 1
+#include "filesystem.source"
+#endif
 
 #endif

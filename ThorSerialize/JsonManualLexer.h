@@ -1,6 +1,7 @@
 #ifndef THORS_ANVIL_SERIALIZER_JSON_MANUAL_LEXER_H
 #define THORS_ANVIL_SERIALIZER_JSON_MANUAL_LEXER_H
 
+#include "SerializeConfig.h"
 #include "Serialize.h"
 #include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"

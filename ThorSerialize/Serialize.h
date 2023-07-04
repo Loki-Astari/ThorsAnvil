@@ -31,6 +31,7 @@
  *                                                                          for each member that needs to be printed/parsed
  */
 
+#include "SerializeConfig.h"
 #include "Traits.h"
 #include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"

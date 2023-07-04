@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_IOUTIL_SAVE_TO_STREAM_H
 #define THORSANVIL_IOUTIL_SAVE_TO_STREAM_H
 
+#include "ThorsIOUtilConfig.h"
 #include "FormatInfo.h"
 #include <iostream>
 

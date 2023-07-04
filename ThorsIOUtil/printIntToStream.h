@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_IOUTIL_PRINT_INT_TO_STREAM_H
 #define THORSANVIL_IOUTIL_PRINT_INT_TO_STREAM_H
 
+#include "ThorsIOUtilConfig.h"
 #include "FormatInfo.h"
 #include "printToStream.h"
 
