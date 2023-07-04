@@ -1,0 +1,27 @@
+        -:    0:Source:../test/Person.h
+        -:    0:Graph:coverage/readTest.gcno
+        -:    0:Data:coverage/readTest.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#ifndef THORSANVIL_FILESYSTEM_COLUMNFORMAT_TEST_PERSON_H
+        -:    2:#define THORSANVIL_FILESYSTEM_COLUMNFORMAT_TEST_PERSON_H
+        -:    3:
+        -:    4:#include <ThorSerialize/Traits.h>
+        -:    5:#include <string>
+        -:    6:
+        -:    7:struct Person
+        -:    8:{
+        -:    9:    std::string name;
+        -:   10:    int         age;
+        -:   11:};
+        -:   12:
+        -:   13:struct TwoPeople
+        -:   14:{
+        -:   15:    Person personOne;
+        -:   16:    Person personTwo;
+        -:   17:};
+        -:   18:
+    #####:   19:ThorsAnvil_MakeTrait(Person, name, age);
+    #####:   20:ThorsAnvil_MakeTrait(TwoPeople, personOne, personTwo);
+        -:   21:
+        -:   22:#endif

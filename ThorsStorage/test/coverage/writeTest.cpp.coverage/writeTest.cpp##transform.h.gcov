@@ -1,0 +1,48 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/transform.h
+        -:    0:Graph:coverage/writeTest.gcno
+        -:    0:Data:coverage/writeTest.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1://===----------------------------------------------------------------------===//
+        -:    2://
+        -:    3:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    4:// See https://llvm.org/LICENSE.txt for license information.
+        -:    5:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    6://
+        -:    7://===----------------------------------------------------------------------===//
+        -:    8:
+        -:    9:#ifndef _LIBCPP___ALGORITHM_TRANSFORM_H
+        -:   10:#define _LIBCPP___ALGORITHM_TRANSFORM_H
+        -:   11:
+        -:   12:#include <__config>
+        -:   13:
+        -:   14:#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   15:#  pragma GCC system_header
+        -:   16:#endif
+        -:   17:
+        -:   18:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   19:
+        -:   20:template <class _InputIterator, class _OutputIterator, class _UnaryOperation>
+        -:   21:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_SINCE_CXX20
+        -:   22:_OutputIterator
+    #####:   23:transform(_InputIterator __first, _InputIterator __last, _OutputIterator __result, _UnaryOperation __op)
+        -:   24:{
+    #####:   25:    for (; __first != __last; ++__first, (void) ++__result)
+    #####:   26:        *__result = __op(*__first);
+    #####:   27:    return __result;
+        -:   28:}
+        -:   29:
+        -:   30:template <class _InputIterator1, class _InputIterator2, class _OutputIterator, class _BinaryOperation>
+        -:   31:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_SINCE_CXX20
+        -:   32:_OutputIterator
+        -:   33:transform(_InputIterator1 __first1, _InputIterator1 __last1, _InputIterator2 __first2,
+        -:   34:          _OutputIterator __result, _BinaryOperation __binary_op)
+        -:   35:{
+        -:   36:    for (; __first1 != __last1; ++__first1, (void) ++__first2, ++__result)
+        -:   37:        *__result = __binary_op(*__first1, *__first2);
+        -:   38:    return __result;
+        -:   39:}
+        -:   40:
+        -:   41:_LIBCPP_END_NAMESPACE_STD
+        -:   42:
+        -:   43:#endif // _LIBCPP___ALGORITHM_TRANSFORM_H

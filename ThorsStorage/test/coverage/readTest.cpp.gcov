@@ -1,0 +1,95 @@
+        -:    0:Source:readTest.cpp
+        -:    0:Graph:coverage/readTest.gcno
+        -:    0:Data:coverage/readTest.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include "gtest/gtest.h"
+        -:    2:
+        -:    3:#include "file.h"
+        -:    4:#include "test/Person.h"
+        -:    5:#include "test/TestFileClass.h"
+        -:    6:
+        -:    7:namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
+        -:    8:
+        -:    9:using ReadTest = SimpleTestDir;
+        1:   10:
+        4:   11:TEST_F(ReadTest, readTwoPeople)
+        1:   12:{
+        -:   13:    {
+        2:   14:        TC::OFile<TwoPeople>    file(simpleTestDir);
+        2:   15:        file << TwoPeople{Person{"Martin" ,20}, Person{"Loki", 22}};
+        2:   16:        ASSERT_TRUE(file);
+        2:   17:    }
+        1:   18:
+        2:   19:    // Just construct and destruct
+        2:   20:    // Make sure it does not throw.
+        2:   21:    TwoPeople               people;
+        2:   22:    TC::File<TwoPeople>     file(simpleTestDir);
+        1:   23:    ASSERT_TRUE(file);
+        1:   24:
+        2:   25:    file >> people;
+        2:   26:    ASSERT_TRUE(file);
+        -:   27:
+        1:   28:    ASSERT_EQ(people.personOne.name, "Martin");
+        1:   29:    ASSERT_EQ(people.personOne.age,  20);
+        1:   30:    ASSERT_EQ(people.personTwo.name, "Loki");
+        1:   31:    ASSERT_EQ(people.personTwo.age,  22);
+        -:   32:
+        1:   33:    TwoPeople               extra;
+        1:   34:    file >> extra;
+        1:   35:    ASSERT_FALSE(file);
+        1:   36:}
+        -:   37:
+        4:   38:TEST_F(ReadTest, readNormal)
+        -:   39:{
+        -:   40:    {
+        1:   41:        TC::OFile<TwoPeople>    file(simpleTestDir);
+        1:   42:        file << TwoPeople{Person{"Martin", 20}, Person{"Loki",   22}};
+        1:   43:        ASSERT_TRUE(file);
+        1:   44:    }
+        -:   45:
+        1:   46:    TwoPeople               twoP;
+        1:   47:    TC::IFile<TwoPeople>    file(simpleTestDir);
+        1:   48:    ASSERT_TRUE(file >> twoP);
+        1:   49:    ASSERT_EQ(twoP.personOne.name, "Martin");
+        1:   50:    ASSERT_EQ(twoP.personTwo.name, "Loki");
+        1:   51:    ASSERT_EQ(twoP.personOne.age,  20);
+        1:   52:    ASSERT_EQ(twoP.personTwo.age,  22);
+        -:   53:
+        1:   54:    ASSERT_FALSE(file >> twoP);
+        1:   55:}
+        -:   56:
+        4:   57:TEST_F(ReadTest, badReadDoesNotChangeFile)
+        -:   58:{
+        -:   59:    {
+        1:   60:        TC::OFile<TwoPeople>    file(simpleTestDir);
+        1:   61:        file << TwoPeople{Person{"Martin", 20}, Person{"Loki",   22}};
+        1:   62:        file << TwoPeople{Person{"Again",  28}, Person{"Astari", 29}};
+        1:   63:        ASSERT_TRUE(file);
+        1:   64:    }
+        -:   65:
+        1:   66:    TwoPeople               twoP;
+        1:   67:    TC::IFile<TwoPeople>    file(simpleTestDir);
+        1:   68:    ASSERT_TRUE(file >> twoP);
+        1:   69:    ASSERT_EQ(twoP.personOne.name, "Martin");
+        1:   70:    ASSERT_EQ(twoP.personTwo.name, "Loki");
+        1:   71:    ASSERT_EQ(twoP.personOne.age,  20);
+        1:   72:    ASSERT_EQ(twoP.personTwo.age,  22);
+        -:   73:
+        1:   74:    file.setstate(std::ios::failbit);
+        1:   75:    ASSERT_FALSE(file >> twoP);
+        1:   76:    ASSERT_EQ(twoP.personOne.name, "Martin");
+        1:   77:    ASSERT_EQ(twoP.personTwo.name, "Loki");
+        1:   78:    ASSERT_EQ(twoP.personOne.age,  20);
+        1:   79:    ASSERT_EQ(twoP.personTwo.age,  22);
+        -:   80:
+        1:   81:    file.clear();
+        1:   82:    ASSERT_TRUE(file >> twoP);
+        1:   83:    ASSERT_EQ(twoP.personOne.name, "Again");
+        1:   84:    ASSERT_EQ(twoP.personTwo.name, "Astari");
+        1:   85:    ASSERT_EQ(twoP.personOne.age,  28);
+        1:   86:    ASSERT_EQ(twoP.personTwo.age,  29);
+        -:   87:
+        1:   88:    ASSERT_FALSE(file >> twoP);
+        1:   89:}
+        -:   90:

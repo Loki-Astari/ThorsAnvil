@@ -1,0 +1,353 @@
+        -:    0:Source:seekTest.cpp
+        -:    0:Graph:coverage/seekTest.gcno
+        -:    0:Data:coverage/seekTest.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include "gtest/gtest.h"
+        -:    2:
+        -:    3:#include "file.h"
+        -:    4:#include "test/Person.h"
+        -:    5:#include "test/TestFileClass.h"
+        -:    6:
+        -:    7:namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
+        -:    8:
+        -:    9:using SeekTest = SimpleTestDir;
+        1:   10:
+        4:   11:TEST_F(SeekTest, seekPutAbsolute)
+        1:   12:{
+        -:   13:    {
+        2:   14:        TC::OFile<TwoPeople>    file(simpleTestDir);
+        2:   15:        file << TwoPeople{Person{"N1.1" ,11}, Person{"N1.2", 12}};
+        2:   16:        file << TwoPeople{Person{"N2.1" ,21}, Person{"N2.2", 22}};
+        2:   17:        file << TwoPeople{Person{"N3.1" ,31}, Person{"N3.2", 32}};
+        2:   18:        file << TwoPeople{Person{"N4.1" ,41}, Person{"N4.2", 42}};
+        3:   19:        ASSERT_EQ(file.tellp(), 4);
+        2:   20:
+        2:   21:        file.seekp(2);
+        2:   22:        file << TwoPeople{Person{"R3.1" ,131}, Person{"R3.2", 132}};
+        1:   23:        ASSERT_EQ(file.tellp(), 3);
+        2:   24:    }
+        1:   25:    {
+        2:   26:        TwoPeople       people;
+        1:   27:        TC::IFile<TwoPeople>    file(simpleTestDir);
+        -:   28:
+        1:   29:        ASSERT_TRUE(file >> people);
+        1:   30:        ASSERT_EQ(people.personOne.name, "N1.1");
+        -:   31:
+        1:   32:        ASSERT_TRUE(file >> people);
+        1:   33:        ASSERT_EQ(people.personOne.name, "N2.1");
+        -:   34:
+        1:   35:        ASSERT_TRUE(file >> people);
+        1:   36:        ASSERT_EQ(people.personTwo.name, "R3.2");
+        -:   37:
+        1:   38:        ASSERT_TRUE(file >> people);
+        1:   39:        ASSERT_FALSE(file >> people);
+        1:   40:    }
+        1:   41:}
+        -:   42:
+        4:   43:TEST_F(SeekTest, seekPutRelBeginning)
+        -:   44:{
+        -:   45:    {
+        1:   46:        TC::OFile<TwoPeople>    file(simpleTestDir);
+        1:   47:        file << TwoPeople{Person{"N1.1" ,11}, Person{"N1.2", 12}};
+        1:   48:        file << TwoPeople{Person{"N2.1" ,21}, Person{"N2.2", 22}};
+        1:   49:        file << TwoPeople{Person{"N3.1" ,31}, Person{"N3.2", 32}};
+        1:   50:        file << TwoPeople{Person{"N4.1" ,41}, Person{"N4.2", 42}};
+        1:   51:        ASSERT_EQ(file.tellp(), 4);
+        -:   52:
+        1:   53:        file.seekp(2, std::ios_base::beg);
+        1:   54:        file << TwoPeople{Person{"R3.1" ,131}, Person{"R3.2", 132}};
+        1:   55:        ASSERT_EQ(file.tellp(), 3);
+        1:   56:    }
+        1:   57:    TwoPeople       people;
+        1:   58:    TC::IFile<TwoPeople>    file(simpleTestDir);
+        -:   59:
+        1:   60:    ASSERT_TRUE(file >> people);
+        1:   61:    ASSERT_EQ(people.personOne.name, "N1.1");
+        -:   62:
+        1:   63:    ASSERT_TRUE(file >> people);
+        1:   64:    ASSERT_EQ(people.personTwo.name, "N2.2");
+        -:   65:
+        1:   66:    ASSERT_TRUE(file >> people);
+        1:   67:    ASSERT_EQ(people.personTwo.age, 132);
+        -:   68:
+        1:   69:    ASSERT_TRUE(file >> people);
+        1:   70:    ASSERT_EQ(people.personOne.age, 41);
+        -:   71:
+        1:   72:    ASSERT_FALSE(file >> people);
+        1:   73:}
+        -:   74:
+        4:   75:TEST_F(SeekTest, seekPutRelEnd)
+        -:   76:{
+        -:   77:    {
+        1:   78:        TC::OFile<TwoPeople>    file(simpleTestDir);
+        1:   79:        file << TwoPeople{Person{"N1.1" ,11}, Person{"N1.2", 12}};
+        1:   80:        file << TwoPeople{Person{"N2.1" ,21}, Person{"N2.2", 22}};
+        1:   81:        file << TwoPeople{Person{"N3.1" ,31}, Person{"N3.2", 32}};
+        1:   82:        file << TwoPeople{Person{"N4.1" ,41}, Person{"N4.2", 42}};
+        1:   83:        ASSERT_EQ(file.tellp(), 4);
+        -:   84:
+        1:   85:        file.seekp(-3, std::ios_base::end);
+        1:   86:        file << TwoPeople{Person{"R2.1" ,121}, Person{"R2.2", 122}};
+        1:   87:        ASSERT_EQ(file.tellp(), 2);
+        1:   88:    }
+        1:   89:    TwoPeople       people;
+        1:   90:    TC::IFile<TwoPeople>    file(simpleTestDir);
+        -:   91:
+        1:   92:    ASSERT_TRUE(file >> people);
+        1:   93:    ASSERT_EQ(people.personOne.name, "N1.1");
+        -:   94:
+        1:   95:    ASSERT_TRUE(file >> people);
+        1:   96:    ASSERT_EQ(people.personTwo.name, "R2.2");
+        -:   97:
+        1:   98:    ASSERT_TRUE(file >> people);
+        1:   99:    ASSERT_EQ(people.personTwo.age, 32);
+        -:  100:
+        1:  101:    ASSERT_TRUE(file >> people);
+        1:  102:    ASSERT_EQ(people.personOne.age, 41);
+        -:  103:
+        1:  104:    ASSERT_FALSE(file >> people);
+        1:  105:}
+        -:  106:
+        4:  107:TEST_F(SeekTest, seekPutRelCurrentNegative)
+        -:  108:{
+        -:  109:    {
+        1:  110:        TC::OFile<TwoPeople>    file(simpleTestDir);
+        1:  111:        file << TwoPeople{Person{"N1.1" ,11}, Person{"N1.2", 12}};
+        1:  112:        file << TwoPeople{Person{"N2.1" ,21}, Person{"N2.2", 22}};
+        1:  113:        file << TwoPeople{Person{"N3.1" ,31}, Person{"N3.2", 32}};
+        1:  114:        file << TwoPeople{Person{"N4.1" ,41}, Person{"N4.2", 42}};
+        1:  115:        ASSERT_EQ(file.tellp(), 4);
+        -:  116:
+        1:  117:        file.seekp(-4, std::ios_base::cur);
+        1:  118:        file << TwoPeople{Person{"R1.1" ,111}, Person{"R1.2", 112}};
+        1:  119:        ASSERT_EQ(file.tellp(), 1);
+        1:  120:    }
+        1:  121:    TwoPeople       people;
+        1:  122:    TC::IFile<TwoPeople>    file(simpleTestDir);
+        -:  123:
+        1:  124:    ASSERT_TRUE(file >> people);
+        1:  125:    ASSERT_EQ(people.personOne.name, "R1.1");
+        -:  126:
+        1:  127:    ASSERT_TRUE(file >> people);
+        1:  128:    ASSERT_EQ(people.personTwo.name, "N2.2");
+        -:  129:
+        1:  130:    ASSERT_TRUE(file >> people);
+        1:  131:    ASSERT_EQ(people.personTwo.age, 32);
+        -:  132:
+        1:  133:    ASSERT_TRUE(file >> people);
+        1:  134:    ASSERT_EQ(people.personOne.age, 41);
+        -:  135:
+        1:  136:    ASSERT_FALSE(file >> people);
+        1:  137:}
+        -:  138:
+        4:  139:TEST_F(SeekTest, seekPutRelCurrentPosative)
+        -:  140:{
+        -:  141:    {
+        1:  142:        TC::OFile<TwoPeople>    file(simpleTestDir);
+        1:  143:        file << TwoPeople{Person{"N1.1" ,11}, Person{"N1.2", 12}};
+        1:  144:        file << TwoPeople{Person{"N2.1" ,21}, Person{"N2.2", 22}};
+        1:  145:        file << TwoPeople{Person{"N3.1" ,31}, Person{"N3.2", 32}};
+        1:  146:        file << TwoPeople{Person{"N4.1" ,41}, Person{"N4.2", 42}};
+        1:  147:        ASSERT_EQ(file.tellp(), 4);
+        -:  148:
+        1:  149:        file.seekp(1);
+        1:  150:        file.seekp(2, std::ios_base::cur);
+        1:  151:        file << TwoPeople{Person{"R4.1" ,141}, Person{"R4.2", 142}};
+        1:  152:        ASSERT_EQ(file.tellp(), 4);
+        1:  153:    }
+        1:  154:    TwoPeople       people;
+        1:  155:    TC::IFile<TwoPeople>    file(simpleTestDir);
+        -:  156:
+        1:  157:    ASSERT_TRUE(file >> people);
+        1:  158:    ASSERT_EQ(people.personOne.name, "N1.1");
+        -:  159:
+        1:  160:    ASSERT_TRUE(file >> people);
+        1:  161:    ASSERT_EQ(people.personTwo.name, "N2.2");
+        -:  162:
+        1:  163:    ASSERT_TRUE(file >> people);
+        1:  164:    ASSERT_EQ(people.personTwo.age, 32);
+        -:  165:
+        1:  166:    ASSERT_TRUE(file >> people);
+        1:  167:    ASSERT_EQ(people.personOne.age, 141);
+        -:  168:
+        1:  169:    ASSERT_FALSE(file >> people);
+        1:  170:}
+        -:  171:
+        4:  172:TEST_F(SeekTest, seekGetAbsolute)
+        -:  173:{
+        -:  174:    {
+        1:  175:        TC::OFile<TwoPeople>    file(simpleTestDir);
+        1:  176:        file << TwoPeople{Person{"N1.1" ,11}, Person{"N1.2", 12}};
+        1:  177:        file << TwoPeople{Person{"N2.1" ,21}, Person{"N2.2", 22}};
+        1:  178:        file << TwoPeople{Person{"N3.1" ,31}, Person{"N3.2", 32}};
+        1:  179:        file << TwoPeople{Person{"N4.1" ,41}, Person{"N4.2", 42}};
+        1:  180:    }
+        1:  181:    TwoPeople       people;
+        1:  182:    TC::IFile<TwoPeople>    file(simpleTestDir);
+        -:  183:
+        1:  184:    ASSERT_TRUE(file >> people);
+        1:  185:    ASSERT_EQ(people.personOne.name, "N1.1");
+        -:  186:
+        1:  187:    ASSERT_TRUE(file >> people);
+        1:  188:    ASSERT_EQ(people.personOne.name, "N2.1");
+        -:  189:
+        1:  190:    ASSERT_TRUE(file >> people);
+        1:  191:    ASSERT_EQ(people.personTwo.name, "N3.2");
+        -:  192:
+        1:  193:    file.seekg(1);
+        1:  194:    std::cerr << "Seek: " << file.rdstate() << "\n";
+        -:  195:
+        1:  196:    ASSERT_TRUE(file >> people);
+        1:  197:    ASSERT_EQ(people.personOne.name, "N2.1");
+        -:  198:
+        1:  199:    ASSERT_TRUE(file >> people);
+        1:  200:    ASSERT_EQ(people.personTwo.name, "N3.2");
+        -:  201:
+        1:  202:    ASSERT_TRUE(file >> people);
+        1:  203:    ASSERT_EQ(people.personTwo.name, "N4.2");
+        -:  204:
+        1:  205:    ASSERT_FALSE(file >> people);
+        1:  206:}
+        -:  207:
+        4:  208:TEST_F(SeekTest, seekGetRelBeginning)
+        -:  209:{
+        -:  210:    {
+        1:  211:        TC::OFile<TwoPeople>    file(simpleTestDir);
+        1:  212:        file << TwoPeople{Person{"N1.1" ,11}, Person{"N1.2", 12}};
+        1:  213:        file << TwoPeople{Person{"N2.1" ,21}, Person{"N2.2", 22}};
+        1:  214:        file << TwoPeople{Person{"N3.1" ,31}, Person{"N3.2", 32}};
+        1:  215:        file << TwoPeople{Person{"N4.1" ,41}, Person{"N4.2", 42}};
+        1:  216:    }
+        1:  217:    TwoPeople       people;
+        1:  218:    TC::IFile<TwoPeople>    file(simpleTestDir);
+        -:  219:
+        1:  220:    ASSERT_TRUE(file >> people);
+        1:  221:    ASSERT_EQ(people.personOne.name, "N1.1");
+        -:  222:
+        1:  223:    ASSERT_TRUE(file >> people);
+        1:  224:    ASSERT_EQ(people.personOne.name, "N2.1");
+        -:  225:
+        1:  226:    file.seekg(3, std::ios::beg);
+        -:  227:
+        1:  228:    ASSERT_TRUE(file >> people);
+        1:  229:    ASSERT_EQ(people.personTwo.name, "N4.2");
+        -:  230:
+        1:  231:    file.seekg(1, std::ios::beg);
+        -:  232:
+        1:  233:    ASSERT_TRUE(file >> people);
+        1:  234:    ASSERT_EQ(people.personOne.name, "N2.1");
+        -:  235:
+        1:  236:    ASSERT_TRUE(file >> people);
+        1:  237:    ASSERT_EQ(people.personTwo.name, "N3.2");
+        -:  238:
+        1:  239:    ASSERT_TRUE(file >> people);
+        1:  240:    ASSERT_EQ(people.personTwo.name, "N4.2");
+        -:  241:
+        1:  242:    ASSERT_FALSE(file >> people);
+        1:  243:}
+        -:  244:
+        4:  245:TEST_F(SeekTest, seekGetRelEnd)
+        -:  246:{
+        -:  247:    {
+        1:  248:        TC::OFile<TwoPeople>    file(simpleTestDir);
+        1:  249:        file << TwoPeople{Person{"N1.1" ,11}, Person{"N1.2", 12}};
+        1:  250:        file << TwoPeople{Person{"N2.1" ,21}, Person{"N2.2", 22}};
+        1:  251:        file << TwoPeople{Person{"N3.1" ,31}, Person{"N3.2", 32}};
+        1:  252:        file << TwoPeople{Person{"N4.1" ,41}, Person{"N4.2", 42}};
+        1:  253:    }
+        1:  254:    TwoPeople       people;
+        1:  255:    TC::IFile<TwoPeople>    file(simpleTestDir);
+        -:  256:
+        1:  257:    ASSERT_TRUE(file >> people);
+        1:  258:    ASSERT_EQ(people.personOne.name, "N1.1");
+        -:  259:
+        1:  260:    ASSERT_TRUE(file >> people);
+        1:  261:    ASSERT_EQ(people.personOne.name, "N2.1");
+        -:  262:
+        1:  263:    ASSERT_TRUE(file >> people);
+        1:  264:    ASSERT_EQ(people.personTwo.name, "N3.2");
+        -:  265:
+        1:  266:    file.seekg(-3, std::ios::end);
+        -:  267:
+        1:  268:    ASSERT_TRUE(file >> people);
+        1:  269:    ASSERT_EQ(people.personOne.name, "N2.1");
+        -:  270:
+        1:  271:    ASSERT_TRUE(file >> people);
+        1:  272:    ASSERT_EQ(people.personTwo.name, "N3.2");
+        -:  273:
+        1:  274:    ASSERT_TRUE(file >> people);
+        1:  275:    ASSERT_EQ(people.personTwo.name, "N4.2");
+        -:  276:
+        1:  277:    ASSERT_FALSE(file >> people);
+        1:  278:}
+        -:  279:
+        4:  280:TEST_F(SeekTest, seekGetRelCurrentNegative)
+        -:  281:{
+        -:  282:    {
+        1:  283:        TC::OFile<TwoPeople>    file(simpleTestDir);
+        1:  284:        file << TwoPeople{Person{"N1.1" ,11}, Person{"N1.2", 12}};
+        1:  285:        file << TwoPeople{Person{"N2.1" ,21}, Person{"N2.2", 22}};
+        1:  286:        file << TwoPeople{Person{"N3.1" ,31}, Person{"N3.2", 32}};
+        1:  287:        file << TwoPeople{Person{"N4.1" ,41}, Person{"N4.2", 42}};
+        1:  288:    }
+        1:  289:    TwoPeople       people;
+        1:  290:    TC::IFile<TwoPeople>    file(simpleTestDir);
+        -:  291:
+        1:  292:    ASSERT_TRUE(file >> people);
+        1:  293:    ASSERT_EQ(people.personOne.name, "N1.1");
+        -:  294:
+        1:  295:    ASSERT_TRUE(file >> people);
+        1:  296:    ASSERT_EQ(people.personOne.name, "N2.1");
+        -:  297:
+        1:  298:    ASSERT_TRUE(file >> people);
+        1:  299:    ASSERT_EQ(people.personTwo.name, "N3.2");
+        -:  300:
+        1:  301:    file.seekg(-2, std::ios::cur);
+        -:  302:
+        1:  303:    ASSERT_TRUE(file >> people);
+        1:  304:    ASSERT_EQ(people.personOne.name, "N2.1");
+        -:  305:
+        1:  306:    ASSERT_TRUE(file >> people);
+        1:  307:    ASSERT_EQ(people.personTwo.name, "N3.2");
+        -:  308:
+        1:  309:    ASSERT_TRUE(file >> people);
+        1:  310:    ASSERT_EQ(people.personTwo.name, "N4.2");
+        -:  311:
+        1:  312:    file.seekg(-2, std::ios::cur);
+        -:  313:
+        1:  314:    ASSERT_TRUE(file >> people);
+        1:  315:    ASSERT_EQ(people.personTwo.name, "N3.2");
+        -:  316:
+        1:  317:    ASSERT_TRUE(file >> people);
+        1:  318:    ASSERT_EQ(people.personTwo.name, "N4.2");
+        -:  319:
+        1:  320:    ASSERT_FALSE(file >> people);
+        1:  321:}
+        -:  322:
+        4:  323:TEST_F(SeekTest, seekGetRelCurrentPosative)
+        -:  324:{
+        -:  325:    {
+        1:  326:        TC::OFile<TwoPeople>    file(simpleTestDir);
+        1:  327:        file << TwoPeople{Person{"N1.1" ,11}, Person{"N1.2", 12}};
+        1:  328:        file << TwoPeople{Person{"N2.1" ,21}, Person{"N2.2", 22}};
+        1:  329:        file << TwoPeople{Person{"N3.1" ,31}, Person{"N3.2", 32}};
+        1:  330:        file << TwoPeople{Person{"N4.1" ,41}, Person{"N4.2", 42}};
+        1:  331:    }
+        1:  332:    TwoPeople       people;
+        1:  333:    TC::IFile<TwoPeople>    file(simpleTestDir);
+        -:  334:
+        1:  335:    ASSERT_TRUE(file >> people);
+        1:  336:    ASSERT_EQ(people.personOne.name, "N1.1");
+        -:  337:
+        1:  338:    file.seekg(1, std::ios::cur);
+        -:  339:
+        1:  340:    ASSERT_TRUE(file >> people);
+        1:  341:    ASSERT_EQ(people.personOne.name, "N3.1");
+        -:  342:
+        1:  343:    ASSERT_TRUE(file >> people);
+        1:  344:    ASSERT_EQ(people.personTwo.name, "N4.2");
+        -:  345:
+        1:  346:    ASSERT_FALSE(file >> people);
+        1:  347:}
+        -:  348:

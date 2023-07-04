@@ -1,0 +1,1085 @@
+        -:    0:Source:/opt/homebrew/include/ThorSerialize/Traits.h
+        -:    0:Graph:coverage/closeTest.gcno
+        -:    0:Data:coverage/closeTest.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#ifndef THORS_ANVIL_SERIALIZE_TRAITS_H
+        -:    2:#define THORS_ANVIL_SERIALIZE_TRAITS_H
+        -:    3:/*
+        -:    4: *  This file is all about defineing the template type Traits<T>
+        -:    5: *
+        -:    6: *  Two macros are provides to facilitate the building of Traits<T>
+        -:    7: *  specializations for user defined types.
+        -:    8: *
+        -:    9: *      ThorsAnvil_MakeTrait(DataType, ...)
+        -:   10: *      ThorsAnvil_ExpandTrait(ParentType, DataType, ...)
+        -:   11: *      ThorsAnvil_Template_MakeTrait(TemplateParameterCount, DataType, ...)
+        -:   12: *      ThorsAnvil_Template_ExpandTrait(TemplateParameterCount, ParentType, DataType, ...)
+        -:   13: *
+        -:   14: *      ThorsAnvil_PointerAllocator(DataType, Action)
+        -:   15: *      ThorsAnvil_MakeEnum(EnumType, EnumValues...)
+        -:   16: *
+        -:   17: *      ThorsAnvil_PolyMorphicSerializer(Type)
+        -:   18: *      ThorsAnvil_RegisterPolyMorphicType(Type)
+        -:   19: *
+        -:   20: *      ThorsAnvil_MakeTraitCustomSerialize(Type, SerializableType)
+        -:   21: *
+        -:   22: *      ThorsAnvil_MakeOverride(DataType, { <From>, <To>}... )
+        -:   23: *      ThorsAnvil_Template_MakeOverride(Count, DataType, { <From>, <To>}... )
+        -:   24: *
+        -:   25: *      ThorsAnvil_MakeFilter(DataType, filter)
+        -:   26: *      ThorsAnvil_Template_MakeFilter(Count, DataType, filter)
+        -:   27: *
+        -:   28: * --------------------------------------------------------------------------
+        -:   29: *
+        -:   30: *      [[Depricated]]
+        -:   31: *      Please don't use. Maintained for backward compatibility.
+        -:   32: *      ThorsAnvil_MakeTraitCustom(DataType)    // Will use operator << and operator >>
+        -:   33: *
+        -:   34: * --------------------------------------------------------------------------
+        -:   35: *
+        -:   36: *      Most commonly used:
+        -:   37: *      These are used for normal structures that you want to serialize.
+        -:   38: *              ThorsAnvil_MakeTrait(Type, Member-1, Member-2 etc)
+        -:   39: *
+        -:   40: *              ThorsAnvil_ExpandTrait(Parent-Type, Type, Member-1, Member-2 etc)
+        -:   41: *
+        -:   42: *      If your types are template types we need to know the number of template parameters.
+        -:   43: *      So you can use these alternatives for templated classes:
+        -:   44: *
+        -:   45: *              ThorsAnvil_Template_MakeTrait(Template-Param-Count, Type, Member-1, Member-2 etc)
+        -:   46: *              ThorsAnvil_Template_ExpandTrait(Template-Param-Count, Parent-Type, Type, Member-1, Member-2 etc)
+        -:   47: *
+        -:   48: *
+        -:   49: *      If you need special processing for pointers then you can use the following:
+        -:   50: *      Note if your object simply used new/delete and can create a default object then you don't need
+        -:   51: *      to use this. This is only required if you need some special creation/deletion processes.
+        -:   52: *
+        -:   53: *              ThorsAnvil_PointerAllocator(Type, AllocationType)
+        -:   54: *
+        -:   55: *              AllocationType::alloc()             // Called to default allocate an object. default new
+        -:   56: *              AllocationType::release()           // Called to release object.             default delete
+        -:   57: *
+        -:   58: *      Enum values are treated like strings when serialized:
+        -:   59: *
+        -:   60: *              ThorsAnvil_MakeEnum(Enum-Type, Enum-1, Enum-2 etc)
+        -:   61: *
+        -:   62: *      If you want pointers to handle polymorphic pointers
+        -:   63: *      Then we need some extra information:
+        -:   64: *
+        -:   65: *              Add the following to your class definition:
+        -:   66: *                  ThorsAnvil_PolyMorphicSerializer(Type)
+        -:   67: *
+        -:   68: *              Then in a source file add the following line:
+        -:   69: *                  ThorsAnvil_RegisterPolyMorphicType(Type)
+        -:   70: *
+        -:   71: *      The new version of Custom serializable:
+        -:   72: *
+        -:   73: *              ThorsAnvil_MakeTraitCustomSerialize(Type, SerializableType)
+        -:   74: *
+        -:   75: *      To get this to work you need to define the type SerializableType:
+        -:   76: *
+        -:   77: *              SerializableType::write(Printer, object)
+        -:   78: *              SerializableType::read(Parser, object)
+        -:   79: *
+        -:   80: *
+        -:   81: *      "object" is the object you want to serialize.
+        -:   82: *      Printer/Parser will be derived from
+        -:   83: *          PrinterInterface
+        -:   84: *          ParserInterface
+        -:   85: *
+        -:   86: *      You can write versions that use these generic types or you can
+        -:   87: *      have implementations for specific version.
+        -:   88: *          eg. BsonParser/BsonPrinter
+        -:   89: *
+        -:   90: *      The code will link with the most appropriate version:
+        -:   91: *
+        -:   92: * Sometimes you can not use the key names you want (they are reserved words or contain
+        -:   93: * symbols that are not valid in identifiers in C++). So we provide a way to override
+        -:   94: * the member names supplied in the ThorsAnvil_MakeTrait() so they will be mapped to
+        -:   95: * the appropriate key value in the JSON/BSON/YAML file.
+        -:   96: *
+        -:   97: *      ThorsAnvil_MakeOverride(DataType, { <From>, <To>}... )
+        -:   98: *      ThorsAnvil_Template_MakeOverride(Count, DataType, { <From>, <To>}... )
+        -:   99: *
+        -:  100: * Normally you would use ThorsAnvil_MakeOverride but if "DataType" is a template
+        -:  101: * type then you will need to use the ThorsAnvil_Template_MakeOverride and specify
+        -:  102: * the number of template parameters in "Count".
+        -:  103: *
+        -:  104: *          DataType:               The type we are overrideing
+        -:  105: *              { <From>, <To>}:    A set of mappings.
+        -:  106: *                                      From: The C++ identifier.
+        -:  107: *                                      To:   The Key used in the JSON/BSON/YAML file.
+        -:  108: *
+        -:  109: * --------------------------------------------------------------------------
+        -:  110: *
+        -:  111: *      Examples:
+        -:  112: *
+        -:  113: *      Bank.h
+        -:  114: *          #include "Traits.h"
+        -:  115: *          #include "Serialize.h"
+        -:  116: *          #include "SerUtil.h"
+        -:  117: *
+        -:  118: *          #include "JsonThor.h"
+        -:  119: *          #include "YamlThor.h"
+        -:  120: *          #include "BsonThor.h"
+        -:  121: *
+        -:  122: *
+        -:  123: *          #include "test/SerializeTest.h"
+        -:  124: *          #include <vector>
+        -:  125: *
+        -:  126: *
+        -:  127: *          namespace OnLineBank
+        -:  128: *          {
+        -:  129: *              enum TransType {Error, Deposit, Withdraw, Correction};
+        -:  130: *              struct ID
+        -:  131: *              {
+        -:  132: *                  long id;
+        -:  133: *                  ID() : id(-1){}
+        -:  134: *                  ID(long id): id(id){}
+        -:  135: *              };
+        -:  136: *              struct SerializeID: public ThorsAnvil::Serialize::DefaultCustomSerializer<OnLineBank::ID>
+        -:  137: *              {
+        -:  138: *                  virtual void writeJson(ThorsAnvil::Serialize::JsonPrinter& printer, ID const& object)   override
+        -:  139: *                  {
+        -:  140: *                      printer.stream() << object.id;
+        -:  141: *                  }
+        -:  142: *                  virtual void readJson(ThorsAnvil::Serialize::JsonParser& parser, ID& object)            override
+        -:  143: *                  {
+        -:  144: *                      parser.stream() >> object.id;
+        -:  145: *                  }
+        -:  146: *
+        -:  147: *                  //virtual void writeYaml(ThorsAnvil::Serialize::YamlPrinter& printer, ID const& object)   override
+        -:  148: *                  //virtual void readYaml(ThorsAnvil::Serialize::YamlParser& parser, ID& object)            override
+        -:  149: *
+        -:  150: *                  // generic version we simply stream the integer value.
+        -:  151: *                  static constexpr std::size_t sizeOfID = 12;
+        -:  152: *                  virtual  std::size_t getPrintSizeBson(ThorsAnvil::Serialize::BsonPrinter& printer, ID const& object) override
+        -:  153: *                  {
+        -:  154: *                      return sizeOfID;
+        -:  155: *                  }
+        -:  156: *                  virtual char getBsonByteMark()   override   {return '\x07';}
+        -:  157: *                  virtual void writeBson(ThorsAnvil::Serialize::BsonPrinter& printer, ID const& object)   override
+        -:  158: *                  {
+        -:  159: *                      printer.stream().write(reinterpret_cast<char const*>(&object.id), sizeof(object.id));
+        -:  160: *                      printer.stream().write("            ", sizeOfID - sizeof(object.id));
+        -:  161: *                  }
+        -:  162: *                  virtual void readBson(ThorsAnvil::Serialize::BsonParser& parser, char byteMarker, ID& object)             override
+        -:  163: *                  {
+        -:  164: *                      parser.stream().read(reinterpret_cast<char*>(&object.id), sizeof(object.id));
+        -:  165: *                      parser.stream().ignore(sizeOfID - sizeof(object.id));
+        -:  166: *                  }
+        -:  167: *              };
+        -:  168: *
+        -:  169: *              template<typename T>
+        -:  170: *              struct Flounder
+        -:  171: *              {
+        -:  172: *                  T   data;
+        -:  173: *              };
+        -:  174: *
+        -:  175: *              struct Transaction
+        -:  176: *              {
+        -:  177: *                  long        timeStamp;
+        -:  178: *                  int         amount;
+        -:  179: *                  TransType   type;
+        -:  180: *                  Transaction()
+        -:  181: *                      : Transaction(0, 0, TransType::Error)
+        -:  182: *                  {}
+        -:  183: *                  Transaction(long timeStamp, int amount, TransType type)
+        -:  184: *                      : timeStamp(timeStamp)
+        -:  185: *                      , amount(amount)
+        -:  186: *                      , type(type)
+        -:  187: *                  {}
+        -:  188: *              };
+        -:  189: *              class BankAccount
+        -:  190: *              {
+        -:  191: *                      friend ThorsAnvil::Serialize::Traits<OnLineBank::BankAccount>;
+        -:  192: *                      ID              id;
+        -:  193: *                      int             balance;
+        -:  194: *                      std::string     details;
+        -:  195: *                      bool            valid;
+        -:  196: *                  protected:
+        -:  197: *                      void update(int amount) {balance += amount;}
+        -:  198: *                  public:
+        -:  199: *                      BankAccount()
+        -:  200: *                          : BankAccount(-1, -1, "Bad", false)
+        -:  201: *                      {}
+        -:  202: *                      BankAccount(ID const& id, int balance, std::string const& details, bool valid)
+        -:  203: *                          : id(id)
+        -:  204: *                          , balance(balance)
+        -:  205: *                          , details(details)
+        -:  206: *                          , valid(valid)
+        -:  207: *                      {}
+        -:  208: *                      virtual ~BankAccount()  {}
+        -:  209: *                      int getAccountIdent()   {return id.id;}
+        -:  210: *                      int getBalance()        {return balance;}
+        -:  211: *                      bool isValid()          {return valid;}
+        -:  212: *                      ThorsAnvil_PolyMorphicSerializer(OnLineBank::BankAccount);
+        -:  213: *                      // Normal Methods
+        -:  214: *              };
+        -:  215: *              class CurrentAccount: public BankAccount
+        -:  216: *              {
+        -:  217: *                      friend ThorsAnvil::Serialize::Traits<OnLineBank::CurrentAccount>;
+        -:  218: *                      std::vector<Transaction>    actions;
+        -:  219: *                  public:
+        -:  220: *                      using BankAccount::BankAccount;
+        -:  221: *                      CurrentAccount() {}
+        -:  222: *                      ThorsAnvil_PolyMorphicSerializer(OnLineBank::CurrentAccount);
+        -:  223: *                      void addTransaction(long timeStamp, int amount, TransType type)
+        -:  224: *                      {
+        -:  225: *                          actions.emplace_back(timeStamp, amount, type);
+        -:  226: *                          switch (type)
+        -:  227: *                          {
+        -:  228: *                              case TransType::Withdraw:   update(-amount);break;
+        -:  229: *                              case TransType::Deposit:    update(amount);break;
+        -:  230: *                              case TransType::Correction: update(-getBalance() + amount);break;
+        -:  231: *                              default: break;
+        -:  232: *                          }
+        -:  233: *                      }
+        -:  234: *              };
+        -:  235: *              class DepositAccount: public BankAccount
+        -:  236: *              {
+        -:  237: *                      friend ThorsAnvil::Serialize::Traits<OnLineBank::DepositAccount>;
+        -:  238: *                      int withdrawlLimit;
+        -:  239: *                  public:
+        -:  240: *                      using BankAccount::BankAccount;
+        -:  241: *                      DepositAccount() {}
+        -:  242: *                      ThorsAnvil_PolyMorphicSerializer(OnLineBank::DepositAccount);
+        -:  243: *              };
+        -:  244: *          }
+        -:  245: *
+        -:  246: *          ThorsAnvil_MakeEnum(OnLineBank::TransType, Error, Deposit, Withdraw, Correction);
+        -:  247: *          ThorsAnvil_MakeTraitCustomSerialize(OnLineBank::ID, OnLineBank::SerializeID);
+        -:  248: *          ThorsAnvil_MakeTrait(OnLineBank::Transaction, timeStamp, amount, type);
+        -:  249: *          ThorsAnvil_Template_MakeTrait(1, OnLineBank::Flounder, data);
+        -:  250: *          ThorsAnvil_MakeTrait(OnLineBank::BankAccount, id, balance, details, valid);
+        -:  251: *          ThorsAnvil_ExpandTrait(OnLineBank::BankAccount, OnLineBank::CurrentAccount, actions);
+        -:  252: *          ThorsAnvil_ExpandTrait(OnLineBank::BankAccount, OnLineBank::DepositAccount, withdrawlLimit);
+        -:  253: *
+        -:  254: *      // Bank.cpp
+        -:  255: *
+        -:  256: *          ThorsAnvil_RegisterPolyMorphicType(OnLineBank::CurrentAccount);
+        -:  257: *          ThorsAnvil_RegisterPolyMorphicType(OnLineBank::DepositAccount);
+        -:  258: *
+        -:  259: */
+        -:  260:
+        -:  261:#include "ThorsSerializerUtil.h"
+        -:  262:#include "ThorsIOUtil/Utility.h"
+        -:  263:#include "ThorsLogging/ThorsLogging.h"
+        -:  264:#include <string>
+        -:  265:#include <tuple>
+        -:  266:#include <map>
+        -:  267:#include <functional>
+        -:  268:#include <memory>
+        -:  269:#include <utility>
+        -:  270:#include <type_traits>
+        -:  271:#include <stdexcept>
+        -:  272:#include <cstddef>
+        -:  273:#include <cstring>
+        -:  274:#include <numeric>
+        -:  275:
+        -:  276:/*
+        -:  277: * Macros for counting the number of arguments
+        -:  278: * Currently set up for a max of 20.
+        -:  279: */
+        -:  280:#define NUM_ARGS(...)          NUM_ARGS_(0, __VA_ARGS__, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 00, Ignore)
+        -:  281:#define NUM_ARGS_(Zero, One, I1, I2, I3, I4 ,I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, I16, I17, I18, I19, I20, I21, I22, I23, I24, I25, I26, I27, I28, I29, I30, I31, I32, I33, I34, I35, I36, I37, I38, I39, I40, I41, I42, I43, A, ...)  A
+        -:  282:
+        -:  283:/*
+        -:  284: * Macros to quote the parameter
+        -:  285: * Used below by the actions.
+        -:  286: */
+        -:  287:#define QUOTE_(A)                       A
+        -:  288:#define QUOTE(A)                        QUOTE_(#A)
+        -:  289:
+        -:  290:/*
+        -:  291: * Macro to force expansion of a macro that takes two parameters.
+        -:  292: * Used by REP_*
+        -:  293: */
+        -:  294:#define EXPAND_(Result)                 Result
+        -:  295:#define EXPAND(Act, TC, P1, P2)         EXPAND_(Act(TC, P1, P2))
+        -:  296:#define ALT_EXPAND_(Result)             Result
+        -:  297:#define ALT_EXPAND(Act, Ex, Id)         EXPAND_(Act(Ex, Id))
+        -:  298:
+        -:  299:/*
+        -:  300: * Macros that that applies the action `Act` (a two parameter macro)
+        -:  301: * To P1 (first argument)
+        -:  302: * and a list of second arguments (placing a comma between each macro).
+        -:  303: *
+        -:  304: * Because NUM_ARGS is limited to 20, This expansion is also limited to 20
+        -:  305: */
+        -:  306:#define REP_N(Act, TC, P1, ...)             REP_OF_N(Act, TC, P1, NUM_ARGS(__VA_ARGS__), __VA_ARGS__)
+        -:  307:#define REP_OF_N(Act, TC, P1, Count, ...)   REP_OF_N_(Act, TC, P1, Count, __VA_ARGS__)
+        -:  308:#define REP_OF_N_(Act, TC, P1, Count, ...)  REP_OF_ ## Count(Act, TC, P1, __VA_ARGS__)
+        -:  309:
+        -:  310:#define REP_OF_43(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_42(Act, TC, P1, __VA_ARGS__)
+        -:  311:#define REP_OF_42(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_41(Act, TC, P1, __VA_ARGS__)
+        -:  312:#define REP_OF_41(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_40(Act, TC, P1, __VA_ARGS__)
+        -:  313:#define REP_OF_40(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_39(Act, TC, P1, __VA_ARGS__)
+        -:  314:#define REP_OF_39(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_38(Act, TC, P1, __VA_ARGS__)
+        -:  315:#define REP_OF_38(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_37(Act, TC, P1, __VA_ARGS__)
+        -:  316:#define REP_OF_37(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_36(Act, TC, P1, __VA_ARGS__)
+        -:  317:#define REP_OF_36(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_35(Act, TC, P1, __VA_ARGS__)
+        -:  318:#define REP_OF_35(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_34(Act, TC, P1, __VA_ARGS__)
+        -:  319:#define REP_OF_34(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_33(Act, TC, P1, __VA_ARGS__)
+        -:  320:#define REP_OF_33(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_32(Act, TC, P1, __VA_ARGS__)
+        -:  321:#define REP_OF_32(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_31(Act, TC, P1, __VA_ARGS__)
+        -:  322:#define REP_OF_31(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_30(Act, TC, P1, __VA_ARGS__)
+        -:  323:#define REP_OF_30(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_29(Act, TC, P1, __VA_ARGS__)
+        -:  324:#define REP_OF_29(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_28(Act, TC, P1, __VA_ARGS__)
+        -:  325:#define REP_OF_28(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_27(Act, TC, P1, __VA_ARGS__)
+        -:  326:#define REP_OF_27(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_26(Act, TC, P1, __VA_ARGS__)
+        -:  327:#define REP_OF_26(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_25(Act, TC, P1, __VA_ARGS__)
+        -:  328:#define REP_OF_25(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_24(Act, TC, P1, __VA_ARGS__)
+        -:  329:#define REP_OF_24(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_23(Act, TC, P1, __VA_ARGS__)
+        -:  330:#define REP_OF_23(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_22(Act, TC, P1, __VA_ARGS__)
+        -:  331:#define REP_OF_22(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_21(Act, TC, P1, __VA_ARGS__)
+        -:  332:#define REP_OF_21(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_20(Act, TC, P1, __VA_ARGS__)
+        -:  333:#define REP_OF_20(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_19(Act, TC, P1, __VA_ARGS__)
+        -:  334:#define REP_OF_19(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_18(Act, TC, P1, __VA_ARGS__)
+        -:  335:#define REP_OF_18(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_17(Act, TC, P1, __VA_ARGS__)
+        -:  336:#define REP_OF_17(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_16(Act, TC, P1, __VA_ARGS__)
+        -:  337:#define REP_OF_16(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_15(Act, TC, P1, __VA_ARGS__)
+        -:  338:#define REP_OF_15(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_14(Act, TC, P1, __VA_ARGS__)
+        -:  339:#define REP_OF_14(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_13(Act, TC, P1, __VA_ARGS__)
+        -:  340:#define REP_OF_13(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_12(Act, TC, P1, __VA_ARGS__)
+        -:  341:#define REP_OF_12(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_11(Act, TC, P1, __VA_ARGS__)
+        -:  342:#define REP_OF_11(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_10(Act, TC, P1, __VA_ARGS__)
+        -:  343:#define REP_OF_10(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_9(Act, TC, P1, __VA_ARGS__)
+        -:  344:#define REP_OF_9(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_8(Act, TC, P1, __VA_ARGS__)
+        -:  345:#define REP_OF_8(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_7(Act, TC, P1, __VA_ARGS__)
+        -:  346:#define REP_OF_7(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_6(Act, TC, P1, __VA_ARGS__)
+        -:  347:#define REP_OF_6(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_5(Act, TC, P1, __VA_ARGS__)
+        -:  348:#define REP_OF_5(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_4(Act, TC, P1, __VA_ARGS__)
+        -:  349:#define REP_OF_4(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_3(Act, TC, P1, __VA_ARGS__)
+        -:  350:#define REP_OF_3(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_2(Act, TC, P1, __VA_ARGS__)
+        -:  351:#define REP_OF_2(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1, P2), REP_OF_1(Act, TC, P1, __VA_ARGS__)
+        -:  352:#define REP_OF_1(Act, TC, P1, P2, One)     EXPAND(Act, TC, P1, P2)
+        -:  353:#define REP_OF_00(Act, TC, P1, One)         LAST_ ## Act(TC, P1)
+        -:  354:
+        -:  355:#define ALT_REP_OF_N(Act, E, P, S, Count)  ALT_REP_OF_N_(Act, E, P, S, Count)
+        -:  356:#define ALT_REP_OF_N_(Act, E, P, S, Count) ALT_REP_OF_ ## Count(Act, E, P, S)
+        -:  357:
+        -:  358:#define ALT_REP_OF_43(Act, E, P, S)     P ALT_EXPAND(Act, E, 43), ALT_REP_OF_42(Act, E,  , S)
+        -:  359:#define ALT_REP_OF_42(Act, E, P, S)     P ALT_EXPAND(Act, E, 42), ALT_REP_OF_41(Act, E,  , S)
+        -:  360:#define ALT_REP_OF_41(Act, E, P, S)     P ALT_EXPAND(Act, E, 41), ALT_REP_OF_40(Act, E,  , S)
+        -:  361:#define ALT_REP_OF_40(Act, E, P, S)     P ALT_EXPAND(Act, E, 40), ALT_REP_OF_39(Act, E,  , S)
+        -:  362:#define ALT_REP_OF_39(Act, E, P, S)     P ALT_EXPAND(Act, E, 39), ALT_REP_OF_38(Act, E,  , S)
+        -:  363:#define ALT_REP_OF_38(Act, E, P, S)     P ALT_EXPAND(Act, E, 38), ALT_REP_OF_37(Act, E,  , S)
+        -:  364:#define ALT_REP_OF_37(Act, E, P, S)     P ALT_EXPAND(Act, E, 37), ALT_REP_OF_36(Act, E,  , S)
+        -:  365:#define ALT_REP_OF_36(Act, E, P, S)     P ALT_EXPAND(Act, E, 36), ALT_REP_OF_35(Act, E,  , S)
+        -:  366:#define ALT_REP_OF_35(Act, E, P, S)     P ALT_EXPAND(Act, E, 35), ALT_REP_OF_34(Act, E,  , S)
+        -:  367:#define ALT_REP_OF_34(Act, E, P, S)     P ALT_EXPAND(Act, E, 34), ALT_REP_OF_33(Act, E,  , S)
+        -:  368:#define ALT_REP_OF_33(Act, E, P, S)     P ALT_EXPAND(Act, E, 33), ALT_REP_OF_32(Act, E,  , S)
+        -:  369:#define ALT_REP_OF_32(Act, E, P, S)     P ALT_EXPAND(Act, E, 32), ALT_REP_OF_31(Act, E,  , S)
+        -:  370:#define ALT_REP_OF_31(Act, E, P, S)     P ALT_EXPAND(Act, E, 31), ALT_REP_OF_30(Act, E,  , S)
+        -:  371:#define ALT_REP_OF_30(Act, E, P, S)     P ALT_EXPAND(Act, E, 30), ALT_REP_OF_29(Act, E,  , S)
+        -:  372:#define ALT_REP_OF_29(Act, E, P, S)     P ALT_EXPAND(Act, E, 29), ALT_REP_OF_28(Act, E,  , S)
+        -:  373:#define ALT_REP_OF_28(Act, E, P, S)     P ALT_EXPAND(Act, E, 28), ALT_REP_OF_27(Act, E,  , S)
+        -:  374:#define ALT_REP_OF_27(Act, E, P, S)     P ALT_EXPAND(Act, E, 27), ALT_REP_OF_26(Act, E,  , S)
+        -:  375:#define ALT_REP_OF_26(Act, E, P, S)     P ALT_EXPAND(Act, E, 26), ALT_REP_OF_25(Act, E,  , S)
+        -:  376:#define ALT_REP_OF_25(Act, E, P, S)     P ALT_EXPAND(Act, E, 25), ALT_REP_OF_24(Act, E,  , S)
+        -:  377:#define ALT_REP_OF_24(Act, E, P, S)     P ALT_EXPAND(Act, E, 24), ALT_REP_OF_23(Act, E,  , S)
+        -:  378:#define ALT_REP_OF_23(Act, E, P, S)     P ALT_EXPAND(Act, E, 23), ALT_REP_OF_22(Act, E,  , S)
+        -:  379:#define ALT_REP_OF_22(Act, E, P, S)     P ALT_EXPAND(Act, E, 22), ALT_REP_OF_21(Act, E,  , S)
+        -:  380:#define ALT_REP_OF_21(Act, E, P, S)     P ALT_EXPAND(Act, E, 21), ALT_REP_OF_20(Act, E,  , S)
+        -:  381:#define ALT_REP_OF_20(Act, E, P, S)     P ALT_EXPAND(Act, E, 20), ALT_REP_OF_19(Act, E,  , S)
+        -:  382:#define ALT_REP_OF_19(Act, E, P, S)     P ALT_EXPAND(Act, E, 19), ALT_REP_OF_18(Act, E,  , S)
+        -:  383:#define ALT_REP_OF_18(Act, E, P, S)     P ALT_EXPAND(Act, E, 18), ALT_REP_OF_17(Act, E,  , S)
+        -:  384:#define ALT_REP_OF_17(Act, E, P, S)     P ALT_EXPAND(Act, E, 17), ALT_REP_OF_16(Act, E,  , S)
+        -:  385:#define ALT_REP_OF_16(Act, E, P, S)     P ALT_EXPAND(Act, E, 16), ALT_REP_OF_15(Act, E,  , S)
+        -:  386:#define ALT_REP_OF_15(Act, E, P, S)     P ALT_EXPAND(Act, E, 15), ALT_REP_OF_14(Act, E,  , S)
+        -:  387:#define ALT_REP_OF_14(Act, E, P, S)     P ALT_EXPAND(Act, E, 14), ALT_REP_OF_13(Act, E,  , S)
+        -:  388:#define ALT_REP_OF_13(Act, E, P, S)     P ALT_EXPAND(Act, E, 13), ALT_REP_OF_12(Act, E,  , S)
+        -:  389:#define ALT_REP_OF_12(Act, E, P, S)     P ALT_EXPAND(Act, E, 12), ALT_REP_OF_11(Act, E,  , S)
+        -:  390:#define ALT_REP_OF_11(Act, E, P, S)     P ALT_EXPAND(Act, E, 11), ALT_REP_OF_10(Act, E,  , S)
+        -:  391:#define ALT_REP_OF_10(Act, E, P, S)     P ALT_EXPAND(Act, E, 10), ALT_REP_OF_9(Act, E,  , S)
+        -:  392:#define ALT_REP_OF_9(Act, E, P, S)     P ALT_EXPAND(Act, E, 9), ALT_REP_OF_8(Act, E,  , S)
+        -:  393:#define ALT_REP_OF_8(Act, E, P, S)     P ALT_EXPAND(Act, E, 8), ALT_REP_OF_7(Act, E,  , S)
+        -:  394:#define ALT_REP_OF_7(Act, E, P, S)     P ALT_EXPAND(Act, E, 7), ALT_REP_OF_6(Act, E,  , S)
+        -:  395:#define ALT_REP_OF_6(Act, E, P, S)     P ALT_EXPAND(Act, E, 6), ALT_REP_OF_5(Act, E,  , S)
+        -:  396:#define ALT_REP_OF_5(Act, E, P, S)     P ALT_EXPAND(Act, E, 5), ALT_REP_OF_4(Act, E,  , S)
+        -:  397:#define ALT_REP_OF_4(Act, E, P, S)     P ALT_EXPAND(Act, E, 4), ALT_REP_OF_3(Act, E,  , S)
+        -:  398:#define ALT_REP_OF_3(Act, E, P, S)     P ALT_EXPAND(Act, E, 3), ALT_REP_OF_2(Act, E,  , S)
+        -:  399:#define ALT_REP_OF_2(Act, E, P, S)     P ALT_EXPAND(Act, E, 2), ALT_REP_OF_1(Act, E,  , S)
+        -:  400:#define ALT_REP_OF_1(Act, E, P, S)     P ALT_EXPAND(Act, E, 1) S
+        -:  401:#define ALT_REP_OF_00(Act, E, P, S)     LAST_ ## Act(E, 00)
+        -:  402:
+        -:  403:/*
+        -:  404: * The actions we apply with REP_*
+        -:  405: *
+        -:  406: * THOR_TYPEACTION:      Declares a type to hold the name and a pointer to the internal object.
+        -:  407: * THOR_VALUEACTION:     Declares an initialization of the Type putting the name and the pointer
+        -:  408: *                  into the object
+        -:  409: */
+        -:  410:#define BUILDTEMPLATETYPEPARAM(Act, Count)      ALT_REP_OF_N(Act, ,  ,  , Count)
+        -:  411:#define BUILDTEMPLATETYPEVALUE(Act, Count)      ALT_REP_OF_N(Act, , <, >, Count)
+        -:  412:
+        -:  413:
+        -:  414:#define THOR_TYPEACTION(TC, Type, Member)       std::pair<char const*, decltype(&Type BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, TC) ::Member)>
+        -:  415:#define THOR_VALUEACTION(TC, Type, Member)      { QUOTE(Member), &Type BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, TC) ::Member }
+        -:  416:#define THOR_NAMEACTION(TC, Type, Member)       { Type::Member, #Member ## s}
+        -:  417:#define LAST_THOR_TYPEACTION(TC, Type)
+        -:  418:#define LAST_THOR_VALUEACTION(TC, Type)
+        -:  419:#define LAST_THOR_NAMEACTION(TC, Type)
+        -:  420:
+        -:  421:#define THOR_TYPENAMEPARAMACTION(Ex, Id)        typename T ## Id
+        -:  422:#define THOR_TYPENAMEVALUEACTION(Ex, Id)        T ## Id
+        -:  423:#define THOR_TYPE_INT_VALUE(Ex, Id)             ThorsAnvil::Serialize::Fake ## Id
+        -:  424:#define THOR_CHECK_ASSERT(Ex, Id)
+        -:  425:#define LAST_THOR_TYPENAMEPARAMACTION(Ex, Id)
+        -:  426:#define LAST_THOR_TYPENAMEVALUEACTION(Ex, Id)
+        -:  427:#define LAST_THOR_TYPE_INT_VALUE(Ex, Id)
+        -:  428:#define LAST_THOR_CHECK_ASSERT(Ex, Id)          DO_ASSERT(Ex)
+        -:  429:
+        -:  430:
+        -:  431:#define THOR_MERGE_LABEL_NAME(Pre, Post)        Pre ## Post
+        -:  432:#define THOR_UNIQUE_LABEL(Line)                 THOR_MERGE_LABEL_NAME(thorUniqueName, Line)
+        -:  433:#define THOR_UNIQUE_NAME                        THOR_UNIQUE_LABEL(__COUNTER__)
+        -:  434:
+        -:  435:/*
+        -:  436: * Defines a trait for a user defined type.
+        -:  437: * Lists the members of the type that can be serialized.
+        -:  438: */
+        -:  439:#define DO_ASSERT(DataType)             DO_ASSERT_WITH_TEMPLATE(DataType, 00)
+        -:  440:#define DO_ASSERT_WITH_TEMPLATE(DataType, Count)                        \
+        -:  441:static_assert(                                                          \
+        -:  442:    ::ThorsAnvil::Serialize::Traits<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPE_INT_VALUE, Count) >::type != ThorsAnvil::Serialize::TraitType::Invalid,   \
+        -:  443:    "The macro ThorsAnvil_MakeTrait must be used outside all namespace."\
+        -:  444:)
+        -:  445:
+        -:  446:#define ThorsAnvil_PointerAllocator(DataType, ActionObj)                \
+        -:  447:namespace ThorsAnvil { namespace Serialize {                            \
+        -:  448:template<>                                                              \
+        -:  449:class Traits<DataType*>                                                 \
+        -:  450:{                                                                       \
+        -:  451:    public:                                                             \
+        -:  452:        static constexpr TraitType type = TraitType::Pointer;           \
+        -:  453:        static DataType* alloc()    {return ActionObj::alloc();}        \
+        -:  454:        static void release(T* p)   {ActionObj::release(p);}            \
+        -:  455:};                                                                      \
+        -:  456:}}
+        -:  457:
+        -:  458:#define ThorsAnvil_MakeOverride(...)                                    \
+        -:  459:    ThorsAnvil_MakeOverride_Base(00,     __VA_ARGS__, {"", ""})
+        -:  460:#define ThorsAnvil_Template_MakeOverride(Count, ...)                    \
+        -:  461:    ThorsAnvil_MakeOverride_Base(Count, __VA_ARGS__, {"", ""})
+        -:  462:
+        -:  463:
+        -:  464:#define ThorsAnvil_MakeOverride_Base(Count, DataType, ...)              \
+        -:  465:namespace ThorsAnvil { namespace Serialize {                            \
+        -:  466:template<BUILDTEMPLATETYPEPARAM(THOR_TYPENAMEPARAMACTION, Count)>       \
+        -:  467:class Override<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > \
+        -:  468:{                                                                       \
+        -:  469:    public:                                                             \
+        -:  470:        static char const* nameOverride(char const* name)               \
+        -:  471:        {                                                               \
+        -:  472:            static auto hashCString = [](char const* str)               \
+        -:  473:            {                                                           \
+        -:  474:                std::hash<std::string_view>  viewHash;                  \
+        -:  475:                return viewHash(std::string_view(str));                 \
+        -:  476:            };                                                          \
+        -:  477:            static auto cmpCString = [](char const* lhs, char const* rhs)\
+        -:  478:            {                                                           \
+        -:  479:                return std::strcmp(lhs, rhs) == 0;                      \
+        -:  480:            };                                                          \
+        -:  481:            using OverrideMap = std::unordered_map<char const*, char const*, decltype(hashCString), decltype(cmpCString)>;   \
+        -:  482:            static OverrideMap overrideMap =                            \
+        -:  483:            {                                                           \
+        -:  484:                {__VA_ARGS__},                                          \
+        -:  485:                101 /* Prime */,                                        \
+        -:  486:                hashCString,                                            \
+        -:  487:                cmpCString                                              \
+        -:  488:            };                                                          \
+        -:  489:            auto find = overrideMap.find(name);                         \
+        -:  490:            if (find == overrideMap.end()) {                            \
+        -:  491:                return name;                                            \
+        -:  492:            }                                                           \
+        -:  493:            return find->second;                                        \
+        -:  494:        }                                                               \
+        -:  495:};                                                                      \
+        -:  496:}}                                                                      \
+        -:  497:static_assert(true, "")
+        -:  498:
+        -:  499:
+        -:  500:#define ThorsAnvil_MakeFilter(DataType, member)                         \
+        -:  501:    ThorsAnvil_MakeFilter_Base(00,    DataType, member)
+        -:  502:#define ThorsAnvil_Template_MakeFilter(Count, DataType, member)         \
+        -:  503:    ThorsAnvil_MakeFilter_Base(Count, DataType, member)
+        -:  504:
+        -:  505:
+        -:  506:#define ThorsAnvil_MakeFilter_Base(Count, DataType, member)             \
+        -:  507:namespace ThorsAnvil { namespace Serialize {                            \
+        -:  508:template<BUILDTEMPLATETYPEPARAM(THOR_TYPENAMEPARAMACTION, Count)>       \
+        -:  509:class Filter<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > \
+        -:  510:{                                                                       \
+        -:  511:    public:                                                             \
+        -:  512:        static bool filter(DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) const& object, char const* name)    \
+        -:  513:        {                                                               \
+        -:  514:            auto find = object.member.find(name);                       \
+        -:  515:            return find == object.member.end() ? true : find->second;   \
+        -:  516:        }                                                               \
+        -:  517:};                                                                      \
+        -:  518:}}                                                                      \
+        -:  519:static_assert(true, "")
+        -:  520:
+        -:  521:
+        -:  522:#define ThorsAnvil_MakeTrait_Base(ParentType, TType, Count, DataType, ...)  \
+        -:  523:namespace ThorsAnvil { namespace Serialize {                            \
+        -:  524:template<BUILDTEMPLATETYPEPARAM(THOR_TYPENAMEPARAMACTION, Count)>       \
+        -:  525:class Traits<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > \
+        -:  526:{                                                                       \
+        -:  527:    public:                                                             \
+        -:  528:        static constexpr TraitType type = TraitType::TType;             \
+        -:  529:        ParentType                                                      \
+        -:  530:        using MyType = DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count); \
+        -:  531:                                                                        \
+        -:  532:        using Members = std::tuple<                                     \
+        -:  533:                        REP_N(THOR_TYPEACTION, Count, DataType, __VA_ARGS__)        \
+        -:  534:                                    >;                                  \
+        -:  535:                                                                        \
+        -:  536:        static Members const& getMembers()                              \
+        -:  537:        {                                                               \
+        -:  538:            static constexpr Members members{                           \
+        -:  539:                        REP_N(THOR_VALUEACTION, Count, DataType, __VA_ARGS__)       \
+        -:  540:                                            };                          \
+        -:  541:            return members;                                             \
+        -:  542:        }                                                               \
+        -:  543:                                                                        \
+        -:  544:        template<typename M>                                            \
+        -:  545:        static std::size_t addSizeOneMember(PrinterInterface& printer, MyType const& /*object*/, M* staticObjPtr) \
+        -:  546:        {                                                               \
+        -:  547:            using MemberType    = std::decay_t<M>;                      \
+        -:  548:            if (staticObjPtr)                                           \
+        -:  549:            {                                                           \
+        -:  550:                return Traits<MemberType>::getPrintSize(printer, *staticObjPtr, false);\
+        -:  551:            }                                                           \
+        -:  552:            return printer.getSizeNull();                               \
+        -:  553:        }                                                               \
+        -:  554:        template<typename M>                                            \
+        -:  555:        static std::size_t addSizeOneMember(PrinterInterface& printer, MyType const& object, M MyType::* memPtr) \
+        -:  556:        {                                                               \
+        -:  557:            using MemberTypeDec = decltype(object.*memPtr);             \
+        -:  558:            using MemberType    = std::decay_t<MemberTypeDec>;          \
+        -:  559:            return Traits<MemberType>::getPrintSize(printer, object.*memPtr, false);\
+        -:  560:        }                                                               \
+        -:  561:                                                                        \
+        -:  562:        template<typename M>                                            \
+        -:  563:        static std::pair<std::size_t, std::size_t> addSizeEachMemberItem(PrinterInterface& printer, MyType const& object, M item) \
+        -:  564:        {                                                               \
+        -:  565:            if (!Filter<MyType>::filter(object, item.first)) {          \
+        -:  566:                return std::make_pair(0UL,0UL);                         \
+        -:  567:            }                                                           \
+        -:  568:            auto partSize   = addSizeOneMember(printer, object, item.second);           \
+        -:  569:            auto nameSize   = std::strlen(Override<MyType>::nameOverride(item.first));  \
+        -:  570:            return std::make_pair(partSize + nameSize, 1);              \
+        -:  571:        }                                                               \
+        -:  572:        template<std::size_t... Seq>                                    \
+        -:  573:        static std::pair<std::size_t, std::size_t> addSizeEachMember(PrinterInterface& printer, MyType const& object, std::index_sequence<Seq...> const&) \
+        -:  574:        {                                                               \
+        -:  575:            Members const& members = getMembers();                      \
+        -:  576:            std::initializer_list<std::pair<std::size_t, std::size_t>>  sizeData = {    \
+        -:  577:                std::make_pair(std::size_t{0}, std::size_t{0}),                         \
+        -:  578:                addSizeEachMemberItem(printer, object, std::get<Seq>(members))...       \
+        -:  579:            };                                                          \
+        -:  580:            return std::accumulate(std::begin(sizeData), std::end(sizeData), std::make_pair(0UL, 0UL),                                  \
+        -:  581:                                   [](auto lhs, auto rhs){return std::make_pair(lhs.first + rhs.first, lhs.second + rhs.second);});     \
+        -:  582:        }                                                               \
+        -:  583:                                                                        \
+        -:  584:        static std::size_t getPrintSizeTotal(PrinterInterface& printer, MyType const& object, std::size_t& count, std::size_t& memberSize)\
+        -:  585:        {                                                               \
+        -:  586:            auto r = addSizeEachMember(printer, object, std::make_index_sequence<std::tuple_size_v<Members>>());\
+        -:  587:            memberSize  += r.first;                                     \
+        -:  588:            count       += r.second;                                    \
+        -:  589:                                                                        \
+        -:  590:            CalcSizeHelper<MyType>  calcHelper;                         \
+        -:  591:            return calcHelper.getPrintSize(printer, object, count, memberSize);\
+        -:  592:        }                                                               \
+        -:  593:                                                                        \
+        -:  594:        static std::size_t getPrintSize(PrinterInterface& printer, MyType const& object, bool poly)\
+        -:  595:        {                                                               \
+        -:  596:            return tryGetPolyMorphicPrintSize(printer, object, poly, 0);\
+        -:  597:        }                                                               \
+        -:  598:};                                                                      \
+        -:  599:}}                                                                      \
+        -:  600:DO_ASSERT_WITH_TEMPLATE(DataType, Count)
+        -:  601:
+        -:  602:#define ThorsAnvil_RegisterPolyMorphicType_Internal(DataType, ...)      \
+        -:  603:    ThorsAnvil_RegisterPolyMorphicType(DataType)
+        -:  604:
+        -:  605:#pragma vera-pushoff
+        -:  606:#define ThorsAnvil_RegisterPolyMorphicType(DataType)                    \
+        -:  607:namespace ThorsAnvil { namespace Serialize {                            \
+        -:  608:namespace                                                               \
+        -:  609:{                                                                       \
+        -:  610:    ThorsAnvil_InitPolyMorphicType<DataType>   THOR_UNIQUE_NAME ( # DataType); \
+        -:  611:}                                                                       \
+        -:  612:}}
+        -:  613:#pragma vera-pop
+        -:  614:
+        -:  615:#define ThorsAnvil_Parent(Count, ParentType, DataType, ...)             \
+        -:  616:        using Parent = ParentType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count); \
+        -:  617:        using Root   = typename GetRootType<ParentType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) >::Root;
+        -:  618:
+        -:  619:#define ThorsAnvil_Template_MakeTrait(Count, ...)                       \
+        -:  620:    ThorsAnvil_MakeTrait_Base( , Map, Count, __VA_ARGS__, 1);           \
+        -:  621:    static_assert(true, "")
+        -:  622:
+        -:  623:#define ThorsAnvil_MakeTrait(...)                                       \
+        -:  624:    ThorsAnvil_MakeTrait_Base( , Map, 00, __VA_ARGS__, 1);              \
+        -:  625:    ThorsAnvil_RegisterPolyMorphicType_Internal(__VA_ARGS__, 1)         \
+        -:  626:    static_assert(true, "")
+        -:  627:
+        -:  628:#define ThorsAnvil_MakeTraitCustom(DataType)                            \
+        -:  629:namespace ThorsAnvil { namespace Serialize {                            \
+        -:  630:template<>                                                              \
+        -:  631:class Traits<DataType>                                                  \
+        -:  632:{                                                                       \
+        -:  633:    public:                                                             \
+        -:  634:    static constexpr TraitType type = TraitType::Custom_Depricated;     \
+        -:  635:    static std::size_t getPrintSize(PrinterInterface& printer, DataType const& value, bool)\
+        -:  636:    {                                                                   \
+        -:  637:        return tryGetSizeFromSerializeType(printer, value, 0);          \
+        -:  638:    }                                                                   \
+        -:  639:};                                                                      \
+        -:  640:}}                                                                      \
+        -:  641:DO_ASSERT(DataType)
+        -:  642:
+        -:  643:#define ThorsAnvil_MakeTraitCustomSerialize(DataType, SerializeType)    \
+        -:  644:namespace ThorsAnvil { namespace Serialize {                            \
+        -:  645:template<>                                                              \
+        -:  646:class Traits<DataType>                                                  \
+        -:  647:{                                                                       \
+        -:  648:    public:                                                             \
+        -:  649:    static constexpr TraitType type = TraitType::Custom_Serialize;      \
+        -:  650:    using SerializingType   = SerializeType;                            \
+        -:  651:    static std::size_t getPrintSize(PrinterInterface& printer, DataType const& object, bool)\
+        -:  652:    {                                                                   \
+        -:  653:        SerializingType info;                                           \
+        -:  654:        switch (printer.formatType())                                   \
+        -:  655:        {                                                               \
+        -:  656:            case FormatType::Bson:  return info.getPrintSizeBson(dynamic_cast<BsonPrinter&>(printer), object);\
+        -:  657:            case FormatType::Json:  /* Fall Through */                  \
+        -:  658:            case FormatType::Yaml:  /* Fall Through */                  \
+        -:  659:            default:                                                    \
+        -:  660:            {                                                           \
+        -:  661:                ThorsLogAndThrowCritical("ThorsAnivl::Seriaizlize::Traits<DataType>",   \
+        -:  662:                                         "getPrintSize",                \
+        -:  663:                                         "Should not get here");        \
+        -:  664:            }                                                           \
+        -:  665:        }                                                               \
+        -:  666:    }                                                                   \
+        -:  667:};                                                                      \
+        -:  668:}}                                                                      \
+        -:  669:DO_ASSERT(DataType)
+        -:  670:
+        -:  671:#define ThorsAnvil_Template_ExpandTrait(Count, ParentType, ...)         \
+        -:  672:    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(00, ParentType, __VA_ARGS__, 1), Parent, Count, __VA_ARGS__, 1); \
+        -:  673:    static_assert(true, "")
+        -:  674:
+        -:  675:#define ThorsAnvil_Template_ExpandTemplate(Count, ParentCount, ParentType, ...)         \
+        -:  676:    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(ParentCount, ParentType, __VA_ARGS__, 1), Parent, Count, __VA_ARGS__, 1); \
+        -:  677:    static_assert(true, "")
+        -:  678:
+        -:  679:#define ThorsAnvil_ExpandTrait(ParentType, ...)                     ThorsAnvil_ExpandTrait_Base(ParentType, __VA_ARGS__, 1)
+        -:  680:#define ThorsAnvil_ExpandTrait_Base(ParentType, DataType, ...)          \
+        -:  681:    static_assert(                                                      \
+        -:  682:        std::is_base_of<typename ThorsAnvil::Serialize::GetPrimaryParentType<ParentType>::type, DataType>::value,                  \
+        -:  683:        "ParentType must be a base class of DataType");                 \
+        -:  684:    static_assert(                                                      \
+        -:  685:        ::ThorsAnvil::Serialize::Traits<ParentType>::type != ThorsAnvil::Serialize::TraitType::Invalid, \
+        -:  686:        "Parent type must have Serialization Traits defined"            \
+        -:  687:    );                                                                  \
+        -:  688:    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(00, ParentType, DataType, __VA_ARGS__), Parent, 00, DataType, __VA_ARGS__); \
+        -:  689:    ThorsAnvil_RegisterPolyMorphicType_Internal(DataType, 1)            \
+        -:  690:    static_assert(true, "")
+        -:  691:
+        -:  692:#include <magic_enum.hpp>
+        -:  693:namespace ThorsAnvil
+        -:  694:{
+        -:  695:    namespace Serialize
+        -:  696:    {
+        -:  697:template<typename EnumName>
+        -:  698:class Traits<EnumName, std::enable_if_t<std::is_enum<EnumName>::value>>
+        -:  699:{
+        -:  700:    public:
+        -:  701:        static constexpr    TraitType       type = TraitType::Enum;
+        -:  702:        static std::size_t getSize()
+        -:  703:        {
+        -:  704:            return magic_enum::enum_count<EnumName>();
+        -:  705:        }
+        -:  706:        static EnumName getValue(std::string const& val, std::string const&)
+        -:  707:        {
+        -:  708:            auto enumDecode = magic_enum::enum_cast<EnumName>(val);
+        -:  709:            if (enumDecode.has_value())
+        -:  710:            {
+        -:  711:                return enumDecode.value();
+        -:  712:            }
+        -:  713:            ThorsLogAndThrow("ThorsAnvil::Serialize::Traits<EnumName>",
+        -:  714:                             "getValue",
+        -:  715:                             "Invalid Enum Value");
+        -:  716:        }
+        -:  717:        static std::size_t getPrintSize(PrinterInterface& printer, EnumName const& value, bool)
+        -:  718:        {
+        -:  719:            auto enumName = magic_enum::enum_name(value);
+        -:  720:            return printer.getSizeValue(enumName);
+        -:  721:        }
+        -:  722:        static void serializeForBlock(PrinterInterface& printer, EnumName const& object)
+        -:  723:        {
+        -:  724:            printer.addValue(magic_enum::enum_name(object));
+        -:  725:        }
+        -:  726:};
+        -:  727:    }
+        -:  728:}
+        -:  729:
+        -:  730:#include <map>
+        -:  731:#include <string>
+        -:  732:#define ThorsAnvil_MakeEnum(EnumName, ...)                              \
+        -:  733:namespace ThorsAnvil { namespace Serialize {                            \
+        -:  734:template<>                                                              \
+        -:  735:class Traits<EnumName>                                                  \
+        -:  736:{                                                                       \
+        -:  737:    public:                                                             \
+        -:  738:        static constexpr    TraitType       type = TraitType::Enum;     \
+        -:  739:        static std::map<EnumName, std::string> const& getValues()       \
+        -:  740:        {                                                               \
+        -:  741:            using std::string_literals::operator""s;                    \
+        -:  742:            static const std::map<EnumName, std::string> values =       \
+        -:  743:            {                                                           \
+        -:  744:                REP_N(THOR_NAMEACTION, 0, EnumName, __VA_ARGS__, 1)     \
+        -:  745:            };                                                          \
+        -:  746:            return values;                                              \
+        -:  747:        }                                                               \
+        -:  748:        static std::size_t getSize()                                    \
+        -:  749:        {                                                               \
+        -:  750:            return NUM_ARGS(__VA_ARGS__, 1);                            \
+        -:  751:        }                                                               \
+        -:  752:        static EnumName getValue(std::string const& val, std::string const&) \
+        -:  753:        {                                                               \
+        -:  754:            std::map<EnumName, std::string> const& values = getValues();\
+        -:  755:            for (auto const& value: values)                             \
+        -:  756:            {                                                           \
+        -:  757:                if (val == value.second) {                              \
+        -:  758:                    return value.first;                                 \
+        -:  759:                }                                                       \
+        -:  760:            }                                                           \
+        -:  761:            ThorsLogAndThrow("ThorsAnvil::Serialize::Traits<EnumName>", \
+        -:  762:                             "getValue",                                \
+        -:  763:                             "Invalid Enum Value");                     \
+        -:  764:        }                                                               \
+        -:  765:        static std::size_t getPrintSize(PrinterInterface& printer, EnumName const& value, bool)\
+        -:  766:        {                                                               \
+        -:  767:            auto find = getValues().find(value);                        \
+        -:  768:            return printer.getSizeValue(find->second);                  \
+        -:  769:        }                                                               \
+        -:  770:        static void serializeForBlock(PrinterInterface& printer, EnumName const& object) \
+        -:  771:        {                                                               \
+        -:  772:            printer.addValue(getValues().find(object)->second);         \
+        -:  773:        }                                                               \
+        -:  774:};                                                                      \
+        -:  775:}}                                                                      \
+        -:  776:DO_ASSERT(EnumName)
+        -:  777:
+        -:  778:// This type is not useful for JSON or other serialization
+        -:  779:// But it can be useful to dump an enum that is a flag based enum.
+        -:  780:// Its interface is not advertised above deliberately
+        -:  781:#define ThorsAnvil_MakeEnumFlag(EnumName, ...)                          \
+        -:  782:inline EnumName operator&(EnumName lhs, EnumName rhs){return static_cast<EnumName>(static_cast<unsigned int>(lhs) & static_cast<unsigned int>(rhs));}\
+        -:  783:inline EnumName operator|(EnumName lhs, EnumName rhs){return static_cast<EnumName>(static_cast<unsigned int>(lhs) | static_cast<unsigned int>(rhs));}\
+        -:  784:inline EnumName operator^(EnumName lhs, EnumName rhs){return static_cast<EnumName>(static_cast<unsigned int>(lhs) ^ static_cast<unsigned int>(rhs));}\
+        -:  785:inline EnumName operator&=(EnumName& lhs, EnumName rhs){lhs = lhs & rhs; return lhs;}\
+        -:  786:inline EnumName operator|=(EnumName& lhs, EnumName rhs){lhs = lhs | rhs; return lhs;}\
+        -:  787:inline EnumName operator^=(EnumName& lhs, EnumName rhs){lhs = lhs ^ rhs; return lhs;}\
+        -:  788:inline std::ostream& operator<<(std::ostream& stream, EnumName const& value)    \
+        -:  789:{                                                                               \
+        -:  790:    if (value == EnumName::empty)                                               \
+        -:  791:    {                                                                           \
+        -:  792:        stream << "empty";                                                      \
+        -:  793:    }                                                                           \
+        -:  794:    else                                                                        \
+        -:  795:    {                                                                           \
+        -:  796:        using std::string_literals::operator""s;                                \
+        -:  797:        static const std::map<EnumName, std::string> values =                   \
+        -:  798:        {                                                                       \
+        -:  799:            REP_N(THOR_NAMEACTION, 0, EnumName, __VA_ARGS__, 1)                 \
+        -:  800:        };                                                                      \
+        -:  801:        bool                first = true;                                       \
+        -:  802:        for (int loop = 0; loop < 32; ++loop)                                   \
+        -:  803:        {                                                                       \
+        -:  804:            EnumName flag = static_cast<EnumName>(1 << loop);                   \
+        -:  805:            if ((value & flag) != EnumName::empty)                              \
+        -:  806:            {                                                                   \
+        -:  807:                if (!first)                                                     \
+        -:  808:                {                                                               \
+        -:  809:                    stream << " | ";                                            \
+        -:  810:                }                                                               \
+        -:  811:                first = false;                                                  \
+        -:  812:                stream << values.find(flag)->second;                            \
+        -:  813:            }                                                                   \
+        -:  814:        }                                                                       \
+        -:  815:    }                                                                           \
+        -:  816:    return stream;                                                              \
+        -:  817:}                                                                               \
+        -:  818:static_assert(true)
+        -:  819:
+        -:  820:/*
+        -:  821: * Defined the virtual function needed by tryPrintPolyMorphicObject()
+        -:  822: */
+        -:  823:#define ThorsAnvil_PolyMorphicSerializer(Type)                                              \
+        -:  824:    virtual void printPolyMorphicObject(ThorsAnvil::Serialize::Serializer&         parent,  \
+        -:  825:                                       ThorsAnvil::Serialize::PrinterInterface&    printer) \
+        -:  826:    {                                                                                       \
+        -:  827:        ThorsAnvil::Serialize::printPolyMorphicObject<Type>(parent, printer, *this);        \
+        -:  828:    }                                                                                       \
+        -:  829:    virtual void parsePolyMorphicObject(ThorsAnvil::Serialize::DeSerializer&       parent,  \
+        -:  830:                                       ThorsAnvil::Serialize::ParserInterface&     parser)  \
+        -:  831:    {                                                                                       \
+        -:  832:        ThorsAnvil::Serialize::parsePolyMorphicObject<Type>(parent, parser, *this);         \
+        -:  833:    }                                                                                       \
+        -:  834:    virtual std::size_t getPolyMorphicPrintSize(ThorsAnvil::Serialize::PrinterInterface& printer) const \
+        -:  835:    {                                                                                       \
+        -:  836:        std::size_t count = 1;                                                              \
+        -:  837:        std::size_t memberSize = (printer.config.polymorphicMarker.size() + printer.getSizeValue(std::string(polyMorphicSerializerName())));\
+        -:  838:                                                                                            \
+        -:  839:        return getNormalPrintSize(printer, *this, count, memberSize);                       \
+        -:  840:    }                                                                                       \
+        -:  841:    static constexpr char const* polyMorphicSerializerName()                                \
+        -:  842:    {                                                                                       \
+        -:  843:        return #Type;                                                                       \
+        -:  844:    }
+        -:  845:
+        -:  846:
+        -:  847:namespace ThorsAnvil
+        -:  848:{
+        -:  849:    namespace Serialize
+        -:  850:    {
+        -:  851:
+        -:  852:/*
+        -:  853: * The traits type.
+        -:  854: * Specialized for each type we want to serialize
+        -:  855: */
+        -:  856:template<typename T, typename SFINE>
+        -:  857:class Traits
+        -:  858:{
+        -:  859:    public:
+        -:  860:        // By default if a traits type is not defined for a type
+        -:  861:        // You get this default implementation.
+        -:  862:        // This just says that it is invalid to serialize this type
+        -:  863:        // static_asserts sprinkled through the code will provide
+        -:  864:        // appropriate error messages based on this being invalid.
+        -:  865:        static constexpr TraitType type = TraitType::Invalid;
+        -:  866:
+        -:  867:        // For types that are Map/Array/Parent we can also define
+        -:  868:        // members that need be serialized via types. To achieve this
+        -:  869:        // they  define a static getMembers() function.
+        -:  870:        // static Members const& getMembers()
+        -:  871:        //
+        -:  872:        // I would have made this a type declaration but I could
+        -:  873:        // not get it to bind correctly without an explicit
+        -:  874:        // instantiation (if you know how please let me know).
+        -:  875:        //
+        -:  876:        // So I use a static member function with a static variable
+        -:  877:        // which can be defined in-line within the traits class and
+        -:  878:        // does not need a separate declaration in a compilation unit.
+        -:  879:};
+        -:  880:template<typename T>
+        -:  881:class Override
+        -:  882:{
+        -:  883:    public:
+        -:  884:        static char const* nameOverride(char const* name) {return name;}
+        -:  885:};
+        -:  886:
+        -:  887:template<typename T>
+        -:  888:class Filter
+        -:  889:{
+        -:  890:    public:
+        -:  891:        static constexpr bool filter(T const& /*object*/, char const* /*name*/)   {return true;}
+        -:  892:};
+        -:  893:
+        -:  894:/*
+        -:  895: * For object that are serialized as Json Array
+        -:  896: * we use this object to get the size of the array.
+        -:  897: *
+        -:  898: * The default action is simply to call size() on
+        -:  899: * the object before printing.
+        -:  900: */
+        -:  901:template<typename T>
+        -:  902:class SerializeArraySize
+        -:  903:{
+        -:  904:    public:
+        -:  905:        static std::size_t size(T const& object)
+        -:  906:        {
+        -:  907:            return object.size();
+        -:  908:        }
+        -:  909:};
+        -:  910:
+        -:  911:template<typename T, typename R = T>
+        -:  912:struct GetRootType
+        -:  913:{
+        -:  914:    using Root = R;
+        -:  915:};
+        -:  916:template<typename T>
+        -:  917:struct GetRootType<T, typename Traits<T>::Root>
+        -:  918:{
+        -:  919:    using Root = typename Traits<T>::Root;
+        -:  920:};
+        -:  921:template<typename T>
+        -:  922:struct GetAllocationType
+        -:  923:{
+        -:  924:    using AllocType = T;
+        -:  925:};
+        -:  926:template<typename T>
+        -:  927:struct GetAllocationType<std::unique_ptr<T>>
+        -:  928:{
+        -:  929:    using AllocType = T;
+        -:  930:};
+        -:  931:#ifdef  SCGRROT_SHARED_PTR_SUPPRT
+        -:  932:/*
+        -:  933: * This will work for shared pointers at a very basic level.
+        -:  934: *
+        -:  935: * But is conditionally included as it does not support one object used by multiple shared pointer
+        -:  936: * in the same object. Serializing and de-serializing will result in multiple versions of the
+        -:  937: * object in the new object.
+        -:  938: */
+        -:  939:template<typename T>
+        -:  940:struct GetAllocationType<std::shared_ptr<T>>
+        -:  941:{
+        -:  942:    using AllocType = T;
+        -:  943:};
+        -:  944:#endif
+        -:  945:
+        -:  946:/*
+        -:  947: */
+        -:  948:class PolyMorphicRegistry
+        -:  949:{
+        -:  950:    static std::map<std::string, std::function<void*()>>& getContainer()
+        -:  951:    {
+        -:  952:        static std::map<std::string, std::function<void*()>>    polyAllocContainer;
+        -:  953:        return polyAllocContainer;
+        -:  954:    }
+        -:  955:
+        -:  956:    public:
+        -:  957:        static std::function<void*()>& getAllocator(std::string const& name)
+        -:  958:        {
+        -:  959:            return getContainer()[name];
+        -:  960:        }
+        -:  961:        template<typename T>
+        -:  962:        static T* getNamedTypeConvertedTo(std::string const& name)
+        -:  963:        {
+        -:  964:            using AllocType     = typename GetAllocationType<T>::AllocType;
+        -:  965:
+        -:  966:            auto     cont       = getContainer();
+        -:  967:            auto     find       = cont.find(name);
+        -:  968:            if (find == cont.end())
+        -:  969:            {
+        -:  970:                ThorsLogAndThrow("ThorsAnvil::Serialize::PolyMorphicRegistry",
+        -:  971:                                 "getNamedTypeConvertedTo",
+        -:  972:                                 "Non polymorphic type");
+        -:  973:            }
+        -:  974:            void*       data        = find->second();
+        -:  975:            AllocType*  dataBase    = reinterpret_cast<AllocType*>(data);
+        -:  976:
+        -:  977:            using ReturnType    = T*;
+        -:  978:            return ReturnType{dataBase};
+        -:  979:        }
+        -:  980:};
+        -:  981:
+        -:  982:template <typename T>
+        -:  983:class HasPolyMorphicObjectMarker
+        -:  984:{
+        -:  985:    using One = char;
+        -:  986:    using Two = long;
+        -:  987:
+        -:  988:    template <typename C> static One test( decltype(&C::parsePolyMorphicObject) );
+        -:  989:    template <typename C> static Two test(...);
+        -:  990:
+        -:  991:public:
+        -:  992:    enum { Value = sizeof(test<T>(nullptr)) == sizeof(char) };
+        -:  993:};
+        -:  994:
+        -:  995:
+        -:  996:template<typename T, bool Poly = HasPolyMorphicObjectMarker<T>::Value>
+        -:  997:struct ThorsAnvil_InitPolyMorphicType;
+        -:  998:
+        -:  999:
+        -: 1000:template<typename T>
+        -: 1001:struct ThorsAnvil_InitPolyMorphicType<T, true>
+        -: 1002:{
+        -: 1003:    ThorsAnvil_InitPolyMorphicType(char const* name)
+        -: 1004:    {
+        -: 1005:        PolyMorphicRegistry::getAllocator(name) =
+        -: 1006:            []() -> void*
+        -: 1007:            {
+        -: 1008:                using Root = typename GetRootType<T>::Root;
+        -: 1009:                return dynamic_cast<Root*>(Traits<T*>::alloc());
+        -: 1010:            };
+        -: 1011:    }
+        -: 1012:};
+        -: 1013:
+        -: 1014:template<typename T>
+        -: 1015:struct ThorsAnvil_InitPolyMorphicType<T, false>
+        -: 1016:{
+       32: 1017:    ThorsAnvil_InitPolyMorphicType(char const*){}
+        -: 1018:};
+        -: 1019:
+        -: 1020:struct Fake1{};
+        -: 1021:struct Fake2{};
+        -: 1022:struct Fake3{};
+        -: 1023:struct Fake4{};
+        -: 1024:struct Fake5{};
+        -: 1025:struct Fake6{};
+        -: 1026:struct Fake7{};
+        -: 1027:struct Fake8{};
+        -: 1028:struct Fake9{};
+        -: 1029:struct Fake10{};
+        -: 1030:struct Fake11{};
+        -: 1031:struct Fake12{};
+        -: 1032:struct Fake13{};
+        -: 1033:struct Fake14{};
+        -: 1034:struct Fake15{};
+        -: 1035:struct Fake16{};
+        -: 1036:struct Fake17{};
+        -: 1037:struct Fake18{};
+        -: 1038:struct Fake19{};
+        -: 1039:struct Fake20{};
+        -: 1040:struct Fake21{};
+        -: 1041:struct Fake22{};
+        -: 1042:struct Fake23{};
+        -: 1043:struct Fake24{};
+        -: 1044:struct Fake25{};
+        -: 1045:struct Fake26{};
+        -: 1046:struct Fake27{};
+        -: 1047:struct Fake28{};
+        -: 1048:struct Fake29{};
+        -: 1049:struct Fake30{};
+        -: 1050:struct Fake31{};
+        -: 1051:struct Fake32{};
+        -: 1052:struct Fake33{};
+        -: 1053:struct Fake34{};
+        -: 1054:struct Fake35{};
+        -: 1055:struct Fake36{};
+        -: 1056:struct Fake37{};
+        -: 1057:struct Fake38{};
+        -: 1058:struct Fake39{};
+        -: 1059:struct Fake40{};
+        -: 1060:struct Fake41{};
+        -: 1061:struct Fake42{};
+        -: 1062:struct Fake43{};
+        -: 1063:struct Fake44{};
+        -: 1064:struct Fake45{};
+        -: 1065:struct Fake46{};
+        -: 1066:struct Fake47{};
+        -: 1067:struct Fake48{};
+        -: 1068:struct Fake49{};
+        -: 1069:struct Fake50{};
+        -: 1070:struct Fake51{};
+        -: 1071:struct Fake52{};
+        -: 1072:struct Fake53{};
+        -: 1073:struct Fake54{};
+        -: 1074:struct Fake55{};
+        -: 1075:
+        -: 1076:
+        -: 1077:    }
+        -: 1078:}
+        -: 1079:
+        -: 1080:#endif

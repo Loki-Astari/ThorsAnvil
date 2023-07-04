@@ -1,0 +1,315 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/stdexcept
+        -:    0:Graph:coverage/closeTest.gcno
+        -:    0:Data:coverage/closeTest.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:// -*- C++ -*-
+        -:    2://===----------------------------------------------------------------------===//
+        -:    3://
+        -:    4:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    5:// See https://llvm.org/LICENSE.txt for license information.
+        -:    6:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    7://
+        -:    8://===----------------------------------------------------------------------===//
+        -:    9:
+        -:   10:#ifndef _LIBCPP_STDEXCEPT
+        -:   11:#define _LIBCPP_STDEXCEPT
+        -:   12:
+        -:   13:/*
+        -:   14:    stdexcept synopsis
+        -:   15:
+        -:   16:namespace std
+        -:   17:{
+        -:   18:
+        -:   19:class logic_error;
+        -:   20:    class domain_error;
+        -:   21:    class invalid_argument;
+        -:   22:    class length_error;
+        -:   23:    class out_of_range;
+        -:   24:class runtime_error;
+        -:   25:    class range_error;
+        -:   26:    class overflow_error;
+        -:   27:    class underflow_error;
+        -:   28:
+        -:   29:for each class xxx_error:
+        -:   30:
+        -:   31:class xxx_error : public exception // at least indirectly
+        -:   32:{
+        -:   33:public:
+        -:   34:    explicit xxx_error(const string& what_arg);
+        -:   35:    explicit xxx_error(const char*   what_arg);
+        -:   36:
+        -:   37:    virtual const char* what() const noexcept // returns what_arg
+        -:   38:};
+        -:   39:
+        -:   40:}  // std
+        -:   41:
+        -:   42:*/
+        -:   43:
+        -:   44:#include <__assert> // all public C++ headers provide the assertion handler
+        -:   45:#include <__config>
+        -:   46:#include <cstdlib>
+        -:   47:#include <exception>
+        -:   48:#include <iosfwd>  // for string forward decl
+        -:   49:
+        -:   50:#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   51:#  pragma GCC system_header
+        -:   52:#endif
+        -:   53:
+        -:   54:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   55:
+        -:   56:#ifndef _LIBCPP_ABI_VCRUNTIME
+        -:   57:class _LIBCPP_HIDDEN __libcpp_refstring
+        -:   58:{
+        -:   59:    const char* __imp_;
+        -:   60:
+        -:   61:    bool __uses_refcount() const;
+        -:   62:public:
+        -:   63:    explicit __libcpp_refstring(const char* __msg);
+        -:   64:    __libcpp_refstring(const __libcpp_refstring& __s) _NOEXCEPT;
+        -:   65:    __libcpp_refstring& operator=(const __libcpp_refstring& __s) _NOEXCEPT;
+        -:   66:    ~__libcpp_refstring();
+        -:   67:
+        -:   68:    const char* c_str() const _NOEXCEPT {return __imp_;}
+        -:   69:};
+        -:   70:#endif // !_LIBCPP_ABI_VCRUNTIME
+        -:   71:
+        -:   72:_LIBCPP_END_NAMESPACE_STD
+        -:   73:
+        -:   74:namespace std  // purposefully not using versioning namespace
+        -:   75:{
+        -:   76:
+        -:   77:class _LIBCPP_EXCEPTION_ABI logic_error
+        -:   78:    : public exception
+        -:   79:{
+        -:   80:#ifndef _LIBCPP_ABI_VCRUNTIME
+        -:   81:private:
+        -:   82:    _VSTD::__libcpp_refstring __imp_;
+        -:   83:public:
+        -:   84:    explicit logic_error(const string&);
+        -:   85:    explicit logic_error(const char*);
+        -:   86:
+        -:   87:    logic_error(const logic_error&) _NOEXCEPT;
+        -:   88:    logic_error& operator=(const logic_error&) _NOEXCEPT;
+        -:   89:
+        -:   90:    ~logic_error() _NOEXCEPT override;
+        -:   91:
+        -:   92:    const char* what() const _NOEXCEPT override;
+        -:   93:#else
+        -:   94:public:
+        -:   95:    explicit logic_error(const _VSTD::string&); // Symbol uses versioned std::string
+        -:   96:    _LIBCPP_INLINE_VISIBILITY explicit logic_error(const char* __s) : exception(__s) {}
+        -:   97:#endif
+        -:   98:};
+        -:   99:
+        -:  100:class _LIBCPP_EXCEPTION_ABI runtime_error
+        -:  101:    : public exception
+        -:  102:{
+        -:  103:#ifndef _LIBCPP_ABI_VCRUNTIME
+        -:  104:private:
+        -:  105:    _VSTD::__libcpp_refstring __imp_;
+        -:  106:public:
+        -:  107:    explicit runtime_error(const string&);
+        -:  108:    explicit runtime_error(const char*);
+        -:  109:
+        -:  110:    runtime_error(const runtime_error&) _NOEXCEPT;
+        -:  111:    runtime_error& operator=(const runtime_error&) _NOEXCEPT;
+        -:  112:
+        -:  113:    ~runtime_error() _NOEXCEPT override;
+        -:  114:
+        -:  115:    const char* what() const _NOEXCEPT override;
+        -:  116:#else
+        -:  117:public:
+        -:  118:   explicit runtime_error(const _VSTD::string&); // Symbol uses versioned std::string
+        -:  119:   _LIBCPP_INLINE_VISIBILITY explicit runtime_error(const char* __s) : exception(__s) {}
+        -:  120:#endif // _LIBCPP_ABI_VCRUNTIME
+        -:  121:};
+        -:  122:
+        -:  123:class _LIBCPP_EXCEPTION_ABI domain_error
+        -:  124:    : public logic_error
+        -:  125:{
+        -:  126:public:
+        -:  127:    _LIBCPP_INLINE_VISIBILITY explicit domain_error(const string& __s) : logic_error(__s) {}
+        -:  128:    _LIBCPP_INLINE_VISIBILITY explicit domain_error(const char* __s)   : logic_error(__s) {}
+        -:  129:
+        -:  130:#ifndef _LIBCPP_ABI_VCRUNTIME
+        -:  131:    domain_error(const domain_error&) _NOEXCEPT = default;
+        -:  132:    ~domain_error() _NOEXCEPT override;
+        -:  133:#endif
+        -:  134:};
+        -:  135:
+        -:  136:class _LIBCPP_EXCEPTION_ABI invalid_argument
+        -:  137:    : public logic_error
+        -:  138:{
+        -:  139:public:
+        -:  140:    _LIBCPP_INLINE_VISIBILITY explicit invalid_argument(const string& __s) : logic_error(__s) {}
+        -:  141:    _LIBCPP_INLINE_VISIBILITY explicit invalid_argument(const char* __s)   : logic_error(__s) {}
+        -:  142:
+        -:  143:#ifndef _LIBCPP_ABI_VCRUNTIME
+        -:  144:    invalid_argument(const invalid_argument&) _NOEXCEPT = default;
+        -:  145:    ~invalid_argument() _NOEXCEPT override;
+        -:  146:#endif
+        -:  147:};
+        -:  148:
+        -:  149:class _LIBCPP_EXCEPTION_ABI length_error
+        -:  150:    : public logic_error
+        -:  151:{
+        -:  152:public:
+        -:  153:    _LIBCPP_INLINE_VISIBILITY explicit length_error(const string& __s) : logic_error(__s) {}
+    #####:  154:    _LIBCPP_INLINE_VISIBILITY explicit length_error(const char* __s)   : logic_error(__s) {}
+        -:  155:#ifndef _LIBCPP_ABI_VCRUNTIME
+        -:  156:    length_error(const length_error&) _NOEXCEPT = default;
+        -:  157:    ~length_error() _NOEXCEPT override;
+        -:  158:#endif
+        -:  159:};
+        -:  160:
+        -:  161:class _LIBCPP_EXCEPTION_ABI out_of_range
+        -:  162:    : public logic_error
+        -:  163:{
+        -:  164:public:
+        -:  165:    _LIBCPP_INLINE_VISIBILITY explicit out_of_range(const string& __s) : logic_error(__s) {}
+        -:  166:    _LIBCPP_INLINE_VISIBILITY explicit out_of_range(const char* __s)   : logic_error(__s) {}
+        -:  167:
+        -:  168:#ifndef _LIBCPP_ABI_VCRUNTIME
+        -:  169:    out_of_range(const out_of_range&) _NOEXCEPT = default;
+        -:  170:    ~out_of_range() _NOEXCEPT override;
+        -:  171:#endif
+        -:  172:};
+        -:  173:
+        -:  174:class _LIBCPP_EXCEPTION_ABI range_error
+        -:  175:    : public runtime_error
+        -:  176:{
+        -:  177:public:
+        -:  178:    _LIBCPP_INLINE_VISIBILITY explicit range_error(const string& __s) : runtime_error(__s) {}
+        -:  179:    _LIBCPP_INLINE_VISIBILITY explicit range_error(const char* __s)   : runtime_error(__s) {}
+        -:  180:
+        -:  181:#ifndef _LIBCPP_ABI_VCRUNTIME
+        -:  182:    range_error(const range_error&) _NOEXCEPT = default;
+        -:  183:    ~range_error() _NOEXCEPT override;
+        -:  184:#endif
+        -:  185:};
+        -:  186:
+        -:  187:class _LIBCPP_EXCEPTION_ABI overflow_error
+        -:  188:    : public runtime_error
+        -:  189:{
+        -:  190:public:
+        -:  191:    _LIBCPP_INLINE_VISIBILITY explicit overflow_error(const string& __s) : runtime_error(__s) {}
+        -:  192:    _LIBCPP_INLINE_VISIBILITY explicit overflow_error(const char* __s)   : runtime_error(__s) {}
+        -:  193:
+        -:  194:#ifndef _LIBCPP_ABI_VCRUNTIME
+        -:  195:    overflow_error(const overflow_error&) _NOEXCEPT = default;
+        -:  196:    ~overflow_error() _NOEXCEPT override;
+        -:  197:#endif
+        -:  198:};
+        -:  199:
+        -:  200:class _LIBCPP_EXCEPTION_ABI underflow_error
+        -:  201:    : public runtime_error
+        -:  202:{
+        -:  203:public:
+        -:  204:    _LIBCPP_INLINE_VISIBILITY explicit underflow_error(const string& __s) : runtime_error(__s) {}
+        -:  205:    _LIBCPP_INLINE_VISIBILITY explicit underflow_error(const char* __s)   : runtime_error(__s) {}
+        -:  206:
+        -:  207:#ifndef _LIBCPP_ABI_VCRUNTIME
+        -:  208:    underflow_error(const underflow_error&) _NOEXCEPT = default;
+        -:  209:    ~underflow_error() _NOEXCEPT override;
+        -:  210:#endif
+        -:  211:};
+        -:  212:
+        -:  213:} // namespace std
+        -:  214:
+        -:  215:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:  216:
+        -:  217:// in the dylib
+        -:  218:_LIBCPP_NORETURN _LIBCPP_FUNC_VIS void __throw_runtime_error(const char*);
+        -:  219:
+        -:  220:_LIBCPP_NORETURN inline _LIBCPP_INLINE_VISIBILITY
+        -:  221:void __throw_logic_error(const char*__msg)
+        -:  222:{
+        -:  223:#ifndef _LIBCPP_NO_EXCEPTIONS
+        -:  224:    throw logic_error(__msg);
+        -:  225:#else
+        -:  226:    ((void)__msg);
+        -:  227:    _VSTD::abort();
+        -:  228:#endif
+        -:  229:}
+        -:  230:
+        -:  231:_LIBCPP_NORETURN inline _LIBCPP_INLINE_VISIBILITY
+        -:  232:void __throw_domain_error(const char*__msg)
+        -:  233:{
+        -:  234:#ifndef _LIBCPP_NO_EXCEPTIONS
+        -:  235:    throw domain_error(__msg);
+        -:  236:#else
+        -:  237:    ((void)__msg);
+        -:  238:    _VSTD::abort();
+        -:  239:#endif
+        -:  240:}
+        -:  241:
+        -:  242:_LIBCPP_NORETURN inline _LIBCPP_INLINE_VISIBILITY
+        -:  243:void __throw_invalid_argument(const char*__msg)
+        -:  244:{
+        -:  245:#ifndef _LIBCPP_NO_EXCEPTIONS
+        -:  246:    throw invalid_argument(__msg);
+        -:  247:#else
+        -:  248:    ((void)__msg);
+        -:  249:    _VSTD::abort();
+        -:  250:#endif
+        -:  251:}
+        -:  252:
+        -:  253:_LIBCPP_NORETURN inline _LIBCPP_INLINE_VISIBILITY
+    #####:  254:void __throw_length_error(const char*__msg)
+        -:  255:{
+        -:  256:#ifndef _LIBCPP_NO_EXCEPTIONS
+    #####:  257:    throw length_error(__msg);
+        -:  258:#else
+        -:  259:    ((void)__msg);
+        -:  260:    _VSTD::abort();
+        -:  261:#endif
+    #####:  262:}
+        -:  263:
+        -:  264:_LIBCPP_NORETURN inline _LIBCPP_INLINE_VISIBILITY
+        -:  265:void __throw_out_of_range(const char*__msg)
+        -:  266:{
+        -:  267:#ifndef _LIBCPP_NO_EXCEPTIONS
+        -:  268:    throw out_of_range(__msg);
+        -:  269:#else
+        -:  270:    ((void)__msg);
+        -:  271:    _VSTD::abort();
+        -:  272:#endif
+        -:  273:}
+        -:  274:
+        -:  275:_LIBCPP_NORETURN inline _LIBCPP_INLINE_VISIBILITY
+        -:  276:void __throw_range_error(const char*__msg)
+        -:  277:{
+        -:  278:#ifndef _LIBCPP_NO_EXCEPTIONS
+        -:  279:    throw range_error(__msg);
+        -:  280:#else
+        -:  281:    ((void)__msg);
+        -:  282:    _VSTD::abort();
+        -:  283:#endif
+        -:  284:}
+        -:  285:
+        -:  286:_LIBCPP_NORETURN inline _LIBCPP_INLINE_VISIBILITY
+        -:  287:void __throw_overflow_error(const char*__msg)
+        -:  288:{
+        -:  289:#ifndef _LIBCPP_NO_EXCEPTIONS
+        -:  290:    throw overflow_error(__msg);
+        -:  291:#else
+        -:  292:    ((void)__msg);
+        -:  293:    _VSTD::abort();
+        -:  294:#endif
+        -:  295:}
+        -:  296:
+        -:  297:_LIBCPP_NORETURN inline _LIBCPP_INLINE_VISIBILITY
+        -:  298:void __throw_underflow_error(const char*__msg)
+        -:  299:{
+        -:  300:#ifndef _LIBCPP_NO_EXCEPTIONS
+        -:  301:    throw underflow_error(__msg);
+        -:  302:#else
+        -:  303:    ((void)__msg);
+        -:  304:    _VSTD::abort();
+        -:  305:#endif
+        -:  306:}
+        -:  307:
+        -:  308:_LIBCPP_END_NAMESPACE_STD
+        -:  309:
+        -:  310:#endif // _LIBCPP_STDEXCEPT

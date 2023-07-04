@@ -1,0 +1,82 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__iterator/ostreambuf_iterator.h
+        -:    0:Graph:coverage/writeTest.gcno
+        -:    0:Data:coverage/writeTest.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:// -*- C++ -*-
+        -:    2://===----------------------------------------------------------------------===//
+        -:    3://
+        -:    4:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    5:// See https://llvm.org/LICENSE.txt for license information.
+        -:    6:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    7://
+        -:    8://===----------------------------------------------------------------------===//
+        -:    9:
+        -:   10:#ifndef _LIBCPP___ITERATOR_OSTREAMBUF_ITERATOR_H
+        -:   11:#define _LIBCPP___ITERATOR_OSTREAMBUF_ITERATOR_H
+        -:   12:
+        -:   13:#include <__config>
+        -:   14:#include <__iterator/iterator.h>
+        -:   15:#include <__iterator/iterator_traits.h>
+        -:   16:#include <cstddef>
+        -:   17:#include <iosfwd> // for forward declaration of basic_streambuf
+        -:   18:
+        -:   19:#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   20:#  pragma GCC system_header
+        -:   21:#endif
+        -:   22:
+        -:   23:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   24:
+        -:   25:_LIBCPP_SUPPRESS_DEPRECATED_PUSH
+        -:   26:template <class _CharT, class _Traits>
+        -:   27:class _LIBCPP_TEMPLATE_VIS ostreambuf_iterator
+        -:   28:#if _LIBCPP_STD_VER <= 14 || !defined(_LIBCPP_ABI_NO_ITERATOR_BASES)
+        -:   29:    : public iterator<output_iterator_tag, void, void, void, void>
+        -:   30:#endif
+        -:   31:{
+        -:   32:_LIBCPP_SUPPRESS_DEPRECATED_POP
+        -:   33:public:
+        -:   34:    typedef output_iterator_tag                 iterator_category;
+        -:   35:    typedef void                                value_type;
+        -:   36:#if _LIBCPP_STD_VER > 17
+        -:   37:    typedef ptrdiff_t                           difference_type;
+        -:   38:#else
+        -:   39:    typedef void                                difference_type;
+        -:   40:#endif
+        -:   41:    typedef void                                pointer;
+        -:   42:    typedef void                                reference;
+        -:   43:    typedef _CharT                              char_type;
+        -:   44:    typedef _Traits                             traits_type;
+        -:   45:    typedef basic_streambuf<_CharT, _Traits>    streambuf_type;
+        -:   46:    typedef basic_ostream<_CharT, _Traits>      ostream_type;
+        -:   47:
+        -:   48:private:
+        -:   49:    streambuf_type* __sbuf_;
+        -:   50:public:
+    #####:   51:    _LIBCPP_INLINE_VISIBILITY ostreambuf_iterator(ostream_type& __s) _NOEXCEPT
+    #####:   52:        : __sbuf_(__s.rdbuf()) {}
+        -:   53:    _LIBCPP_INLINE_VISIBILITY ostreambuf_iterator(streambuf_type* __s) _NOEXCEPT
+        -:   54:        : __sbuf_(__s) {}
+        -:   55:    _LIBCPP_INLINE_VISIBILITY ostreambuf_iterator& operator=(_CharT __c)
+        -:   56:        {
+        -:   57:            if (__sbuf_ && traits_type::eq_int_type(__sbuf_->sputc(__c), traits_type::eof()))
+        -:   58:                __sbuf_ = nullptr;
+        -:   59:            return *this;
+        -:   60:        }
+        -:   61:    _LIBCPP_INLINE_VISIBILITY ostreambuf_iterator& operator*()     {return *this;}
+        -:   62:    _LIBCPP_INLINE_VISIBILITY ostreambuf_iterator& operator++()    {return *this;}
+        -:   63:    _LIBCPP_INLINE_VISIBILITY ostreambuf_iterator& operator++(int) {return *this;}
+    #####:   64:    _LIBCPP_INLINE_VISIBILITY bool failed() const _NOEXCEPT {return __sbuf_ == nullptr;}
+        -:   65:
+        -:   66:    template <class _Ch, class _Tr>
+        -:   67:    friend
+        -:   68:    _LIBCPP_HIDE_FROM_ABI
+        -:   69:    ostreambuf_iterator<_Ch, _Tr>
+        -:   70:    __pad_and_output(ostreambuf_iterator<_Ch, _Tr> __s,
+        -:   71:                     const _Ch* __ob, const _Ch* __op, const _Ch* __oe,
+        -:   72:                     ios_base& __iob, _Ch __fl);
+        -:   73:};
+        -:   74:
+        -:   75:_LIBCPP_END_NAMESPACE_STD
+        -:   76:
+        -:   77:#endif // _LIBCPP___ITERATOR_OSTREAMBUF_ITERATOR_H

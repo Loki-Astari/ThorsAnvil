@@ -1,0 +1,134 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__iterator/access.h
+        -:    0:Graph:coverage/writeTest.gcno
+        -:    0:Data:coverage/writeTest.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:// -*- C++ -*-
+        -:    2://===----------------------------------------------------------------------===//
+        -:    3://
+        -:    4:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    5:// See https://llvm.org/LICENSE.txt for license information.
+        -:    6:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    7://
+        -:    8://===----------------------------------------------------------------------===//
+        -:    9:
+        -:   10:#ifndef _LIBCPP___ITERATOR_ACCESS_H
+        -:   11:#define _LIBCPP___ITERATOR_ACCESS_H
+        -:   12:
+        -:   13:#include <__config>
+        -:   14:#include <cstddef>
+        -:   15:
+        -:   16:#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   17:#  pragma GCC system_header
+        -:   18:#endif
+        -:   19:
+        -:   20:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   21:
+        -:   22:template <class _Tp, size_t _Np>
+        -:   23:_LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_SINCE_CXX14
+        -:   24:_Tp*
+        -:   25:begin(_Tp (&__array)[_Np])
+        -:   26:{
+        -:   27:    return __array;
+        -:   28:}
+        -:   29:
+        -:   30:template <class _Tp, size_t _Np>
+        -:   31:_LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_SINCE_CXX14
+        -:   32:_Tp*
+        -:   33:end(_Tp (&__array)[_Np])
+        -:   34:{
+        -:   35:    return __array + _Np;
+        -:   36:}
+        -:   37:
+        -:   38:#if !defined(_LIBCPP_CXX03_LANG)
+        -:   39:
+        -:   40:template <class _Cp>
+        -:   41:_LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_SINCE_CXX17
+        -:   42:auto
+    #####:   43:begin(_Cp& __c) -> decltype(__c.begin())
+        -:   44:{
+    #####:   45:    return __c.begin();
+        -:   46:}
+        -:   47:
+        -:   48:template <class _Cp>
+        -:   49:_LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_SINCE_CXX17
+        -:   50:auto
+    #####:   51:begin(const _Cp& __c) -> decltype(__c.begin())
+        -:   52:{
+    #####:   53:    return __c.begin();
+        -:   54:}
+        -:   55:
+        -:   56:template <class _Cp>
+        -:   57:_LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_SINCE_CXX17
+        -:   58:auto
+    #####:   59:end(_Cp& __c) -> decltype(__c.end())
+        -:   60:{
+    #####:   61:    return __c.end();
+        -:   62:}
+        -:   63:
+        -:   64:template <class _Cp>
+        -:   65:_LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_SINCE_CXX17
+        -:   66:auto
+    #####:   67:end(const _Cp& __c) -> decltype(__c.end())
+        -:   68:{
+    #####:   69:    return __c.end();
+        -:   70:}
+        -:   71:
+        -:   72:#if _LIBCPP_STD_VER > 11
+        -:   73:
+        -:   74:template <class _Cp>
+        -:   75:_LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_SINCE_CXX14
+        -:   76:auto cbegin(const _Cp& __c) -> decltype(_VSTD::begin(__c))
+        -:   77:{
+        -:   78:    return _VSTD::begin(__c);
+        -:   79:}
+        -:   80:
+        -:   81:template <class _Cp>
+        -:   82:_LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_SINCE_CXX14
+        -:   83:auto cend(const _Cp& __c) -> decltype(_VSTD::end(__c))
+        -:   84:{
+        -:   85:    return _VSTD::end(__c);
+        -:   86:}
+        -:   87:
+        -:   88:#endif
+        -:   89:
+        -:   90:
+        -:   91:#else  // defined(_LIBCPP_CXX03_LANG)
+        -:   92:
+        -:   93:template <class _Cp>
+        -:   94:_LIBCPP_INLINE_VISIBILITY
+        -:   95:typename _Cp::iterator
+        -:   96:begin(_Cp& __c)
+        -:   97:{
+        -:   98:    return __c.begin();
+        -:   99:}
+        -:  100:
+        -:  101:template <class _Cp>
+        -:  102:_LIBCPP_INLINE_VISIBILITY
+        -:  103:typename _Cp::const_iterator
+        -:  104:begin(const _Cp& __c)
+        -:  105:{
+        -:  106:    return __c.begin();
+        -:  107:}
+        -:  108:
+        -:  109:template <class _Cp>
+        -:  110:_LIBCPP_INLINE_VISIBILITY
+        -:  111:typename _Cp::iterator
+        -:  112:end(_Cp& __c)
+        -:  113:{
+        -:  114:    return __c.end();
+        -:  115:}
+        -:  116:
+        -:  117:template <class _Cp>
+        -:  118:_LIBCPP_INLINE_VISIBILITY
+        -:  119:typename _Cp::const_iterator
+        -:  120:end(const _Cp& __c)
+        -:  121:{
+        -:  122:    return __c.end();
+        -:  123:}
+        -:  124:
+        -:  125:#endif // !defined(_LIBCPP_CXX03_LANG)
+        -:  126:
+        -:  127:_LIBCPP_END_NAMESPACE_STD
+        -:  128:
+        -:  129:#endif // _LIBCPP___ITERATOR_ACCESS_H

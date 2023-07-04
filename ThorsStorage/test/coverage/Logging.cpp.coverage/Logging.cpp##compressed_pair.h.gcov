@@ -1,0 +1,182 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__memory/compressed_pair.h
+        -:    0:Graph:coverage/Logging.gcno
+        -:    0:Data:coverage/Logging.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:// -*- C++ -*-
+        -:    2://===----------------------------------------------------------------------===//
+        -:    3://
+        -:    4:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    5:// See https://llvm.org/LICENSE.txt for license information.
+        -:    6:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    7://
+        -:    8://===----------------------------------------------------------------------===//
+        -:    9:
+        -:   10:#ifndef _LIBCPP___MEMORY_COMPRESSED_PAIR_H
+        -:   11:#define _LIBCPP___MEMORY_COMPRESSED_PAIR_H
+        -:   12:
+        -:   13:#include <__config>
+        -:   14:#include <__fwd/get.h>
+        -:   15:#include <__fwd/tuple.h>
+        -:   16:#include <__tuple_dir/tuple_indices.h>
+        -:   17:#include <__type_traits/decay.h>
+        -:   18:#include <__type_traits/dependent_type.h>
+        -:   19:#include <__type_traits/enable_if.h>
+        -:   20:#include <__type_traits/is_default_constructible.h>
+        -:   21:#include <__type_traits/is_empty.h>
+        -:   22:#include <__type_traits/is_final.h>
+        -:   23:#include <__type_traits/is_same.h>
+        -:   24:#include <__type_traits/is_swappable.h>
+        -:   25:#include <__utility/forward.h>
+        -:   26:#include <__utility/move.h>
+        -:   27:#include <__utility/piecewise_construct.h>
+        -:   28:#include <cstddef>
+        -:   29:
+        -:   30:#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   31:#  pragma GCC system_header
+        -:   32:#endif
+        -:   33:
+        -:   34:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   35:
+        -:   36:// Tag used to default initialize one or both of the pair's elements.
+        -:   37:struct __default_init_tag {};
+        -:   38:struct __value_init_tag {};
+        -:   39:
+        -:   40:template <class _Tp, int _Idx, bool _CanBeEmptyBase = is_empty<_Tp>::value && !__libcpp_is_final<_Tp>::value>
+        -:   41:struct __compressed_pair_elem {
+        -:   42:  using _ParamT = _Tp;
+        -:   43:  using reference = _Tp&;
+        -:   44:  using const_reference = const _Tp&;
+        -:   45:
+     2719:   46:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR explicit __compressed_pair_elem(__default_init_tag) {}
+        -:   47:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR explicit __compressed_pair_elem(__value_init_tag) : __value_() {}
+        -:   48:
+        -:   49:  template <class _Up, class = __enable_if_t<!is_same<__compressed_pair_elem, typename decay<_Up>::type>::value> >
+        -:   50:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR
+        -:   51:  explicit __compressed_pair_elem(_Up&& __u) : __value_(std::forward<_Up>(__u)) {}
+        -:   52:
+        -:   53:#ifndef _LIBCPP_CXX03_LANG
+        -:   54:  template <class... _Args, size_t... _Indices>
+        -:   55:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX17
+        -:   56:  explicit __compressed_pair_elem(piecewise_construct_t, tuple<_Args...> __args, __tuple_indices<_Indices...>)
+        -:   57:      : __value_(std::forward<_Args>(std::get<_Indices>(__args))...) {}
+        -:   58:#endif
+        -:   59:
+     8877:   60:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 reference __get() _NOEXCEPT { return __value_; }
+    24309:   61:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR const_reference __get() const _NOEXCEPT { return __value_; }
+        -:   62:
+        -:   63:private:
+        -:   64:  _Tp __value_;
+        -:   65:};
+        -:   66:
+        -:   67:template <class _Tp, int _Idx>
+        -:   68:struct __compressed_pair_elem<_Tp, _Idx, true> : private _Tp {
+        -:   69:  using _ParamT = _Tp;
+        -:   70:  using reference = _Tp&;
+        -:   71:  using const_reference = const _Tp&;
+        -:   72:  using __value_type = _Tp;
+        -:   73:
+        -:   74:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR explicit __compressed_pair_elem() = default;
+     1286:   75:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR explicit __compressed_pair_elem(__default_init_tag) {}
+        -:   76:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR explicit __compressed_pair_elem(__value_init_tag) : __value_type() {}
+        -:   77:
+        -:   78:  template <class _Up, class = __enable_if_t<!is_same<__compressed_pair_elem, typename decay<_Up>::type>::value> >
+        -:   79:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR
+        -:   80:  explicit __compressed_pair_elem(_Up&& __u) : __value_type(std::forward<_Up>(__u)) {}
+        -:   81:
+        -:   82:#ifndef _LIBCPP_CXX03_LANG
+        -:   83:  template <class... _Args, size_t... _Indices>
+        -:   84:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX17
+        -:   85:  __compressed_pair_elem(piecewise_construct_t, tuple<_Args...> __args, __tuple_indices<_Indices...>)
+        -:   86:      : __value_type(std::forward<_Args>(std::get<_Indices>(__args))...) {}
+        -:   87:#endif
+        -:   88:
+        -:   89:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 reference __get() _NOEXCEPT { return *this; }
+        -:   90:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR const_reference __get() const _NOEXCEPT { return *this; }
+        -:   91:};
+        -:   92:
+        -:   93:template <class _T1, class _T2>
+        -:   94:class __compressed_pair : private __compressed_pair_elem<_T1, 0>,
+        -:   95:                          private __compressed_pair_elem<_T2, 1> {
+        -:   96:public:
+        -:   97:  // NOTE: This static assert should never fire because __compressed_pair
+        -:   98:  // is *almost never* used in a scenario where it's possible for T1 == T2.
+        -:   99:  // (The exception is std::function where it is possible that the function
+        -:  100:  //  object and the allocator have the same type).
+        -:  101:  static_assert((!is_same<_T1, _T2>::value),
+        -:  102:    "__compressed_pair cannot be instantiated when T1 and T2 are the same type; "
+        -:  103:    "The current implementation is NOT ABI-compatible with the previous implementation for this configuration");
+        -:  104:
+        -:  105:  using _Base1 _LIBCPP_NODEBUG = __compressed_pair_elem<_T1, 0>;
+        -:  106:  using _Base2 _LIBCPP_NODEBUG = __compressed_pair_elem<_T2, 1>;
+        -:  107:
+        -:  108:  template <bool _Dummy = true,
+        -:  109:    class = __enable_if_t<
+        -:  110:        __dependent_type<is_default_constructible<_T1>, _Dummy>::value &&
+        -:  111:        __dependent_type<is_default_constructible<_T2>, _Dummy>::value
+        -:  112:    >
+        -:  113:  >
+        -:  114:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR
+        -:  115:  explicit __compressed_pair() : _Base1(__value_init_tag()), _Base2(__value_init_tag()) {}
+        -:  116:
+        -:  117:  template <class _U1, class _U2>
+        -:  118:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR
+     2572:  119:  explicit __compressed_pair(_U1&& __t1, _U2&& __t2) : _Base1(std::forward<_U1>(__t1)), _Base2(std::forward<_U2>(__t2)) {}
+        -:  120:
+        -:  121:#ifndef _LIBCPP_CXX03_LANG
+        -:  122:  template <class... _Args1, class... _Args2>
+        -:  123:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX17
+        -:  124:  explicit __compressed_pair(piecewise_construct_t __pc, tuple<_Args1...> __first_args,
+        -:  125:                             tuple<_Args2...> __second_args)
+        -:  126:      : _Base1(__pc, std::move(__first_args), typename __make_tuple_indices<sizeof...(_Args1)>::type()),
+        -:  127:        _Base2(__pc, std::move(__second_args), typename __make_tuple_indices<sizeof...(_Args2)>::type()) {}
+        -:  128:#endif
+        -:  129:
+        -:  130:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14
+     8877:  131:  typename _Base1::reference first() _NOEXCEPT {
+     8877:  132:    return static_cast<_Base1&>(*this).__get();
+        -:  133:  }
+        -:  134:
+        -:  135:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR
+    24309:  136:  typename _Base1::const_reference first() const _NOEXCEPT {
+    24309:  137:    return static_cast<_Base1 const&>(*this).__get();
+        -:  138:  }
+        -:  139:
+        -:  140:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14
+        -:  141:  typename _Base2::reference second() _NOEXCEPT {
+        -:  142:    return static_cast<_Base2&>(*this).__get();
+        -:  143:  }
+        -:  144:
+        -:  145:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR
+        -:  146:  typename _Base2::const_reference second() const _NOEXCEPT {
+        -:  147:    return static_cast<_Base2 const&>(*this).__get();
+        -:  148:  }
+        -:  149:
+        -:  150:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR static
+        -:  151:  _Base1* __get_first_base(__compressed_pair* __pair) _NOEXCEPT {
+        -:  152:    return static_cast<_Base1*>(__pair);
+        -:  153:  }
+        -:  154:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR static
+        -:  155:  _Base2* __get_second_base(__compressed_pair* __pair) _NOEXCEPT {
+        -:  156:    return static_cast<_Base2*>(__pair);
+        -:  157:  }
+        -:  158:
+        -:  159:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14
+        -:  160:  void swap(__compressed_pair& __x)
+        -:  161:      _NOEXCEPT_(__is_nothrow_swappable<_T1>::value && __is_nothrow_swappable<_T2>::value) {
+        -:  162:    using std::swap;
+        -:  163:    swap(first(), __x.first());
+        -:  164:    swap(second(), __x.second());
+        -:  165:  }
+        -:  166:};
+        -:  167:
+        -:  168:template <class _T1, class _T2>
+        -:  169:inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14
+        -:  170:void swap(__compressed_pair<_T1, _T2>& __x, __compressed_pair<_T1, _T2>& __y)
+        -:  171:    _NOEXCEPT_(__is_nothrow_swappable<_T1>::value && __is_nothrow_swappable<_T2>::value) {
+        -:  172:  __x.swap(__y);
+        -:  173:}
+        -:  174:
+        -:  175:_LIBCPP_END_NAMESPACE_STD
+        -:  176:
+        -:  177:#endif // _LIBCPP___MEMORY_COMPRESSED_PAIR_H

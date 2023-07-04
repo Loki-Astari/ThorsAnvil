@@ -1,0 +1,157 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/cstring
+        -:    0:Graph:coverage/closeTest.gcno
+        -:    0:Data:coverage/closeTest.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:// -*- C++ -*-
+        -:    2://===----------------------------------------------------------------------===//
+        -:    3://
+        -:    4:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    5:// See https://llvm.org/LICENSE.txt for license information.
+        -:    6:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    7://
+        -:    8://===----------------------------------------------------------------------===//
+        -:    9:
+        -:   10:#ifndef _LIBCPP_CSTRING
+        -:   11:#define _LIBCPP_CSTRING
+        -:   12:
+        -:   13:/*
+        -:   14:    cstring synopsis
+        -:   15:
+        -:   16:Macros:
+        -:   17:
+        -:   18:    NULL
+        -:   19:
+        -:   20:namespace std
+        -:   21:{
+        -:   22:
+        -:   23:Types:
+        -:   24:
+        -:   25:    size_t
+        -:   26:
+        -:   27:void* memcpy(void* restrict s1, const void* restrict s2, size_t n);
+        -:   28:void* memmove(void* s1, const void* s2, size_t n);
+        -:   29:char* strcpy (char* restrict s1, const char* restrict s2);
+        -:   30:char* strncpy(char* restrict s1, const char* restrict s2, size_t n);
+        -:   31:char* strcat (char* restrict s1, const char* restrict s2);
+        -:   32:char* strncat(char* restrict s1, const char* restrict s2, size_t n);
+        -:   33:int memcmp(const void* s1, const void* s2, size_t n);
+        -:   34:int strcmp (const char* s1, const char* s2);
+        -:   35:int strncmp(const char* s1, const char* s2, size_t n);
+        -:   36:int strcoll(const char* s1, const char* s2);
+        -:   37:size_t strxfrm(char* restrict s1, const char* restrict s2, size_t n);
+        -:   38:const void* memchr(const void* s, int c, size_t n);
+        -:   39:      void* memchr(      void* s, int c, size_t n);
+        -:   40:const char* strchr(const char* s, int c);
+        -:   41:      char* strchr(      char* s, int c);
+        -:   42:size_t strcspn(const char* s1, const char* s2);
+        -:   43:const char* strpbrk(const char* s1, const char* s2);
+        -:   44:      char* strpbrk(      char* s1, const char* s2);
+        -:   45:const char* strrchr(const char* s, int c);
+        -:   46:      char* strrchr(      char* s, int c);
+        -:   47:size_t strspn(const char* s1, const char* s2);
+        -:   48:const char* strstr(const char* s1, const char* s2);
+        -:   49:      char* strstr(      char* s1, const char* s2);
+        -:   50:char* strtok(char* restrict s1, const char* restrict s2);
+        -:   51:void* memset(void* s, int c, size_t n);
+        -:   52:char* strerror(int errnum);
+        -:   53:size_t strlen(const char* s);
+        -:   54:
+        -:   55:}  // std
+        -:   56:
+        -:   57:*/
+        -:   58:
+        -:   59:#include <__assert> // all public C++ headers provide the assertion handler
+        -:   60:#include <__config>
+        -:   61:#include <__type_traits/is_constant_evaluated.h>
+        -:   62:
+        -:   63:#include <string.h>
+        -:   64:
+        -:   65:#ifndef _LIBCPP_STRING_H
+        -:   66:#   error <cstring> tried including <string.h> but didn't find libc++'s <string.h> header. \
+        -:   67:          This usually means that your header search paths are not configured properly. \
+        -:   68:          The header search paths should contain the C++ Standard Library headers before \
+        -:   69:          any C Standard Library, and you are probably using compiler flags that make that \
+        -:   70:          not be the case.
+        -:   71:#endif
+        -:   72:
+        -:   73:#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   74:#  pragma GCC system_header
+        -:   75:#endif
+        -:   76:
+        -:   77:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   78:
+        -:   79:using ::size_t _LIBCPP_USING_IF_EXISTS;
+        -:   80:using ::memcpy _LIBCPP_USING_IF_EXISTS;
+        -:   81:using ::memmove _LIBCPP_USING_IF_EXISTS;
+        -:   82:using ::strcpy _LIBCPP_USING_IF_EXISTS;
+        -:   83:using ::strncpy _LIBCPP_USING_IF_EXISTS;
+        -:   84:using ::strcat _LIBCPP_USING_IF_EXISTS;
+        -:   85:using ::strncat _LIBCPP_USING_IF_EXISTS;
+        -:   86:using ::memcmp _LIBCPP_USING_IF_EXISTS;
+        -:   87:using ::strcmp _LIBCPP_USING_IF_EXISTS;
+        -:   88:using ::strncmp _LIBCPP_USING_IF_EXISTS;
+        -:   89:using ::strcoll _LIBCPP_USING_IF_EXISTS;
+        -:   90:using ::strxfrm _LIBCPP_USING_IF_EXISTS;
+        -:   91:using ::memchr _LIBCPP_USING_IF_EXISTS;
+        -:   92:using ::strchr _LIBCPP_USING_IF_EXISTS;
+        -:   93:using ::strcspn _LIBCPP_USING_IF_EXISTS;
+        -:   94:using ::strpbrk _LIBCPP_USING_IF_EXISTS;
+        -:   95:using ::strrchr _LIBCPP_USING_IF_EXISTS;
+        -:   96:using ::strspn _LIBCPP_USING_IF_EXISTS;
+        -:   97:using ::strstr _LIBCPP_USING_IF_EXISTS;
+        -:   98:using ::strtok _LIBCPP_USING_IF_EXISTS;
+        -:   99:using ::memset _LIBCPP_USING_IF_EXISTS;
+        -:  100:using ::strerror _LIBCPP_USING_IF_EXISTS;
+        -:  101:using ::strlen _LIBCPP_USING_IF_EXISTS;
+        -:  102:
+    #####:  103:inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 size_t __constexpr_strlen(const char* __str) {
+        -:  104:  // GCC currently doesn't support __builtin_strlen for heap-allocated memory during constant evaluation.
+        -:  105:  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70816
+        -:  106:#ifdef _LIBCPP_COMPILER_GCC
+        -:  107:  if (__libcpp_is_constant_evaluated()) {
+        -:  108:    size_t __i = 0;
+        -:  109:    for (; __str[__i] != '\0'; ++__i)
+        -:  110:      ;
+        -:  111:    return __i;
+        -:  112:  }
+        -:  113:#endif
+    #####:  114:  return __builtin_strlen(__str);
+        -:  115:}
+        -:  116:
+        -:  117:template <class _Tp>
+        -:  118:_LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 int
+        -:  119:__constexpr_memcmp(const _Tp* __lhs, const _Tp* __rhs, size_t __count) {
+        -:  120:#ifdef _LIBCPP_COMPILER_GCC
+        -:  121:  if (__libcpp_is_constant_evaluated()) {
+        -:  122:    for (; __count; --__count, ++__lhs, ++__rhs) {
+        -:  123:      if (*__lhs < *__rhs)
+        -:  124:        return -1;
+        -:  125:      if (*__rhs < *__lhs)
+        -:  126:        return 1;
+        -:  127:    }
+        -:  128:    return 0;
+        -:  129:  }
+        -:  130:#endif
+        -:  131:  return __builtin_memcmp(__lhs, __rhs, __count);
+        -:  132:}
+        -:  133:
+        -:  134:inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 const char*
+        -:  135:__constexpr_char_memchr(const char* __str, int __char, size_t __count) {
+        -:  136:#if __has_builtin(__builtin_char_memchr)
+        -:  137:  return __builtin_char_memchr(__str, __char, __count);
+        -:  138:#else
+        -:  139:  if (!__libcpp_is_constant_evaluated())
+        -:  140:    return static_cast<const char*>(std::memchr(__str, __char, __count));
+        -:  141:  for (; __count; --__count) {
+        -:  142:    if (*__str == __char)
+        -:  143:      return __str;
+        -:  144:    ++__str;
+        -:  145:  }
+        -:  146:  return nullptr;
+        -:  147:#endif
+        -:  148:}
+        -:  149:
+        -:  150:_LIBCPP_END_NAMESPACE_STD
+        -:  151:
+        -:  152:#endif // _LIBCPP_CSTRING

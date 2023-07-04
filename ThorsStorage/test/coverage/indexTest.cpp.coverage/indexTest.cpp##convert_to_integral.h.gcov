@@ -1,0 +1,77 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__utility/convert_to_integral.h
+        -:    0:Graph:coverage/indexTest.gcno
+        -:    0:Data:coverage/indexTest.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1://===----------------------------------------------------------------------===//
+        -:    2://
+        -:    3:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    4:// See https://llvm.org/LICENSE.txt for license information.
+        -:    5:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    6://
+        -:    7://===----------------------------------------------------------------------===//
+        -:    8:
+        -:    9:#ifndef _LIBCPP___UTILITY_CONVERT_TO_INTEGRAL_H
+        -:   10:#define _LIBCPP___UTILITY_CONVERT_TO_INTEGRAL_H
+        -:   11:
+        -:   12:#include <__config>
+        -:   13:#include <__type_traits/enable_if.h>
+        -:   14:#include <__type_traits/is_enum.h>
+        -:   15:#include <__type_traits/is_floating_point.h>
+        -:   16:#include <__type_traits/underlying_type.h>
+        -:   17:
+        -:   18:#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   19:#  pragma GCC system_header
+        -:   20:#endif
+        -:   21:
+        -:   22:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   23:
+        -:   24:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR
+        -:   25:int __convert_to_integral(int __val) { return __val; }
+        -:   26:
+        -:   27:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR
+        -:   28:unsigned __convert_to_integral(unsigned __val) { return __val; }
+        -:   29:
+        -:   30:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR
+        -:   31:long __convert_to_integral(long __val) { return __val; }
+        -:   32:
+        -:   33:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR
+    #####:   34:unsigned long __convert_to_integral(unsigned long __val) { return __val; }
+        -:   35:
+        -:   36:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR
+        -:   37:long long __convert_to_integral(long long __val) { return __val; }
+        -:   38:
+        -:   39:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR
+        -:   40:unsigned long long __convert_to_integral(unsigned long long __val) {return __val; }
+        -:   41:
+        -:   42:template<typename _Fp>
+        -:   43:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR
+        -:   44:typename enable_if<is_floating_point<_Fp>::value, long long>::type
+        -:   45: __convert_to_integral(_Fp __val) { return __val; }
+        -:   46:
+        -:   47:#ifndef _LIBCPP_HAS_NO_INT128
+        -:   48:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR
+        -:   49:__int128_t __convert_to_integral(__int128_t __val) { return __val; }
+        -:   50:
+        -:   51:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR
+        -:   52:__uint128_t __convert_to_integral(__uint128_t __val) { return __val; }
+        -:   53:#endif
+        -:   54:
+        -:   55:template <class _Tp, bool = is_enum<_Tp>::value>
+        -:   56:struct __sfinae_underlying_type
+        -:   57:{
+        -:   58:    typedef typename underlying_type<_Tp>::type type;
+        -:   59:    typedef decltype(((type)1) + 0) __promoted_type;
+        -:   60:};
+        -:   61:
+        -:   62:template <class _Tp>
+        -:   63:struct __sfinae_underlying_type<_Tp, false> {};
+        -:   64:
+        -:   65:template <class _Tp>
+        -:   66:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR
+        -:   67:typename __sfinae_underlying_type<_Tp>::__promoted_type
+        -:   68:__convert_to_integral(_Tp __val) { return __val; }
+        -:   69:
+        -:   70:_LIBCPP_END_NAMESPACE_STD
+        -:   71:
+        -:   72:#endif // _LIBCPP___UTILITY_CONVERT_TO_INTEGRAL_H
