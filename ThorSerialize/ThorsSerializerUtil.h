@@ -508,7 +508,7 @@ class Traits<Parents<Args...>>
         template<typename ChildType, std::size_t... Seq>
         static std::size_t getPrintSizeTotalAllParents(PrinterInterface& printer, ChildType const& object, std::size_t& count, std::size_t& memberSize, std::index_sequence<Seq...> const&)
         {
-            auto sums = {0UL, getPrintSizeTotalParent<ChildType, Seq>(printer, object, count, memberSize)...};
+            auto sums = {static_cast<std::size_t>(0), getPrintSizeTotalParent<ChildType, Seq>(printer, object, count, memberSize)...};
             return *(sums.end() - 1);
         }
 

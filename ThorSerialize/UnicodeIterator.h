@@ -23,6 +23,7 @@
 #include "ThorsLogging/ThorsLogging.h"
 #include <iterator>
 #include <vector>
+#include <cstdint>
 
 namespace ThorsAnvil
 {
@@ -60,7 +61,7 @@ struct UnicodePushBackIterator
     C&       cont;
     bool     lastWasSlash;
     int      unicodeCount;
-    uint32_t unicodeValue;
+    std::uint32_t unicodeValue;
     UnicodePushBackIterator(C& c)
         : cont(c)
         , lastWasSlash(false)

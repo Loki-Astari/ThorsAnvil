@@ -16,6 +16,7 @@
 #include <typeindex>
 #include <cassert>
 #include <type_traits>
+#include <cstdint>
 
 
 namespace ThorsAnvil
@@ -366,7 +367,7 @@ class Formatter
                                             : info.width;
                 std::size_t fractPrec = (info.useDynamicSize == Dynamic::Precision || info.useDynamicSize == Dynamic::Both)
                                             ? s.iword(static_cast<int>(Dynamic::Precision))
-                                            : info.precision == -1UL && info.type == Type::Float ? 6 : info.precision;
+                                            : info.precision == static_cast<std::size_t>(-1) && info.type == Type::Float ? 6 : info.precision;
                 bool                    forceLeft = info.leftJustify;
                 std::ios_base::fmtflags format    = info.format;
                 if ((info.useDynamicSize == Dynamic::Width || info.useDynamicSize == Dynamic::Both) && s.iword(static_cast<int>(Dynamic::Width)) < 0)

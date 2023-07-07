@@ -18,7 +18,7 @@ namespace ThorsAnvil
 inline
 void printStringToStream(std::ostream& s, char const* const& arg, FormatInfo const& info)
 {
-    if (info.precision == -1UL)
+    if (info.precision == static_cast<std::size_t>(-1))
     {
         s << arg;
     }

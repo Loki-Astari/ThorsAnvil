@@ -3,7 +3,9 @@
 #include <iomanip>
 #include <iostream>
 #include <tuple>
+#ifndef __WINNT
 #include <arpa/inet.h>
+#endif
 
 namespace ThorsAnvil::Serialize
 {

@@ -1,7 +1,3 @@
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <stdio.h>
 
 namespace ThorsAnvil::FileSystem
 {
@@ -10,24 +6,15 @@ namespace ThorsAnvil::FileSystem
 HEADER_ONLY_INCLUDE
 FileSystem::DirResult FileSystem::makeDirectory(std::string const& path, mode_t permissions)
 {
-    using StatusInfo = struct stat;
-
-    StatusInfo        info;
-    for (std::size_t pos = path.find('/'); pos != std::string::npos; pos = path.find(pos + 1, '/'))
-    {
-        std::string     subPath = path.substr(0, pos);
-        if ((stat(subPath.c_str(), &info) != 0) && (mkdir(subPath.c_str(), permissions) != 0))
-        {
-            return DirFailedToCreate;
-        }
-    }
-    if (stat(path.c_str(), &info) == 0)
+    namespace FS = std::filesystem;
+    std::error_code error;
+    if (FS::exists(path, error))
     {
         return DirAlreadyExists;
     }
-
-    if (mkdir(path.c_str(), permissions) == 0)
+    if (FS::create_directories(path, error))
     {
+        FS::permissions(path, static_cast<FS::perms>(permissions));
         return DirCreated;
     }
     return DirFailedToCreate;
@@ -36,19 +23,29 @@ FileSystem::DirResult FileSystem::makeDirectory(std::string const& path, mode_t 
 HEADER_ONLY_INCLUDE
 bool FileSystem::isFileOpenable(std::string const& path, openmode mode)
 {
-    bool result = true;
-    int accessFlag = ((mode & in) ? R_OK : 0)
-                   | ((mode & out)? W_OK : 0);
-    if (access(path.c_str(), accessFlag) != 0)
+    namespace FS = std::filesystem;
+    static constexpr int readPerm  = (static_cast<int>(FS::perms::owner_read) | static_cast<int>(FS::perms::group_read) | static_cast<int>(FS::perms::others_read));
+    static constexpr int writePerm = (static_cast<int>(FS::perms::owner_write) | static_cast<int>(FS::perms::group_write) | static_cast<int>(FS::perms::others_write));
+
+    std::error_code     errorCode;
+    FS::file_status stat = FS::status(path, errorCode);
+
+    bool    result = true;
+    if (mode & in)
     {
-        // This is still OK if we want to open a file for writing as we will be creating it.
-        // But to make sure we have permission we have to check three things.
-        //  1: The errors for accesses is because the file does not exist.
-        //  2: We want to open the file for writing.
-        //  3: The directory we want to open the file is writable by this processes.
-        //
-        //  Otherwise the file is not open-able for the mode we want.
-        result = (errno == ENOENT) && (mode & out) && (access(path.substr(0, path.find_last_of('/')).c_str(), W_OK) == 0);
+        result =
+            // To read the file must exist.
+            (stat.type() != FS::file_type::not_found)
+            // And be readable by one of the groups (not perfect but reasonable)
+         && (static_cast<int>(stat.permissions()) & readPerm);
+    }
+    if (mode & out)
+    {
+        result =
+            // File does not exist but directory has write permission.
+            (stat.type() == FS::file_type::not_found && isFileOpenable(path.substr(0, path.find_last_of('/')), out))
+            // Or file exists and has permission
+         || ((stat.type() != FS::file_type::not_found) && (static_cast<int>(stat.permissions()) & writePerm));
     }
     return result;
 }
