@@ -544,6 +544,17 @@ DeSerializeMemberContainer<T, M>::DeSerializeMemberContainer(DeSerializer&, Pars
     }
 }
 
+template<typename T, typename M>
+DeSerializeMemberContainer<T, M>::DeSerializeMemberContainer(DeSerializer&, ParserInterface& parser, std::string const& key, T& object, std::pair<char const*, M*> const& memberInfo)
+{
+    if (key.compare(ThorsAnvil::Serialize::Override<T>::nameOverride(memberInfo.first)) == 0)
+    {
+        used = true;
+        DeSerializer    deSerializer(parser, false);
+        deSerializer.parse(*(memberInfo.second));
+    }
+}
+
 template<typename T, typename M, TraitType Type>
 DeSerializeMemberValue<T, M, Type>::DeSerializeMemberValue(DeSerializer& parent, ParserInterface& parser, std::string const& key, T& object, std::pair<char const*, M T::*> const& memberInfo)
 {
@@ -894,6 +905,18 @@ SerializeMemberContainer<T, M>::SerializeMemberContainer(Serializer&, PrinterInt
 
         Serializer      serialzier(printer, false);
         serialzier.print(object.*(memberInfo.second));
+    }
+}
+
+template<typename T, typename M>
+SerializeMemberContainer<T, M>::SerializeMemberContainer(Serializer&, PrinterInterface& printer, T const& object, std::pair<char const*, M*> const& memberInfo)
+{
+    if (ThorsAnvil::Serialize::Filter<T>::filter(object, memberInfo.first))
+    {
+        printer.addKey(ThorsAnvil::Serialize::Override<T>::nameOverride(memberInfo.first));
+
+        Serializer      serialzier(printer, false);
+        serialzier.print(*(memberInfo.second));
     }
 }
 

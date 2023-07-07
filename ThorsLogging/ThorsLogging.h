@@ -11,10 +11,10 @@
 #if defined(HEADER_ONLY) && HEADER_ONLY == 1
 // Don't use logru with header only
 #include <iostream>
-// FATAL:   2
-// ERROR:   3
-// WARNING: 4
-// INFO:    5
+#define FATAL       2
+#define ERROR       3
+#define WARNING     4
+#define INFO        5
 #ifndef THOR_LOGGING_DEFAULT_LOG_LEVEL
 #define THOR_LOGGING_DEFAULT_LOG_LEVEL   3
 #endif
@@ -67,12 +67,24 @@ namespace ThorsAnvil
 }
 
 #if HEADER_ONLY
-#define ThorsLogAndThrowAction(Level, Exception, Scope, Function, ...)  throw Exception("Exception. No details available in HEADER ONLY Version")
+#define ThorsLogAndThrowAction(Level, Exception, Scope, Function, ...)  \
+do                                                                      \
+{                                                                       \
+    std::string message = ThorsAnvil::Utility::buildErrorMessage(       \
+                                            Scope,                      \
+                                            Function,                   \
+                                            __VA_ARGS__);               \
+    if (Level <= THOR_LOGGING_DEFAULT_LOG_LEVEL) {                      \
+        std::cerr << message;                                           \
+    }                                                                   \
+    throw Exception(message);                                           \
+}                                                                       \
+while (false)
 #define ThorsMessage(Level, ...)                                        \
 do                                                                      \
 {                                                                       \
     if (Level <= THOR_LOGGING_DEFAULT_LOG_LEVEL) {                      \
-        std::cerr << ThorsAnvil::Utility::buildErrorMessage(__VA_ARGS__);\
+        std::cerr << ThorsAnvil::Utility::buildErrorMessage(__VA_ARGS__); \
     }                                                                   \
 }                                                                       \
 while (false)

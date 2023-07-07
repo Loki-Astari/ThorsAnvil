@@ -720,6 +720,13 @@ class Traits<EnumName, std::enable_if_t<std::is_enum<EnumName>::value>>
         }
         static void serializeForBlock(PrinterInterface& printer, EnumName const& object)
         {
+            auto findValue = magic_enum::enum_name(object);
+            if (findValue == "")
+            {
+                ThorsLogAndThrow("ThorsAnvil::Serialize::Traits<EnumName(With Magic)>",
+                                 "serializeForBlock",
+                                 "Invalid Enum Value");
+            }
             printer.addValue(magic_enum::enum_name(object));
         }
 };
@@ -768,6 +775,13 @@ class Traits<EnumName>                                                  \
         }                                                               \
         static void serializeForBlock(PrinterInterface& printer, EnumName const& object) \
         {                                                               \
+            auto values = getValues();                                  \
+            auto find = values.find(object);                            \
+            if (find == values.end()) {                                 \
+                ThorsLogAndThrow("ThorsAnvil::Serialize::Traits<EnumName>", \
+                                 "serializeForBlock",                       \
+                                 "Invalid Enum Value");                     \
+            }                                                           \
             printer.addValue(getValues().find(object)->second);         \
         }                                                               \
 };                                                                      \

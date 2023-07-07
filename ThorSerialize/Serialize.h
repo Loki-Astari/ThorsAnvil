@@ -78,6 +78,7 @@ class DeSerializeMemberContainer
 {
     public:
         DeSerializeMemberContainer(DeSerializer&, ParserInterface& parser, std::string const& key, T& object, std::pair<char const*, M T::*> const& memberInfo);
+        DeSerializeMemberContainer(DeSerializer&, ParserInterface& parser, std::string const& key, T& object, std::pair<char const*, M*> const& memberInfo);
         explicit operator bool() const {return used;}
     private:
         bool used = false;
@@ -125,6 +126,7 @@ class SerializeMemberContainer
 {
     public:
         SerializeMemberContainer(Serializer&, PrinterInterface& printer, T const& object, std::pair<char const*, M T::*> const& memberInfo);
+        SerializeMemberContainer(Serializer&, PrinterInterface& printer, T const& object, std::pair<char const*, M*> const& memberInfo);
 };
 
 template<typename T, typename M, TraitType Type>
