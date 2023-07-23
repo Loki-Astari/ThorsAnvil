@@ -11,10 +11,19 @@
 #if defined(HEADER_ONLY) && HEADER_ONLY == 1
 // Don't use logru with header only
 #include <iostream>
-#define FATAL       2
-#define ERROR       3
-#define WARNING     4
-#define INFO        5
+#define Verbosity_FATAL       2
+#define Verbosity_ERROR       3
+#define Verbosity_WARNING     4
+#define Verbosity_INFO        5
+#define Verbosity_1           1
+#define Verbosity_2           2
+#define Verbosity_3           3
+#define Verbosity_4           4
+#define Verbosity_5           5
+#define Verbosity_6           6
+#define Verbosity_7           7
+#define Verbosity_8           8
+#define Verbosity_9           9
 #ifndef THOR_LOGGING_DEFAULT_LOG_LEVEL
 #define THOR_LOGGING_DEFAULT_LOG_LEVEL   3
 #endif
@@ -75,7 +84,7 @@ do                                                                      \
                                             Scope,                      \
                                             Function,                   \
                                             __VA_ARGS__);               \
-    if (Level <= THOR_LOGGING_DEFAULT_LOG_LEVEL) {                      \
+    if ((Verbosity_ ## Level) <= THOR_LOGGING_DEFAULT_LOG_LEVEL) {      \
         std::cerr << message_ThorsLogAndThrowAction;                    \
     }                                                                   \
     throw Exception(message_ThorsLogAndThrowAction);                    \
@@ -84,7 +93,7 @@ while (false)
 #define ThorsMessage(Level, ...)                                        \
 do                                                                      \
 {                                                                       \
-    if (Level <= THOR_LOGGING_DEFAULT_LOG_LEVEL) {                      \
+    if ((Verbosity_ ## Level) <= THOR_LOGGING_DEFAULT_LOG_LEVEL) {      \
         std::cerr << ThorsAnvil::Utility::buildErrorMessage(__VA_ARGS__); \
     }                                                                   \
 }                                                                       \
