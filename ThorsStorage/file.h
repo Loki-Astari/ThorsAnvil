@@ -14,6 +14,7 @@ namespace ThorsAnvil
 {
     namespace FileSystem
     {
+        using StrIndex = std::uint64_t;
         namespace ColumnFormat
         {
     /*
@@ -32,7 +33,7 @@ namespace ThorsAnvil
      *      OFile:      Output File
      *      File:       Can be either in or out or in/out just need to be specific in the open flag.
      */
-     
+
     // Need to forward declare FileMembers as it is used in the Implementation details section.
     template<typename S, typename T>
     class FileMembers;

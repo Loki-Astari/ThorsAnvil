@@ -76,7 +76,7 @@ namespace ThorsAnvil
             {
                 if (ok)
                 {
-                    file.open(path.c_str(), mode);
+                    file.open(path.c_str(), mode | std::ios_base::binary);
                 }
             }
             void close()                                {file.close();}
@@ -107,11 +107,11 @@ namespace ThorsAnvil
             {
                 if (ok)
                 {
-                    file.data.open(path, mode);
+                    file.data.open(path, mode | std::ios_base::binary);
                     {
                         std::ofstream touch(path + ".index", std::ios::app);
                     }
-                    file.index.open(path + ".index", mode | std::ios_base::in | std::ios_base::out);
+                    file.index.open(path + ".index", mode | std::ios_base::in | std::ios_base::out | std::ios_base::binary);
                 }
             }
             void close()
@@ -139,8 +139,8 @@ namespace ThorsAnvil
                     used  += (len + 1);
                 }
                 file.data << std::string_view(&*start) << "\n";
-                streampos index = file.data.tellp();
-                file.index.write(reinterpret_cast<char*>(&index), sizeof(streampos));
+                StrIndex index = static_cast<StrIndex>(file.data.tellp());
+                file.index.write(reinterpret_cast<char*>(&index), sizeof(index));
             }
             void setstate(iostate extraState)           {file.data.setstate(extraState);file.index.setstate(extraState);}
             void clear(iostate newState)                {file.data.clear(newState);file.index.clear(newState);}
@@ -154,10 +154,10 @@ namespace ThorsAnvil
                 }
                 else
                 {
-                    file.index.seekg(pos * sizeof(std::size_t) - sizeof(std::size_t));
-                    streampos index;
-                    file.index.read(reinterpret_cast<char*>(&index), sizeof(streampos));
-                    file.data.seekg(index);
+                    file.index.seekg(pos * sizeof(StrIndex) - sizeof(StrIndex));
+                    StrIndex index;
+                    file.index.read(reinterpret_cast<char*>(&index), sizeof(index));
+                    file.data.seekg(static_cast<std::streampos>(index));
                 }
             }
             void seekp(streampos pos)
@@ -169,11 +169,11 @@ namespace ThorsAnvil
                 }
                 else
                 {
-                    file.index.seekg(pos * sizeof(std::size_t) - sizeof(std::size_t));
-                    streampos index;
-                    file.index.read(reinterpret_cast<char*>(&index), sizeof(streampos));
-                    file.index.seekp(pos * sizeof(std::size_t) - sizeof(std::size_t));
-                    file.data.seekp(index);
+                    file.index.seekg(pos * sizeof(StrIndex) - sizeof(StrIndex));
+                    StrIndex index;
+                    file.index.read(reinterpret_cast<char*>(&index), sizeof(index));
+                    file.index.seekp(pos * sizeof(StrIndex) - sizeof(StrIndex));
+                    file.data.seekp(static_cast<std::streampos>(index));
                 }
             }
         };

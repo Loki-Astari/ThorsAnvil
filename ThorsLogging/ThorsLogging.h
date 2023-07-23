@@ -70,14 +70,15 @@ namespace ThorsAnvil
 #define ThorsLogAndThrowAction(Level, Exception, Scope, Function, ...)  \
 do                                                                      \
 {                                                                       \
-    std::string message = ThorsAnvil::Utility::buildErrorMessage(       \
+    std::string message_ThorsLogAndThrowAction =                        \
+                          ThorsAnvil::Utility::buildErrorMessage(       \
                                             Scope,                      \
                                             Function,                   \
                                             __VA_ARGS__);               \
     if (Level <= THOR_LOGGING_DEFAULT_LOG_LEVEL) {                      \
-        std::cerr << message;                                           \
+        std::cerr << message_ThorsLogAndThrowAction;                    \
     }                                                                   \
-    throw Exception(message);                                           \
+    throw Exception(message_ThorsLogAndThrowAction);                    \
 }                                                                       \
 while (false)
 #define ThorsMessage(Level, ...)                                        \
@@ -92,12 +93,13 @@ while (false)
 #define ThorsLogAndThrowAction(Level, Exception, Scope, Function, ...)  \
 do                                                                      \
 {                                                                       \
-    std::string message = ThorsAnvil::Utility::buildErrorMessage(       \
+    std::string message_ThorsLogAndThrowAction =                        \
+                          ThorsAnvil::Utility::buildErrorMessage(       \
                                             Scope,                      \
                                             Function,                   \
                                             __VA_ARGS__);               \
-    LOG_F(Level, "%s", message.c_str());                                \
-    throw Exception(message);                                           \
+    LOG_F(Level, "%s", message_ThorsLogAndThrowAction.c_str());         \
+    throw Exception(message_ThorsLogAndThrowAction);                    \
 }                                                                       \
 while (false)
 

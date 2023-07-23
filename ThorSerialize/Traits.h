@@ -856,6 +856,29 @@ static_assert(true)
         return #Type;                                                                       \
     }
 
+#define ThorsAnvil_PolyMorphicSerializerWithOverride(Type)                                  \
+    virtual void printPolyMorphicObject(ThorsAnvil::Serialize::Serializer&         parent,  \
+                                       ThorsAnvil::Serialize::PrinterInterface&    printer) override \
+    {                                                                                       \
+        ThorsAnvil::Serialize::printPolyMorphicObject<Type>(parent, printer, *this);        \
+    }                                                                                       \
+    virtual void parsePolyMorphicObject(ThorsAnvil::Serialize::DeSerializer&       parent,  \
+                                       ThorsAnvil::Serialize::ParserInterface&     parser)  override \
+    {                                                                                       \
+        ThorsAnvil::Serialize::parsePolyMorphicObject<Type>(parent, parser, *this);         \
+    }                                                                                       \
+    virtual std::size_t getPolyMorphicPrintSize(ThorsAnvil::Serialize::PrinterInterface& printer) const override \
+    {                                                                                       \
+        std::size_t count = 1;                                                              \
+        std::size_t memberSize = (printer.config.polymorphicMarker.size() + printer.getSizeValue(std::string(polyMorphicSerializerName())));\
+                                                                                            \
+        return getNormalPrintSize(printer, *this, count, memberSize);                       \
+    }                                                                                       \
+    static constexpr char const* polyMorphicSerializerName()                                \
+    {                                                                                       \
+        return #Type;                                                                       \
+    }
+
 
 namespace ThorsAnvil
 {

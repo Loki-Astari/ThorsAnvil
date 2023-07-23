@@ -545,7 +545,7 @@ DeSerializeMemberContainer<T, M>::DeSerializeMemberContainer(DeSerializer&, Pars
 }
 
 template<typename T, typename M>
-DeSerializeMemberContainer<T, M>::DeSerializeMemberContainer(DeSerializer&, ParserInterface& parser, std::string const& key, T& object, std::pair<char const*, M*> const& memberInfo)
+DeSerializeMemberContainer<T, M>::DeSerializeMemberContainer(DeSerializer&, ParserInterface& parser, std::string const& key, T& /*object*/, std::pair<char const*, M*> const& memberInfo)
 {
     if (key.compare(ThorsAnvil::Serialize::Override<T>::nameOverride(memberInfo.first)) == 0)
     {

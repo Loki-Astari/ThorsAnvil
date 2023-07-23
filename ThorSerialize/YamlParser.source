@@ -19,6 +19,10 @@ int thorsanvilYamlStreamReader(void* data, unsigned char* buffer, size_t size, s
     *size_read      = owner->input.gcount();
     result          = ((*size_read) != size_t(-1));
 
+    if ((owner->input.rdstate() == (std::ios::eofbit | std::ios::failbit)) && (*size_read) > 0) {
+        owner->input.clear();
+    }
+
     return result;
 }
 
