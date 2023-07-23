@@ -195,7 +195,7 @@ class ObjectID
     // 4 byte timestamp
     // 5 byte random
     // 3 byte incrementing counter.
-    static int classCounter; // = rand();
+    static int& classCounter();
 
     std::int32_t    timestamp;
     std::int64_t    random;
@@ -203,7 +203,7 @@ class ObjectID
     public:
         static int getNextCounter()
         {
-            return (classCounter++) % 0xFFF;
+            return (classCounter()++) % 0xFFF;
         }
         ObjectID(std::int32_t timestamp = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count(), std::int64_t random = std::rand(), std::int32_t counter = ObjectID::getNextCounter());
         bool operator==(ObjectID const& rhs) const {return std::tie(timestamp, random, counter) == std::tie(rhs.timestamp, rhs.random, rhs.counter);}
