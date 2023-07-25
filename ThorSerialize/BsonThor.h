@@ -1,5 +1,5 @@
-#ifndef THORS_ANVIL_SERIALIZE_BSON_H
-#define THORS_ANVIL_SERIALIZE_BSON_H
+#ifndef THORSANVIL_SERIALIZE_BSON_H
+#define THORSANVIL_SERIALIZE_BSON_H
 /*
  * Defines the Bson Serialization interface
  *      ThorsAnvil::Serialize::Bson
@@ -25,7 +25,7 @@ namespace ThorsAnvil
     namespace Serialize
     {
 
-template<typename T, TraitType trait = Traits<T>::type>
+template<typename T, TraitType trait = Traits<std::remove_cv_t<T>>::type>
 struct BsonBaseTypeGetter
 {
     static constexpr BsonContainer value = BsonContainer::Value;
@@ -84,12 +84,12 @@ struct Bson
 // @param config.catchExceptions    'false:    exceptions propogate.   'true':   parsing exceptions are stopped.
 // @return                          Object that can be passed to operator<< for serialization.
 template<typename T>
-Exporter<Bson, T> bsonExporter(T const& value, PrinterInterface::PrinterConfig config = PrinterInterface::PrinterConfig{})
+Exporter<Bson, T, BsonPrinterConfig> bsonExporter(T const& value, BsonPrinterConfig config = PrinterInterface::PrinterConfig{})
 {
     config.parserInfo = static_cast<long>(BsonBaseTypeGetter<T>::value);
     BsonBaseTypeGetter<T>::validate(value);
 
-    return Exporter<Bson, T>(value, config);
+    return Exporter<Bson, T, BsonPrinterConfig>(value, config);
 }
 
 // @function-api
@@ -113,15 +113,56 @@ Importer<Bson, T> bsonImporter(T& value, ParserInterface::ParserConfig config = 
 // @param config.catchExceptions    'false:    exceptions propogate.   'true':   parsing exceptions are stopped.
 // @return                          The size of the object that would be put on the stream in bytes.
 template<typename T>
-std::size_t bsonGetPrintSize(T const& value, PrinterInterface::PrinterConfig config = PrinterInterface::PrinterConfig{})
+std::size_t bsonGetPrintSize(T const& value, BsonPrinterConfig config = PrinterInterface::PrinterConfig{})
 {
     config.parserInfo = static_cast<long>(BsonBaseTypeGetter<T>::value);
     BsonBaseTypeGetter<T>::validate(value);
 
     std::stringstream         fakeStream;
     typename Bson::Printer    printer(fakeStream, config);
-    return Traits<T>::getPrintSize(printer, value, false);
+    return Traits<std::remove_cv_t<T>>::getPrintSize(printer, value, false);
 }
+
+/*
+ * BSON has the concept of a projection.
+ * We specify what fields we want to retrieve.
+ * The projection object achieves this.
+ */
+template<typename T>
+struct Projection
+{
+    T                   projection;
+};
+
+template<typename T>
+class Traits<Projection<T>>
+{
+    public:
+        using RefType = T;
+        struct ValueGetter
+        {
+            BsonPrinter&    printer;
+            bool            originalValue;
+
+            ValueGetter(PrinterInterface& p)
+                : printer(dynamic_cast<BsonPrinter&>(p))
+                , originalValue(printer.setProjection(true))
+
+            {}
+            ~ValueGetter()
+            {
+                printer.setProjection(originalValue);
+            }
+
+            T const&    getOutputValue(Projection<T> const& output) const   {return output.projection;}
+        };
+        static constexpr TraitType type = TraitType::Reference;
+        static std::size_t getPrintSize(PrinterInterface& printer, Projection<T> const& object, bool p)
+        {
+            return Traits<std::remove_cv_t<T>>::getPrintSize(printer, object.projection, p);
+        }
+};
+
     }
 }
 

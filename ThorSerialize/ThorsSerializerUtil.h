@@ -1,5 +1,5 @@
-#ifndef THORS_ANVIL_SERIALIZER_THORSSERIALIZERUTIL_H
-#define THORS_ANVIL_SERIALIZER_THORSSERIALIZERUTIL_H
+#ifndef THORSANVIL_SERIALIZER_THORSSERIALIZERUTIL_H
+#define THORSANVIL_SERIALIZER_THORSSERIALIZERUTIL_H
 
 #include "SerializeConfig.h"
 #include "ThorsIOUtil/Utility.h"
@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <cstddef>
 #include <algorithm>
+#include <functional>
 
 namespace ThorsAnvil
 {
@@ -134,7 +135,7 @@ struct HasParent: std::false_type
 {};
 
 template <class T>
-struct HasParent<T, std::enable_if_t<(sizeof(typename Traits<T>::Parent) >= 0)>>: std::true_type
+struct HasParent<T, std::enable_if_t<(sizeof(typename Traits<std::remove_cv_t<T>>::Parent) >= 0)>>: std::true_type
 {};
 
 /*
@@ -159,7 +160,17 @@ struct GetPrimaryParentType
 template<typename... Args>
 struct GetPrimaryParentType<Parents<Args...>>
 {
-    using type = typename std::tuple_element<0, std::tuple<Args...>>::type;
+    using type = std::tuple_element_t<0, std::tuple<Args...>>;
+};
+
+struct IgnoreCallBack
+{
+    using AppendFunc = std::function<void(char const*, std::size_t)>;
+    using ReadFunc   = std::function<void(std::istream&, char*, std::size_t)>;
+    using IgnoreFunc = std::function<void(std::istream&, std::size_t)>;
+    AppendFunc  append  = [](char const*, std::size_t){};
+    ReadFunc    read    = [](std::istream& s, char* d, std::size_t size){s.read(d, size);};
+    IgnoreFunc  ignore  = [](std::istream& s, std::size_t size)         {s.ignore(size);};
 };
 
 class ParserInterface
@@ -169,6 +180,16 @@ class ParserInterface
         enum class ParserToken {Error, DocStart, DocEnd, MapStart, MapEnd, ArrayStart, ArrayEnd, Key, Value};
         struct ParserConfig
         {
+            ParserConfig(IgnoreCallBack&& cb,
+                         ParseType parseStrictness = ParseType::Weak,
+                         std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
+                         bool catchExceptions = true)
+                : parseStrictness(parseStrictness)
+                , polymorphicMarker(polymorphicMarker)
+                , catchExceptions(catchExceptions)
+                , parserInfo(0)
+                , ignoreCallBack(std::move(cb))
+            {}
             ParserConfig(ParseType parseStrictness = ParseType::Weak,
                          std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
                          bool catchExceptions = true)
@@ -199,6 +220,7 @@ class ParserInterface
             std::string     polymorphicMarker;
             bool            catchExceptions;
             long            parserInfo;
+            IgnoreCallBack  ignoreCallBack;
         };
 
         std::istream&   input;
@@ -217,7 +239,9 @@ class ParserInterface
         virtual ParserToken     getNextToken()          = 0;
         virtual std::string     getKey()                = 0;
 
-        virtual void    ignoreDataValue()                {}
+        virtual void    ignoreDataValue()               {}
+        virtual void    ignoreDataMap(bool)             {}
+        virtual void    ignoreDataArray(bool)           {}
 
         virtual void    getValue(short int&)             = 0;
         virtual void    getValue(int&)                   = 0;
@@ -338,6 +362,8 @@ class PrinterInterface
         void addValue(void const*)  = delete;
 
         virtual bool        printerUsesSize()                       {return false;}
+        virtual void        pushLevel(bool)                         {}
+        virtual void        popLevel()                              {}
         virtual std::size_t getSizeMap(std::size_t /*count*/)       {return 0;}
         virtual std::size_t getSizeArray(std::size_t /*count*/)     {return 0;}
         virtual std::size_t getSizeNull()                           {return 0;}
@@ -373,7 +399,8 @@ struct CalcSizeHelper<T, true>
 {
     std::size_t getPrintSize(PrinterInterface& printer, T const& object, std::size_t& count, std::size_t& memberSize)
     {
-        return ThorsAnvil::Serialize::Traits<typename Traits<T>::Parent>::getPrintSizeTotal(printer, object, count, memberSize);
+        using Parent = typename Traits<std::remove_cv_t<T>>::Parent;
+        return ThorsAnvil::Serialize::Traits<std::remove_cv_t<Parent>>::getPrintSizeTotal(printer, object, count, memberSize);
     }
 };
 
@@ -426,6 +453,9 @@ class Traits<TYPE>                                                  \
         }                                                           \
 }
 
+THORSANVIL_TRAITS_FOR_BASIC_TYPE_VALUE(char);
+THORSANVIL_TRAITS_FOR_BASIC_TYPE_VALUE(unsigned char);
+THORSANVIL_TRAITS_FOR_BASIC_TYPE_VALUE(signed char);
 THORSANVIL_TRAITS_FOR_BASIC_TYPE_VALUE(short int);
 THORSANVIL_TRAITS_FOR_BASIC_TYPE_VALUE(int);
 THORSANVIL_TRAITS_FOR_BASIC_TYPE_VALUE(long int);
@@ -442,6 +472,7 @@ THORSANVIL_TRAITS_FOR_BASIC_TYPE_VALUE(long double);
 THORSANVIL_TRAITS_FOR_BASIC_TYPE_VALUE(bool);
 
 THORSANVIL_TRAITS_FOR_BASIC_TYPE_VALUE(std::string);
+THORSANVIL_TRAITS_FOR_BASIC_TYPE_VALUE(std::string_view);
 
 #if 0
 template<> class Traits<short int>              {public: THORSANVIL_TRAITS_FOR_VALUE(short int)};
@@ -483,7 +514,7 @@ class Traits<T*>
         {
             if (object)
             {
-                return Traits<T>::getPrintSize(printer, *object, true);
+                return Traits<std::remove_cv_t<T>>::getPrintSize(printer, *object, true);
             }
             return printer.getSizeNull();
         }
@@ -501,8 +532,8 @@ class Traits<Parents<Args...>>
         template<typename ChildType, std::size_t Index>
         static std::size_t getPrintSizeTotalParent(PrinterInterface& printer, ChildType const& object, std::size_t& count, std::size_t& memberSize)
         {
-            using Parent = typename std::tuple_element<Index, std::tuple<Args...>>::type;
-            return Traits<Parent>::getPrintSizeTotal(printer, static_cast<Parent const&>(object), count, memberSize);
+            using Parent = std::tuple_element_t<Index, std::tuple<Args...>>;
+            return Traits<std::remove_cv_t<Parent>>::getPrintSizeTotal(printer, static_cast<Parent const&>(object), count, memberSize);
         }
 
         template<typename ChildType, std::size_t... Seq>
@@ -548,7 +579,7 @@ auto tryGetPolyMorphicPrintSize(PrinterInterface& printer, T const& object, bool
 template<typename T>
 std::size_t getNormalPrintSize(PrinterInterface& printer, T const& object, std::size_t count, std::size_t memberSize)
 {
-    std::size_t result = Traits<T>::getPrintSizeTotal(printer, object, count, memberSize);
+    std::size_t result = Traits<std::remove_cv_t<T>>::getPrintSizeTotal(printer, object, count, memberSize);
     return result;
 }
 
@@ -606,7 +637,7 @@ auto tryGetSizeFromSerializeType(PrinterInterface&, T const&, long) -> std::size
     }
 }
 
-#if defined(HEADER_ONLY) && HEADER_ONLY == 1
+#if defined(THORS_SERIALIZER_HEADER_ONLY) && THORS_SERIALIZER_HEADER_ONLY == 1
 #include "ThorsSerializerUtil.source"
 #endif
 

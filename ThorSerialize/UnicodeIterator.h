@@ -1,5 +1,5 @@
-#ifndef THORS_ANVIL_SERIALIZE_UNICODE_ITERATOR_H
-#define THORS_ANVIL_SERIALIZE_UNICODE_ITERATOR_H
+#ifndef THORSANVIL_SERIALIZE_UNICODE_ITERATOR_H
+#define THORSANVIL_SERIALIZE_UNICODE_ITERATOR_H
 /*
  * An iterator used to scan the inside of a quoted string.
  * It will convert all escaped characters into the actual UTF-8 character.
@@ -292,12 +292,12 @@ struct UnicodeWrapperIterator
         if (unicodeValue <= 0x7F)
         {
             // Encode as single UTF-8 character
-            cont.push_back(unicodeValue);
+            cont.push_back(unicodeValue & 0x7F);
         }
         else if (unicodeValue <= 0x7FF)
         {
             // Encode as two UTF-8 characters
-            cont.push_back(0xC0 |((unicodeValue >>  6)));
+            cont.push_back(0xC0 |((unicodeValue >>  6) & 0x1F));
             cont.push_back(0x80 |((unicodeValue >>  0) & 0x3F));
         }
         else if (unicodeValue <= 0xFFFF)
@@ -305,7 +305,7 @@ struct UnicodeWrapperIterator
             if ((unicodeValue & 0xFC00) != 0xD800)
             {
                 // Encode as three UTF-8 characters
-                cont.push_back(0xE0 |((unicodeValue >> 12)));
+                cont.push_back(0xE0 |((unicodeValue >> 12) & 0x0F));
                 cont.push_back(0x80 |((unicodeValue >>  6) & 0x3F));
                 cont.push_back(0x80 |((unicodeValue >>  0) & 0x3F));
             }
@@ -349,7 +349,7 @@ struct UnicodeWrapperIterator
         unicodeValue    = 0x00010000 | ((unicodeValue & 0x03FF0000) >> 6) | (unicodeValue & 0x000003FF);
 
         // Encode as 4 UTF-8 characters
-        cont.push_back(0xF0 |((unicodeValue >> 18)));
+        cont.push_back(0xF0 |((unicodeValue >> 18) & 0x0F));
         cont.push_back(0x80 |((unicodeValue >> 12) & 0x3F));
         cont.push_back(0x80 |((unicodeValue >>  6) & 0x3F));
         cont.push_back(0x80 |((unicodeValue >>  0) & 0x3F));

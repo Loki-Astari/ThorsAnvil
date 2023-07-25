@@ -13,7 +13,7 @@ using ParserToken = ParserInterface::ParserToken;
 
 char const* getTokenTypeAsString(ParserToken result);
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 BsonParser::BsonParser(std::istream& stream, ParserConfig config)
     : ParserInterface(stream, config)
     , nextToken(ParserToken::DocStart)
@@ -23,7 +23,7 @@ BsonParser::BsonParser(std::istream& stream, ParserConfig config)
     currentContainer.emplace_back(static_cast<BsonContainer>(config.parserInfo));
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 ParserToken BsonParser::getNextToken()
 {
     if (skipOverValue)
@@ -143,7 +143,7 @@ ParserToken BsonParser::getNextToken()
     return result;
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 char const* getTokenTypeAsString(ParserToken result)
 {
     switch (result)
@@ -162,24 +162,96 @@ char const* getTokenTypeAsString(ParserToken result)
     }
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+void BsonParser::ignoreDataMap(bool begin)
+{
+    if (begin)
+    {
+        std::int32_t    size = 0;
+        config.ignoreCallBack.append("\x03", 1);
+        config.ignoreCallBack.append(nextKey.c_str(), nextKey.size() + 1);
+        config.ignoreCallBack.append(reinterpret_cast<char*>(&size), sizeof(size));
+    }
+    else
+    {
+        config.ignoreCallBack.append("\0x00", 1);
+    }
+}
+
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+void BsonParser::ignoreDataArray(bool begin)
+{
+    if (begin)
+    {
+        std::int32_t    size = 0;
+        config.ignoreCallBack.append("\x04", 1);
+        config.ignoreCallBack.append(nextKey.c_str(), nextKey.size() + 1);
+        config.ignoreCallBack.append(reinterpret_cast<char*>(&size), sizeof(size));
+    }
+    else
+    {
+        config.ignoreCallBack.append("\0x00", 1);
+    }
+}
+
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonParser::ignoreDataValue()
 {
     if (skipOverValue == false)
     {
         return;
     }
+    using AppendFunc = typename IgnoreCallBack::AppendFunc;
+    using ReadFunc   = typename IgnoreCallBack::ReadFunc;
+    using IgnoreFunc = typename IgnoreCallBack::IgnoreFunc;
+    AppendFunc& append  = config.ignoreCallBack.append;
+    ReadFunc&   read    = config.ignoreCallBack.read;
+    IgnoreFunc& ignore  = config.ignoreCallBack.ignore;
+
+    append(&nextType, 1);
+    append(nextKey.c_str(), nextKey.size() + 1);
+
     switch (nextType)
     {
-        case '\x01':    input.ignore(8);    dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Double-64");   break;
-        case '\x13':    input.ignore(16);   dataLeft.back() -= 16;  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Double-128");  break;
-        case '\x10':    input.ignore(4);    dataLeft.back() -= 4;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Int-32");      break;
-        case '\x12':    input.ignore(8);    dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Int-64");      break;
-        case '\x07':    input.ignore(12);   dataLeft.back() -= 12;  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Obj-ID");      break;
-        case '\x08':    input.ignore(1);    dataLeft.back() -= 1;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Bool");        break;
+        /*
+            Notes:  0x06: => Deprecated
+                    0x03: => Map
+                    0x04: => Array
+                    0x0B: => RegExpression  Not supported (don't understand use case)
+                    0x0C: => Deprecated
+                    0x0D: => Javascript     Not supported (don't understand use case)
+                    0x0E: => Deprecated
+                    0x0F: => Deprecated
+                    -1:   => Min Key        Not supported (don't understand use case)
+                    127:  => Max Key        Not supported (don't understand use case)
+        */
+        case '\x01':    ignore(input, 8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Double-64");   break;
+        case '\x13':    ignore(input, 16);  dataLeft.back() -= 16;  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Double-128");  break;
+        case '\x10':    ignore(input, 4);   dataLeft.back() -= 4;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Int-32");      break;
+        case '\x12':    ignore(input, 8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Int-64");      break;
+        case '\x07':    ignore(input, 12);  dataLeft.back() -= 12;  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Obj-ID");      break;
+        case '\x08':    ignore(input, 1);   dataLeft.back() -= 1;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Bool");        break;
+        case '\x09':    ignore(input, 8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "UTC DateTime");break;
+        case '\x11':    ignore(input, 8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "TimeStamp");   break;
         case '\x0A':                                                ThorsMessage(5, "BsonParser", "ignoreDataValue", "NULL");        break;
-        case '\x02':    {std::size_t size = readSize<4, std::int32_t>();input.ignore(size);      dataLeft.back() -= (size + 4);  ThorsMessage(5, "BsonParser", "ignoreDataValue", "String");break;}
-        case '\x05':    {std::size_t size = readSize<4, std::int32_t>();input.ignore(size + 1);  dataLeft.back() -= (size + 5);  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Binary");break;}
+        case '\x02':
+        {
+            std::int32_t size;
+            read(input, reinterpret_cast<char*>(&size), sizeof(size));
+            ignore(input, size);
+            dataLeft.back() -= (size + 4);
+            ThorsMessage(5, "BsonParser", "ignoreDataValue", "String");
+            break;
+        }
+        case '\x05':
+        {
+            std::int32_t size;
+            read(input, reinterpret_cast<char*>(&size), sizeof(size));
+            ignore(input, size + 1);
+            dataLeft.back() -= (size + 5);
+            ThorsMessage(5, "BsonParser", "ignoreDataValue", "Binary");
+            break;
+        }
         default:
         {
             ThorsLogAndThrow("ThorsAnvil::Serialize::BsonParser",
@@ -189,7 +261,7 @@ void BsonParser::ignoreDataValue()
     }
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 bool BsonParser::isEndOfContainer(std::size_t excess)
 {
     ThorsMessage(5, "BsonParser", "isEndOfContainer", "isEndOfContainer: dataLeft.back(): ", dataLeft.back(), " Excess: ",  excess);
@@ -207,7 +279,7 @@ bool BsonParser::isEndOfContainer(std::size_t excess)
     return false;
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonParser::readEndOfContainer()
 {
     char    mark = '\xFF';
@@ -229,7 +301,7 @@ void BsonParser::readEndOfContainer()
     }
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonParser::readKey()
 {
     if (input.read(&nextType, 1) && std::getline(input, nextKey, '\0'))
@@ -243,7 +315,7 @@ void BsonParser::readKey()
                      "Failed to read Key");
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 bool BsonParser::readBool()
 {
     bool result;
@@ -257,7 +329,7 @@ bool BsonParser::readBool()
                      "Failed to read Bool");
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 std::size_t BsonParser::peekSize()
 {
     std::int32_t size;
@@ -266,14 +338,14 @@ std::size_t BsonParser::peekSize()
     if (input.read(reinterpret_cast<char*>(&size), 4))
     {
         input.seekg(pos);
-        return boost::endian::little_to_native(size);
+        return size;
     }
     ThorsLogAndThrow("ThorsAnvil::Serialize::BsonParser",
                      "peekSize",
                      "Failed to peek at the size of the next object");
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 std::string BsonParser::readString()
 {
     std::int32_t size = readSize<4, std::int32_t>();
@@ -290,11 +362,11 @@ std::string BsonParser::readString()
                      "Failed to read String");
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonParser::readNull()
 {}
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 std::string BsonParser::readBinary()
 {
     char            subType     = '\xFF';
@@ -316,23 +388,27 @@ std::string BsonParser::readBinary()
                      "Failed to read Binary Data");
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 std::string BsonParser::getKey()
 {
     return nextKey;
 }
 
-HEADER_ONLY_INCLUDE
+
+/*
+ * Note: This functionality is used by depricated methods.
+ *       It only supports conversion from binary to string and then being parsed into a value.
+ *       See:           ThorsAnvil_MakeTraitCustom for details.
+ *       Prefer to use: ThorsAnvil_SelfSerialize   for a better experience.
+ */
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 std::string BsonParser::getRawValue()
 {
     switch (nextType)
     {
-        case '\x10':            ThorsMessage(5, "BsonParser", "getRawValue", "Double-32");return std::to_string(readInt<4, std::int32_t>());
-        case '\x12':            ThorsMessage(5, "BsonParser", "getRawValue", "Double-64");return std::to_string(readInt<8, std::int64_t>());
-        case '\x01':            ThorsMessage(5, "BsonParser", "getRawValue", "Double-128");return std::to_string(readFloat<8>());
-#if 0
-        case '\x13':            ThorsMessage(5, "BsonParser", "getRawValue", "Int-64");return std::to_string(readFloat<16>());
-#endif
+        case '\x01':            ThorsMessage(5, "BsonParser", "getRawValue", "Double-64");return std::to_string(readFloat<double>());
+        case '\x10':            ThorsMessage(5, "BsonParser", "getRawValue", "Int-32");return std::to_string(readInt<4, std::int32_t>());
+        case '\x12':            ThorsMessage(5, "BsonParser", "getRawValue", "Int-64");return std::to_string(readInt<8, std::int64_t>());
         case '\x08':            ThorsMessage(5, "BsonParser", "getRawValue", "Bool");return readBool() ? "true" : "false";
         case '\x0A':            ThorsMessage(5, "BsonParser", "getRawValue", "Null");readNull(); return "null";
         case '\x02':

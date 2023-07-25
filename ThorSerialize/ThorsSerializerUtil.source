@@ -5,7 +5,7 @@
 namespace ThorsAnvil::Serialize
 {
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void ParserInterface::ignoreValue()
 {
     if (config.parseStrictness != ParseType::Weak)
@@ -18,9 +18,10 @@ void ParserInterface::ignoreValue()
     ignoreTheValue();
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void ParserInterface::ignoreTheMap()
 {
+    ignoreDataMap(true);
     for (ParserToken token = getNextToken(); token != ParserToken::MapEnd; token = getNextToken())
     {
         ignoreDataValue();
@@ -32,11 +33,13 @@ void ParserInterface::ignoreTheMap()
         }
         ignoreTheValue();
     }
+    ignoreDataMap(false);
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void ParserInterface::ignoreTheArray()
 {
+    ignoreDataArray(true);
     ParserToken token = getNextToken();
     while (token != ParserToken::ArrayEnd)
     {
@@ -72,9 +75,10 @@ void ParserInterface::ignoreTheArray()
         }
         token = getNextToken();
     }
+    ignoreDataArray(false);
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void ParserInterface::ignoreTheValue()
 {
     ParserToken token = getNextToken();

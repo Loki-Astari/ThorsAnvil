@@ -1,5 +1,5 @@
-#ifndef THORS_ANVIL_SERIALIZE_JSON_PRINTER_H
-#define THORS_ANVIL_SERIALIZE_JSON_PRINTER_H
+#ifndef THORSANVIL_SERIALIZE_JSON_PRINTER_H
+#define THORSANVIL_SERIALIZE_JSON_PRINTER_H
 /*
  * JsonaryPrinter<T>
  *  See documentation in JsonParser.h
@@ -59,7 +59,7 @@ class JsonPrinter: public PrinterInterface
     }
 }
 
-#if defined(HEADER_ONLY) && HEADER_ONLY == 1
+#if defined(THORS_SERIALIZER_HEADER_ONLY) && THORS_SERIALIZER_HEADER_ONLY == 1
 #include "JsonPrinter.source"
 #endif
 

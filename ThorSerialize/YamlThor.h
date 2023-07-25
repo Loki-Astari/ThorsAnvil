@@ -1,5 +1,5 @@
-#ifndef THORS_ANVIL_SERIALIZE_YAML_H
-#define THORS_ANVIL_SERIALIZE_YAML_H
+#ifndef THORSANVIL_SERIALIZE_YAML_H
+#define THORSANVIL_SERIALIZE_YAML_H
 /*
  * Defines the Yaml Serialization interface
  *      ThorsAnvil::Serialize::Yaml

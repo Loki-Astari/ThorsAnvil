@@ -1,3 +1,4 @@
+#include "MongoUtility.h"
 #include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"
 #include <iomanip>
@@ -6,26 +7,63 @@
 namespace ThorsAnvil::Serialize
 {
 
-HEADER_ONLY_INCLUDE
-BsonPrinter::BsonPrinter(std::ostream& output, PrinterConfig config)
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+BsonPrinter::BsonPrinter(std::ostream& output, BsonPrinterConfig config)
     : PrinterInterface(output, config)
+    , idStore(config.idStore)
+    , projection(false)
 {}
 
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+void BsonPrinter::pushLevel(bool isMap)
+{
+    currentContainer.emplace_back(isMap ? BsonContainer::Map : BsonContainer::Array);
+}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+void BsonPrinter::popLevel()
+{
+    currentContainer.pop_back();
+}
+
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+bool BsonPrinter::needToInsertId() const
+{
+    // We will add the _id field on the following condition.
+    // 1: The user has requested this by proving the idStore so we can output the new ObjectID.
+    // 2: We are in an array of objects.
+    // 3: The array is inside a map
+    // The array being inside a amp mirrors the pattern used by Mongo.
+    // See: https://www.mongodb.com/docs/manual/reference/command/insert/
+    // The "Insert" command is the Map which contains the field "documents" which is an array
+    // of documents that will be inserted.
+    return idStore.has_value() && currentContainer.size() == 2 && currentContainer[0] == BsonContainer::Map && currentContainer[1] == BsonContainer::Array;
+}
+
 // MAP
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 std::size_t BsonPrinter::getSizeMap(std::size_t count)
 {
     /*
      * A map is a document:
-     *      <size 4bytes> <Element-List> <Terminator 1byte>
+     *      <size 4 bytes> <Element-List> <Terminator 1 byte>
      * Each element int the <Element-List> consists of:
-     *      <type 1byte> <e-name (size accounted for) + '\0' 1byte> <object (size accounted for)>
+     *      <type 1 byte> <e-name (size accounted for) + '\0' 1 byte> <object (size accounted for)>
+     * If AddId is true then we will insert and _id member into the map.
+     *      <type 1byte(0x07) <e_name _id\x00>  <Object ID 12-byte>
      */
-    return 4 + (count * (1 + 1)) + 1;
+    std::size_t addIdSize = 0;
+    if (needToInsertId()) {
+        addIdSize = 17;
+    }
+
+    return 4                            // Size
+           + (count * (1 + 1))          // Type plus '\0' for each item
+           + addIdSize                  // Size from extra ID field being inserted.
+           + 1;                         // Terminator
 }
 
 // ARRAY
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 std::size_t BsonPrinter::getSizeArray(std::size_t count)
 {
     /*
@@ -53,11 +91,14 @@ std::size_t BsonPrinter::getSizeArray(std::size_t count)
     }
     indexTotalStringLen += (count - accountedFor) * numberOfDigitsThisLevel;
 
-    return getSizeMap(count) + indexTotalStringLen;
+    return 4                            // Size
+           + (count * (1 + 1))          // Type plus '\0' for each item
+           + indexTotalStringLen        // The string lengths.
+           + 1;                         // Terminator
 }
 
 // Add a new Key
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonPrinter::addKey(std::string const& key)
 {
     if (currentContainer.back() != BsonContainer::Map)
@@ -69,7 +110,7 @@ void BsonPrinter::addKey(std::string const& key)
     currentKey = key;
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonPrinter::writeKey(char value, std::size_t size)
 {
     if (!currentContainer.empty())
@@ -93,7 +134,7 @@ void BsonPrinter::writeKey(char value, std::size_t size)
         // So when we write a single value we wrap it just like an array.
         //
         // <4 byte Doc Size> <1 byte Type info> <2 byte Index "0"> <value> <1 byte doc term>
-        std::int32_t totalSize = 4 + 1 + 2 + size + 1;
+        std::int32_t totalSize = static_cast<std::int32_t>(4 + 1 + 2 + size + 1);
         writeSize<4, std::int32_t>(totalSize);
         output.write(&value, 1);
         output.write("0", 2);
@@ -102,10 +143,12 @@ void BsonPrinter::writeKey(char value, std::size_t size)
     }
 }
 
-HEADER_ONLY_INCLUDE void BsonPrinter::openDoc()
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+void BsonPrinter::openDoc()
 {}
 
-HEADER_ONLY_INCLUDE void BsonPrinter::closeDoc()
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+void BsonPrinter::closeDoc()
 {
     if (config.parserInfo == static_cast<long>(BsonContainer::Value))
     {
@@ -115,15 +158,25 @@ HEADER_ONLY_INCLUDE void BsonPrinter::closeDoc()
         output.write("", 1);
     }
 }
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonPrinter::openMap(std::size_t size)
 {
     writeKey('\x03', -1);
-    writeSize<4, std::int32_t>(size);
+    writeSize<4, std::int32_t>(static_cast<std::int32_t>(size));
+
+    bool shouldAddID = needToInsertId();
     currentContainer.emplace_back(BsonContainer::Map);
+
+    if (shouldAddID)
+    {
+        addKey("_id");
+        writeKey('\x07', 12);
+        idStore->get().emplace_back();
+        (*this) << idStore->get().back();
+    }
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonPrinter::closeMap()
 {
     if (currentContainer.back() != BsonContainer::Map)
@@ -136,16 +189,16 @@ void BsonPrinter::closeMap()
     currentContainer.pop_back();
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonPrinter::openArray(std::size_t size)
 {
     writeKey('\x04', -1);
-    writeSize<4, std::int32_t>(size);
+    writeSize<4, std::int32_t>(static_cast<std::int32_t>(size));
     currentContainer.emplace_back(BsonContainer::Array);
     arrayIndex.emplace_back(0);
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonPrinter::closeArray()
 {
     if (currentContainer.back() != BsonContainer::Array)
@@ -159,7 +212,7 @@ void BsonPrinter::closeArray()
     arrayIndex.pop_back();
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonPrinter::writeBool(bool value)
 {
     writeKey('\x08', 1);
@@ -167,26 +220,26 @@ void BsonPrinter::writeBool(bool value)
     output.write(&outVal, 1);
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonPrinter::writeString(std::string const& value)
 {
     writeKey('\x02', 4 + value.size() + 1);
-    writeSize<4, std::int32_t>(value.size() + 1);
+    writeSize<4, std::int32_t>(static_cast<std::int32_t>(value.size() + 1));
     output << EscapeString(value);
     output.write("", 1);
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonPrinter::writeNull()
 {
     writeKey('\x0A', 0);
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonPrinter::writeBinary(std::string const& value)
 {
     writeKey('\x05', 4 + 1 + value.size());    // binary
-    writeSize<4, std::int32_t>(value.size());
+    writeSize<4, std::int32_t>(static_cast<std::int32_t>(value.size()));
     output.write("\x80", 1);
     output.write(value.c_str(), value.size());
 }

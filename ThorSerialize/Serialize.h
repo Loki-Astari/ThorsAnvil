@@ -1,5 +1,5 @@
-#ifndef THORS_ANVIL_SERIALIZE_SERIALIZE_H
-#define THORS_ANVIL_SERIALIZE_SERIALIZE_H
+#ifndef THORSANVIL_SERIALIZE_SERIALIZE_H
+#define THORSANVIL_SERIALIZE_SERIALIZE_H
 
 /*
  * This is the guts of the serialization code.
@@ -47,12 +47,12 @@ namespace ThorsAnvil
 template<typename T>
 T scanValue(char const* buffer, char** end);
 
-template<>  inline short int               scanValue<short int>(char const* buffer, char** end)               {return std::strtol(buffer, end, 10);}
+template<>  inline short int               scanValue<short int>(char const* buffer, char** end)               {return static_cast<short int>(std::strtol(buffer, end, 10));}
 template<>  inline int                     scanValue<int>(char const* buffer, char** end)                     {return std::strtol(buffer, end, 10);}
 template<>  inline long int                scanValue<long int>(char const* buffer, char** end)                {return std::strtol(buffer, end, 10);}
 template<>  inline long long int           scanValue<long long int>(char const* buffer, char** end)           {return std::strtoll(buffer, end, 10);}
 
-template<>  inline unsigned short int      scanValue<unsigned short int>(char const* buffer, char** end)      {return std::strtoul(buffer, end, 10);}
+template<>  inline unsigned short int      scanValue<unsigned short int>(char const* buffer, char** end)      {return static_cast<unsigned short int>(std::strtoul(buffer, end, 10));}
 template<>  inline unsigned int            scanValue<unsigned int>(char const* buffer, char** end)            {return std::strtoul(buffer, end, 10);}
 template<>  inline unsigned long int       scanValue<unsigned long int>(char const* buffer, char** end)       {return std::strtoul(buffer, end, 10);}
 template<>  inline unsigned long long int  scanValue<unsigned long long int>(char const* buffer, char** end)  {return std::strtoull(buffer, end, 10);}
@@ -170,7 +170,7 @@ template<typename P>
 struct BaseTypeGetter
 {
     // Done this way so smart pointers can specialize
-    using type = typename std::remove_pointer<P>::type;
+    using type = std::remove_pointer_t<P>;
 };
 
 /* ------------ MetaTraits for Serialization/DeSerialization ------------------------- */

@@ -1,5 +1,5 @@
-#ifndef THORS_ANVIL_SERIALIZE_EXPORTER_H
-#define THORS_ANVIL_SERIALIZE_EXPORTER_H
+#ifndef THORSANVIL_SERIALIZE_EXPORTER_H
+#define THORSANVIL_SERIALIZE_EXPORTER_H
 /*
  * The Exporter simply wrap an object of type T so that when serialized
  * it creates an object of type Serializer and calls it appropriately.
@@ -14,14 +14,13 @@ namespace ThorsAnvil
     namespace Serialize
     {
 
-template<typename Format, typename T>
+template<typename Format, typename T, typename Config = PrinterInterface::PrinterConfig>
 class Exporter
 {
-    using PrinterConfig = PrinterInterface::PrinterConfig;
     T const&        value;
-    PrinterConfig   config;
+    Config          config;
     public:
-        Exporter(T const& value, PrinterConfig config)
+        Exporter(T const& value, Config config)
             : value(value)
             , config(config)
         {}

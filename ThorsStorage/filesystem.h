@@ -110,7 +110,7 @@ namespace ThorsAnvil
     }
 }
 
-#if defined(HEADER_ONLY) && HEADER_ONLY == 1
+#if defined(THORS_STORAGE_HEADER_ONLY) && THORS_STORAGE_HEADER_ONLY == 1
 #include "filesystem.source"
 #endif
 

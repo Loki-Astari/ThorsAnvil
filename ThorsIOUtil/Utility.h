@@ -111,7 +111,7 @@ std::string errnoToName()
         THOR_CASE( ECONNABORTED );
         THOR_CASE( ECONNRESET );
         THOR_CASE( EDESTADDRREQ );
-#ifndef __WINNT
+#if !defined(__WINNT) && !defined(_WIN32) && !defined(_WIN64)
         THOR_CASE( EDQUOT );
 #endif
         THOR_CASE( EEXIST );
@@ -157,7 +157,13 @@ inline
 std::string systemErrorMessage()
 {
     std::string result = errnoToName();
+#if !defined(_WIN32) && !defined(_WIN64)
     result += std::strerror(errno);
+#else
+    static char buffer[1000];
+    strerror_s(buffer, 1000, errno);
+    result += buffer;
+#endif
     return result;
 }
 

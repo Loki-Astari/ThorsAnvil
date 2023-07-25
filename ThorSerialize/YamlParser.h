@@ -1,5 +1,5 @@
-#ifndef THORS_ANIVL_SERIALIZE_YAML_PARSER_H
-#define THORS_ANIVL_SERIALIZE_YAML_PARSER_H
+#ifndef THORSANVIL_SERIALIZE_YAML_PARSER_H
+#define THORSANVIL_SERIALIZE_YAML_PARSER_H
 /*
  * YamlParser<T>
  *      This is used in conjunction with YamlPrinter<T>
@@ -82,7 +82,7 @@ class YamlParser: public ParserInterface
     }
 }
 
-#if defined(HEADER_ONLY) && HEADER_ONLY == 1
+#if defined(THORS_SERIALIZER_HEADER_ONLY) && THORS_SERIALIZER_HEADER_ONLY == 1
 #include "YamlParser.source"
 #endif
 

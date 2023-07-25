@@ -1,5 +1,5 @@
-#ifndef THORS_ANVIL_SERIALIZE_TRAITS_H
-#define THORS_ANVIL_SERIALIZE_TRAITS_H
+#ifndef THORSANVIL_SERIALIZE_TRAITS_H
+#define THORSANVIL_SERIALIZE_TRAITS_H
 /*
  *  This file is all about defineing the template type Traits<T>
  *
@@ -74,20 +74,12 @@
  *
  *      To get this to work you need to define the type SerializableType:
  *
- *              SerializableType::write(Printer, object)
- *              SerializableType::read(Parser, object)
- *
- *
- *      "object" is the object you want to serialize.
- *      Printer/Parser will be derived from
- *          PrinterInterface
- *          ParserInterface
- *
- *      You can write versions that use these generic types or you can
- *      have implementations for specific version.
- *          eg. BsonParser/BsonPrinter
- *
- *      The code will link with the most appropriate version:
+ *          struct SerializableType
+ *          {
+ *              static std::size_t getPrintSizeBson(BsonPrinter& printer, Type const& object);
+ *              static void writeCustom(PrinterInterface& printer, Type const& object);
+ *              static void readCustom(ParserInterface& parser, Type& object);
+ *          };
  *
  * Sometimes you can not use the key names you want (they are reserved words or contain
  * symbols that are not valid in identifiers in C++). So we provide a way to override
@@ -356,51 +348,99 @@
 #define ALT_REP_OF_N(Act, E, P, S, Count)  ALT_REP_OF_N_(Act, E, P, S, Count)
 #define ALT_REP_OF_N_(Act, E, P, S, Count) ALT_REP_OF_ ## Count(Act, E, P, S)
 
-#define ALT_REP_OF_43(Act, E, P, S)     P ALT_EXPAND(Act, E, 43), ALT_REP_OF_42(Act, E,  , S)
-#define ALT_REP_OF_42(Act, E, P, S)     P ALT_EXPAND(Act, E, 42), ALT_REP_OF_41(Act, E,  , S)
-#define ALT_REP_OF_41(Act, E, P, S)     P ALT_EXPAND(Act, E, 41), ALT_REP_OF_40(Act, E,  , S)
-#define ALT_REP_OF_40(Act, E, P, S)     P ALT_EXPAND(Act, E, 40), ALT_REP_OF_39(Act, E,  , S)
-#define ALT_REP_OF_39(Act, E, P, S)     P ALT_EXPAND(Act, E, 39), ALT_REP_OF_38(Act, E,  , S)
-#define ALT_REP_OF_38(Act, E, P, S)     P ALT_EXPAND(Act, E, 38), ALT_REP_OF_37(Act, E,  , S)
-#define ALT_REP_OF_37(Act, E, P, S)     P ALT_EXPAND(Act, E, 37), ALT_REP_OF_36(Act, E,  , S)
-#define ALT_REP_OF_36(Act, E, P, S)     P ALT_EXPAND(Act, E, 36), ALT_REP_OF_35(Act, E,  , S)
-#define ALT_REP_OF_35(Act, E, P, S)     P ALT_EXPAND(Act, E, 35), ALT_REP_OF_34(Act, E,  , S)
-#define ALT_REP_OF_34(Act, E, P, S)     P ALT_EXPAND(Act, E, 34), ALT_REP_OF_33(Act, E,  , S)
-#define ALT_REP_OF_33(Act, E, P, S)     P ALT_EXPAND(Act, E, 33), ALT_REP_OF_32(Act, E,  , S)
-#define ALT_REP_OF_32(Act, E, P, S)     P ALT_EXPAND(Act, E, 32), ALT_REP_OF_31(Act, E,  , S)
-#define ALT_REP_OF_31(Act, E, P, S)     P ALT_EXPAND(Act, E, 31), ALT_REP_OF_30(Act, E,  , S)
-#define ALT_REP_OF_30(Act, E, P, S)     P ALT_EXPAND(Act, E, 30), ALT_REP_OF_29(Act, E,  , S)
-#define ALT_REP_OF_29(Act, E, P, S)     P ALT_EXPAND(Act, E, 29), ALT_REP_OF_28(Act, E,  , S)
-#define ALT_REP_OF_28(Act, E, P, S)     P ALT_EXPAND(Act, E, 28), ALT_REP_OF_27(Act, E,  , S)
-#define ALT_REP_OF_27(Act, E, P, S)     P ALT_EXPAND(Act, E, 27), ALT_REP_OF_26(Act, E,  , S)
-#define ALT_REP_OF_26(Act, E, P, S)     P ALT_EXPAND(Act, E, 26), ALT_REP_OF_25(Act, E,  , S)
-#define ALT_REP_OF_25(Act, E, P, S)     P ALT_EXPAND(Act, E, 25), ALT_REP_OF_24(Act, E,  , S)
-#define ALT_REP_OF_24(Act, E, P, S)     P ALT_EXPAND(Act, E, 24), ALT_REP_OF_23(Act, E,  , S)
-#define ALT_REP_OF_23(Act, E, P, S)     P ALT_EXPAND(Act, E, 23), ALT_REP_OF_22(Act, E,  , S)
-#define ALT_REP_OF_22(Act, E, P, S)     P ALT_EXPAND(Act, E, 22), ALT_REP_OF_21(Act, E,  , S)
-#define ALT_REP_OF_21(Act, E, P, S)     P ALT_EXPAND(Act, E, 21), ALT_REP_OF_20(Act, E,  , S)
-#define ALT_REP_OF_20(Act, E, P, S)     P ALT_EXPAND(Act, E, 20), ALT_REP_OF_19(Act, E,  , S)
-#define ALT_REP_OF_19(Act, E, P, S)     P ALT_EXPAND(Act, E, 19), ALT_REP_OF_18(Act, E,  , S)
-#define ALT_REP_OF_18(Act, E, P, S)     P ALT_EXPAND(Act, E, 18), ALT_REP_OF_17(Act, E,  , S)
-#define ALT_REP_OF_17(Act, E, P, S)     P ALT_EXPAND(Act, E, 17), ALT_REP_OF_16(Act, E,  , S)
-#define ALT_REP_OF_16(Act, E, P, S)     P ALT_EXPAND(Act, E, 16), ALT_REP_OF_15(Act, E,  , S)
-#define ALT_REP_OF_15(Act, E, P, S)     P ALT_EXPAND(Act, E, 15), ALT_REP_OF_14(Act, E,  , S)
-#define ALT_REP_OF_14(Act, E, P, S)     P ALT_EXPAND(Act, E, 14), ALT_REP_OF_13(Act, E,  , S)
-#define ALT_REP_OF_13(Act, E, P, S)     P ALT_EXPAND(Act, E, 13), ALT_REP_OF_12(Act, E,  , S)
-#define ALT_REP_OF_12(Act, E, P, S)     P ALT_EXPAND(Act, E, 12), ALT_REP_OF_11(Act, E,  , S)
-#define ALT_REP_OF_11(Act, E, P, S)     P ALT_EXPAND(Act, E, 11), ALT_REP_OF_10(Act, E,  , S)
-#define ALT_REP_OF_10(Act, E, P, S)     P ALT_EXPAND(Act, E, 10), ALT_REP_OF_9(Act, E,  , S)
-#define ALT_REP_OF_9(Act, E, P, S)     P ALT_EXPAND(Act, E, 9), ALT_REP_OF_8(Act, E,  , S)
-#define ALT_REP_OF_8(Act, E, P, S)     P ALT_EXPAND(Act, E, 8), ALT_REP_OF_7(Act, E,  , S)
-#define ALT_REP_OF_7(Act, E, P, S)     P ALT_EXPAND(Act, E, 7), ALT_REP_OF_6(Act, E,  , S)
-#define ALT_REP_OF_6(Act, E, P, S)     P ALT_EXPAND(Act, E, 6), ALT_REP_OF_5(Act, E,  , S)
-#define ALT_REP_OF_5(Act, E, P, S)     P ALT_EXPAND(Act, E, 5), ALT_REP_OF_4(Act, E,  , S)
-#define ALT_REP_OF_4(Act, E, P, S)     P ALT_EXPAND(Act, E, 4), ALT_REP_OF_3(Act, E,  , S)
-#define ALT_REP_OF_3(Act, E, P, S)     P ALT_EXPAND(Act, E, 3), ALT_REP_OF_2(Act, E,  , S)
-#define ALT_REP_OF_2(Act, E, P, S)     P ALT_EXPAND(Act, E, 2), ALT_REP_OF_1(Act, E,  , S)
+#define ALT_REP_OF_43(Act, E, P, S)     P ALT_EXPAND(Act, E, 43), ALT_REP_OF_42(Act,  ,  , S)
+#define ALT_REP_OF_42(Act, E, P, S)     P ALT_EXPAND(Act, E, 42), ALT_REP_OF_41(Act,  ,  , S)
+#define ALT_REP_OF_41(Act, E, P, S)     P ALT_EXPAND(Act, E, 41), ALT_REP_OF_40(Act,  ,  , S)
+#define ALT_REP_OF_40(Act, E, P, S)     P ALT_EXPAND(Act, E, 40), ALT_REP_OF_39(Act,  ,  , S)
+#define ALT_REP_OF_39(Act, E, P, S)     P ALT_EXPAND(Act, E, 39), ALT_REP_OF_38(Act,  ,  , S)
+#define ALT_REP_OF_38(Act, E, P, S)     P ALT_EXPAND(Act, E, 38), ALT_REP_OF_37(Act,  ,  , S)
+#define ALT_REP_OF_37(Act, E, P, S)     P ALT_EXPAND(Act, E, 37), ALT_REP_OF_36(Act,  ,  , S)
+#define ALT_REP_OF_36(Act, E, P, S)     P ALT_EXPAND(Act, E, 36), ALT_REP_OF_35(Act,  ,  , S)
+#define ALT_REP_OF_35(Act, E, P, S)     P ALT_EXPAND(Act, E, 35), ALT_REP_OF_34(Act,  ,  , S)
+#define ALT_REP_OF_34(Act, E, P, S)     P ALT_EXPAND(Act, E, 34), ALT_REP_OF_33(Act,  ,  , S)
+#define ALT_REP_OF_33(Act, E, P, S)     P ALT_EXPAND(Act, E, 33), ALT_REP_OF_32(Act,  ,  , S)
+#define ALT_REP_OF_32(Act, E, P, S)     P ALT_EXPAND(Act, E, 32), ALT_REP_OF_31(Act,  ,  , S)
+#define ALT_REP_OF_31(Act, E, P, S)     P ALT_EXPAND(Act, E, 31), ALT_REP_OF_30(Act,  ,  , S)
+#define ALT_REP_OF_30(Act, E, P, S)     P ALT_EXPAND(Act, E, 30), ALT_REP_OF_29(Act,  ,  , S)
+#define ALT_REP_OF_29(Act, E, P, S)     P ALT_EXPAND(Act, E, 29), ALT_REP_OF_28(Act,  ,  , S)
+#define ALT_REP_OF_28(Act, E, P, S)     P ALT_EXPAND(Act, E, 28), ALT_REP_OF_27(Act,  ,  , S)
+#define ALT_REP_OF_27(Act, E, P, S)     P ALT_EXPAND(Act, E, 27), ALT_REP_OF_26(Act,  ,  , S)
+#define ALT_REP_OF_26(Act, E, P, S)     P ALT_EXPAND(Act, E, 26), ALT_REP_OF_25(Act,  ,  , S)
+#define ALT_REP_OF_25(Act, E, P, S)     P ALT_EXPAND(Act, E, 25), ALT_REP_OF_24(Act,  ,  , S)
+#define ALT_REP_OF_24(Act, E, P, S)     P ALT_EXPAND(Act, E, 24), ALT_REP_OF_23(Act,  ,  , S)
+#define ALT_REP_OF_23(Act, E, P, S)     P ALT_EXPAND(Act, E, 23), ALT_REP_OF_22(Act,  ,  , S)
+#define ALT_REP_OF_22(Act, E, P, S)     P ALT_EXPAND(Act, E, 22), ALT_REP_OF_21(Act,  ,  , S)
+#define ALT_REP_OF_21(Act, E, P, S)     P ALT_EXPAND(Act, E, 21), ALT_REP_OF_20(Act,  ,  , S)
+#define ALT_REP_OF_20(Act, E, P, S)     P ALT_EXPAND(Act, E, 20), ALT_REP_OF_19(Act,  ,  , S)
+#define ALT_REP_OF_19(Act, E, P, S)     P ALT_EXPAND(Act, E, 19), ALT_REP_OF_18(Act,  ,  , S)
+#define ALT_REP_OF_18(Act, E, P, S)     P ALT_EXPAND(Act, E, 18), ALT_REP_OF_17(Act,  ,  , S)
+#define ALT_REP_OF_17(Act, E, P, S)     P ALT_EXPAND(Act, E, 17), ALT_REP_OF_16(Act,  ,  , S)
+#define ALT_REP_OF_16(Act, E, P, S)     P ALT_EXPAND(Act, E, 16), ALT_REP_OF_15(Act,  ,  , S)
+#define ALT_REP_OF_15(Act, E, P, S)     P ALT_EXPAND(Act, E, 15), ALT_REP_OF_14(Act,  ,  , S)
+#define ALT_REP_OF_14(Act, E, P, S)     P ALT_EXPAND(Act, E, 14), ALT_REP_OF_13(Act,  ,  , S)
+#define ALT_REP_OF_13(Act, E, P, S)     P ALT_EXPAND(Act, E, 13), ALT_REP_OF_12(Act,  ,  , S)
+#define ALT_REP_OF_12(Act, E, P, S)     P ALT_EXPAND(Act, E, 12), ALT_REP_OF_11(Act,  ,  , S)
+#define ALT_REP_OF_11(Act, E, P, S)     P ALT_EXPAND(Act, E, 11), ALT_REP_OF_10(Act,  ,  , S)
+#define ALT_REP_OF_10(Act, E, P, S)     P ALT_EXPAND(Act, E, 10), ALT_REP_OF_9(Act,  ,  , S)
+#define ALT_REP_OF_9(Act, E, P, S)     P ALT_EXPAND(Act, E, 9), ALT_REP_OF_8(Act,  ,  , S)
+#define ALT_REP_OF_8(Act, E, P, S)     P ALT_EXPAND(Act, E, 8), ALT_REP_OF_7(Act,  ,  , S)
+#define ALT_REP_OF_7(Act, E, P, S)     P ALT_EXPAND(Act, E, 7), ALT_REP_OF_6(Act,  ,  , S)
+#define ALT_REP_OF_6(Act, E, P, S)     P ALT_EXPAND(Act, E, 6), ALT_REP_OF_5(Act,  ,  , S)
+#define ALT_REP_OF_5(Act, E, P, S)     P ALT_EXPAND(Act, E, 5), ALT_REP_OF_4(Act,  ,  , S)
+#define ALT_REP_OF_4(Act, E, P, S)     P ALT_EXPAND(Act, E, 4), ALT_REP_OF_3(Act,  ,  , S)
+#define ALT_REP_OF_3(Act, E, P, S)     P ALT_EXPAND(Act, E, 3), ALT_REP_OF_2(Act,  ,  , S)
+#define ALT_REP_OF_2(Act, E, P, S)     P ALT_EXPAND(Act, E, 2), ALT_REP_OF_1(Act,  ,  , S)
 #define ALT_REP_OF_1(Act, E, P, S)     P ALT_EXPAND(Act, E, 1) S
 #define ALT_REP_OF_00(Act, E, P, S)     LAST_ ## Act(E, 00)
 
+#define REP_CMD_N(Act, TC, P1, Forward, ...)             REP_CMD_OF_N(Act, TC, P1, Forward, NUM_ARGS(__VA_ARGS__), __VA_ARGS__)
+#define REP_CMD_OF_N(Act, TC, P1, Forward, Count, ...)   REP_CMD_OF_N_(Act, TC, P1, Forward, Count, __VA_ARGS__)
+#define REP_CMD_OF_N_(Act, TC, P1, Forward, Count, ...)  REP_CMD_OF_ ## Count(Act, TC, P1, Forward, __VA_ARGS__)
+
+#define REP_CMD_OF_43(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_42(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_42(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_41(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_41(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_40(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_40(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_39(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_39(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_38(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_38(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_37(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_37(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_36(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_36(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_35(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_35(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_34(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_34(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_33(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_33(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_32(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_32(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_31(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_31(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_30(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_30(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_29(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_29(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_28(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_28(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_27(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_27(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_26(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_26(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_25(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_25(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_24(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_24(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_23(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_23(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_22(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_22(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_21(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_21(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_20(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_20(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_19(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_19(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_18(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_18(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_17(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_17(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_16(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_16(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_15(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_15(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_14(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_14(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_13(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_13(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_12(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_12(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_11(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_11(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_10(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_10(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_9(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_9(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_8(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_8(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_7(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_7(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_6(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_6(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_5(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_5(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_4(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_4(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_3(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_3(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_2(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_2(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward, P2)  REP_CMD_OF_1(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_1(Act, TC, P1, Forward, P2, One)     Act(TC, P1, Forward, P2)  REP_CMD_OF_00(Act, TC, P1, P2, One)
+#define REP_CMD_OF_00(Act, TC, P1, Forward, One)         LAST_ ## Act(TC, P1, Forward, One)
 /*
  * The actions we apply with REP_*
  *
@@ -409,11 +449,11 @@
  *                  into the object
  */
 #define BUILDTEMPLATETYPEPARAM(Act, Count)      ALT_REP_OF_N(Act, ,  ,  , Count)
-#define BUILDTEMPLATETYPEVALUE(Act, Count)      ALT_REP_OF_N(Act, , <, >, Count)
+#define BUILDTEMPLATETYPEVALUE(Act, M1, Count)  ALT_REP_OF_N(Act, M1, <, >, Count)
 
 
-#define THOR_TYPEACTION(TC, Type, Member)       std::pair<char const*, decltype(&Type BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, TC) ::Member)>
-#define THOR_VALUEACTION(TC, Type, Member)      { QUOTE(Member), &Type BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, TC) ::Member }
+#define THOR_TYPEACTION(TC, Type, Member)       std::pair<char const*, decltype(&Type BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , TC) ::Member)>
+#define THOR_VALUEACTION(TC, Type, Member)      { QUOTE(Member), &Type BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , TC) ::Member }
 #define THOR_NAMEACTION(TC, Type, Member)       { Type::Member, #Member ## s}
 #define LAST_THOR_TYPEACTION(TC, Type)
 #define LAST_THOR_VALUEACTION(TC, Type)
@@ -421,28 +461,85 @@
 
 #define THOR_TYPENAMEPARAMACTION(Ex, Id)        typename T ## Id
 #define THOR_TYPENAMEVALUEACTION(Ex, Id)        T ## Id
-#define THOR_TYPE_INT_VALUE(Ex, Id)             ThorsAnvil::Serialize::Fake ## Id
+#define THOR_TYPE_INT_VALUE(Ex, Id)             EXPAND_(THOR_TYPE_INT_VALUE_FAKE ## Ex(Id))
+#define THOR_TYPE_INT_VALUE_FAKETemplate(Id)    ThorsAnvil::Serialize::TemplateFake
+#define THOR_TYPE_INT_VALUE_FAKE(Id)            EXPAND_(ThorsAnvil::Serialize::Fake ## Id)
 #define THOR_CHECK_ASSERT(Ex, Id)
 #define LAST_THOR_TYPENAMEPARAMACTION(Ex, Id)
 #define LAST_THOR_TYPENAMEVALUEACTION(Ex, Id)
 #define LAST_THOR_TYPE_INT_VALUE(Ex, Id)
 #define LAST_THOR_CHECK_ASSERT(Ex, Id)          DO_ASSERT(Ex)
 
+#define THOR_BUILD_NAME(Pre, Name)              EXPAND_(Pre ## Name)
+#define THOR_DECLARE_MEMBER_TYPE(TC, DataType, Forward, Member)      using THOR_BUILD_NAME(Type, Member) = std::remove_cv_t<decltype(DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , TC) ::Member)>;
+#define LAST_THOR_DECLARE_MEMBER_TYPE(TC, DataType, Forward, Member)
+
 
 #define THOR_MERGE_LABEL_NAME(Pre, Post)        Pre ## Post
 #define THOR_UNIQUE_LABEL(Line)                 THOR_MERGE_LABEL_NAME(thorUniqueName, Line)
 #define THOR_UNIQUE_NAME                        THOR_UNIQUE_LABEL(__COUNTER__)
 
+// I have disabled the check: DO_ASSERT_WITH_TEMPLATE() where there are any template parameters.
+// I may put it back.
+//
+// There is an issue if there are concepts/requires constraints on the types
+// used by the template.
+//
+// This is because these macros insert here by DO_ASSERT_WITH_TEMPLATE => Fake1, Fake2, Fake3 etc
+// probably does not hold to these constraints and thus we will get an error in the code if you
+// try and serialize a template type that has constraints on the input parameter.
+// Note: This is false fail as we are just doing this to get a better error message.
+//
+// I may come back and removed the disabled at some point.
+// TODO
+#define DO_ASSERT_WITH_TEMPLATE(DataType, TF, Count)            EXPAND(DO_ASSERT_WITH_TEMPLATE_CHECK_ ## Count, DataType, TF, Count)
+
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_00(DataType, TF, Count)   DO_ASSERT_WITH_TEMPLATE_WORKING(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_1(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_2(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_3(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_4(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_5(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_6(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_7(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_8(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_9(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_10(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_11(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_12(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_13(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_14(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_15(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_16(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_17(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_18(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_19(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_20(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_21(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_22(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_23(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_24(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_25(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_26(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_27(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_28(DataType, TF, Count)
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_29(DataType, TF, Count)
+// You have more than 20 template parameters!
+
 /*
  * Defines a trait for a user defined type.
  * Lists the members of the type that can be serialized.
  */
-#define DO_ASSERT(DataType)             DO_ASSERT_WITH_TEMPLATE(DataType, 00)
-#define DO_ASSERT_WITH_TEMPLATE(DataType, Count)                        \
+#define DO_ASSERT(DataType)             DO_ASSERT_WITH_TEMPLATE(DataType, , 00)
+#if defined(NEOVIM)
+#define DO_ASSERT_WITH_TEMPLATE_WORKING(DataType, TF, Count)
+#else
+#define DO_ASSERT_WITH_TEMPLATE_WORKING(DataType, TF, Count)            \
 static_assert(                                                          \
-    ::ThorsAnvil::Serialize::Traits<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPE_INT_VALUE, Count) >::type != ThorsAnvil::Serialize::TraitType::Invalid,   \
+    ::ThorsAnvil::Serialize::Traits<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPE_INT_VALUE, TF, Count) >::type != ThorsAnvil::Serialize::TraitType::Invalid,   \
     "The macro ThorsAnvil_MakeTrait must be used outside all namespace."\
 )
+#endif
 
 #define ThorsAnvil_PointerAllocator(DataType, ActionObj)                \
 namespace ThorsAnvil { namespace Serialize {                            \
@@ -457,15 +554,17 @@ class Traits<DataType*>                                                 \
 }}
 
 #define ThorsAnvil_MakeOverride(...)                                    \
-    ThorsAnvil_MakeOverride_Base(00,     __VA_ARGS__, {"", ""})
+    ThorsAnvil_MakeOverride_Base(00, ,    __VA_ARGS__, {"", ""})
 #define ThorsAnvil_Template_MakeOverride(Count, ...)                    \
-    ThorsAnvil_MakeOverride_Base(Count, __VA_ARGS__, {"", ""})
+    ThorsAnvil_MakeOverride_Base(Count, , __VA_ARGS__, {"", ""})
+#define ThorsAnvil_TTemplate_MakeOverride(Count, ...)                    \
+    ThorsAnvil_MakeOverride_Base(Count, template<typename>, __VA_ARGS__, {"", ""})
 
 
-#define ThorsAnvil_MakeOverride_Base(Count, DataType, ...)              \
+#define ThorsAnvil_MakeOverride_Base(Count, TT, DataType, ...)          \
 namespace ThorsAnvil { namespace Serialize {                            \
-template<BUILDTEMPLATETYPEPARAM(THOR_TYPENAMEPARAMACTION, Count)>       \
-class Override<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > \
+template<TT BUILDTEMPLATETYPEPARAM(THOR_TYPENAMEPARAMACTION, Count)>    \
+class Override<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , Count) > \
 {                                                                       \
     public:                                                             \
         static char const* nameOverride(char const* name)               \
@@ -507,10 +606,11 @@ static_assert(true, "")
 #define ThorsAnvil_MakeFilter_Base(Count, DataType, member)             \
 namespace ThorsAnvil { namespace Serialize {                            \
 template<BUILDTEMPLATETYPEPARAM(THOR_TYPENAMEPARAMACTION, Count)>       \
-class Filter<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > \
+class Filter<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , Count) > \
 {                                                                       \
     public:                                                             \
-        static bool filter(DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) const& object, char const* name)    \
+        template<typename M>                                            \
+        static bool filter(DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , Count) const& object, char const* name, M const& /*v*/)    \
         {                                                               \
             auto find = object.member.find(name);                       \
             return find == object.member.end() ? true : find->second;   \
@@ -519,16 +619,16 @@ class Filter<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > 
 }}                                                                      \
 static_assert(true, "")
 
-
-#define ThorsAnvil_MakeTrait_Base(ParentType, TType, Count, DataType, ...)  \
+#define ThorsAnvil_MakeTrait_Base(ParentType, TType, TF, TT, Count, DataType, ...)  \
 namespace ThorsAnvil { namespace Serialize {                            \
-template<BUILDTEMPLATETYPEPARAM(THOR_TYPENAMEPARAMACTION, Count)>       \
-class Traits<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > \
+template<TT BUILDTEMPLATETYPEPARAM(THOR_TYPENAMEPARAMACTION, Count)>    \
+class Traits<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , Count) > \
 {                                                                       \
     public:                                                             \
         static constexpr TraitType type = TraitType::TType;             \
         ParentType                                                      \
-        using MyType = DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count); \
+        using MyType = DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , Count); \
+        REP_CMD_N(THOR_DECLARE_MEMBER_TYPE, Count, DataType, Ignore, __VA_ARGS__)  \
                                                                         \
         using Members = std::tuple<                                     \
                         REP_N(THOR_TYPEACTION, Count, DataType, __VA_ARGS__)        \
@@ -548,7 +648,7 @@ class Traits<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > 
             using MemberType    = std::decay_t<M>;                      \
             if (staticObjPtr)                                           \
             {                                                           \
-                return Traits<MemberType>::getPrintSize(printer, *staticObjPtr, false);\
+                return Traits<std::remove_cv_t<MemberType>>::getPrintSize(printer, *staticObjPtr, false);\
             }                                                           \
             return printer.getSizeNull();                               \
         }                                                               \
@@ -557,13 +657,23 @@ class Traits<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > 
         {                                                               \
             using MemberTypeDec = decltype(object.*memPtr);             \
             using MemberType    = std::decay_t<MemberTypeDec>;          \
-            return Traits<MemberType>::getPrintSize(printer, object.*memPtr, false);\
+            return Traits<std::remove_cv_t<MemberType>>::getPrintSize(printer, object.*memPtr, false);\
         }                                                               \
                                                                         \
-        template<typename M>                                            \
-        static std::pair<std::size_t, std::size_t> addSizeEachMemberItem(PrinterInterface& printer, MyType const& object, M item) \
+        template<typename M, typename C>                                            \
+        static std::pair<std::size_t, std::size_t> addSizeEachMemberItem(PrinterInterface& printer, MyType const& object, std::pair<C, M*> const& item) \
         {                                                               \
-            if (!Filter<MyType>::filter(object, item.first)) {          \
+            if (!Filter<MyType>::filter(object, item.first, *(item.second))) {          \
+                return std::make_pair(0UL,0UL);                         \
+            }                                                           \
+            auto partSize   = addSizeOneMember(printer, object, item.second);           \
+            auto nameSize   = std::strlen(Override<MyType>::nameOverride(item.first));  \
+            return std::make_pair(partSize + nameSize, 1);              \
+        }                                                               \
+        template<typename M, typename C>                                            \
+        static std::pair<std::size_t, std::size_t> addSizeEachMemberItem(PrinterInterface& printer, MyType const& object, std::pair<C, M MyType::*> const& item) \
+        {                                                               \
+            if (!Filter<MyType>::filter(object, item.first, object.*(item.second))) {          \
                 return std::make_pair(0UL,0UL);                         \
             }                                                           \
             auto partSize   = addSizeOneMember(printer, object, item.second);           \
@@ -578,13 +688,15 @@ class Traits<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > 
                 std::make_pair(std::size_t{0}, std::size_t{0}),                         \
                 addSizeEachMemberItem(printer, object, std::get<Seq>(members))...       \
             };                                                          \
-            return std::accumulate(std::begin(sizeData), std::end(sizeData), std::make_pair(0UL, 0UL),                                  \
+            return std::accumulate(std::begin(sizeData), std::end(sizeData), std::make_pair(std::size_t{0}, std::size_t{0}),                                  \
                                    [](auto lhs, auto rhs){return std::make_pair(lhs.first + rhs.first, lhs.second + rhs.second);});     \
         }                                                               \
                                                                         \
         static std::size_t getPrintSizeTotal(PrinterInterface& printer, MyType const& object, std::size_t& count, std::size_t& memberSize)\
         {                                                               \
+            printer.pushLevel(true);                                    \
             auto r = addSizeEachMember(printer, object, std::make_index_sequence<std::tuple_size_v<Members>>());\
+            printer.popLevel();                                         \
             memberSize  += r.first;                                     \
             count       += r.second;                                    \
                                                                         \
@@ -598,11 +710,14 @@ class Traits<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) > 
         }                                                               \
 };                                                                      \
 }}                                                                      \
-DO_ASSERT_WITH_TEMPLATE(DataType, Count)
+DO_ASSERT_WITH_TEMPLATE(DataType, TF, Count)
 
 #define ThorsAnvil_RegisterPolyMorphicType_Internal(DataType, ...)      \
     ThorsAnvil_RegisterPolyMorphicType(DataType)
 
+#if defined(NEOVIM)
+#define ThorsAnvil_RegisterPolyMorphicType(DataType)
+#else
 #define ThorsAnvil_RegisterPolyMorphicType(DataType)                    \
 namespace ThorsAnvil { namespace Serialize {                            \
 namespace                                                               \
@@ -610,17 +725,22 @@ namespace                                                               \
     ThorsAnvil_InitPolyMorphicType<DataType>   THOR_UNIQUE_NAME ( # DataType); \
 }                                                                       \
 }}
+#endif
 
 #define ThorsAnvil_Parent(Count, ParentType, DataType, ...)             \
-        using Parent = ParentType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count); \
-        using Root   = typename GetRootType<ParentType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, Count) >::Root;
+        using Parent = ParentType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , Count); \
+        using Root   = typename GetRootType<ParentType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , Count) >::Root;
 
 #define ThorsAnvil_Template_MakeTrait(Count, ...)                       \
-    ThorsAnvil_MakeTrait_Base( , Map, Count, __VA_ARGS__, 1);           \
+    ThorsAnvil_MakeTrait_Base( , Map, , , Count, __VA_ARGS__, 1);       \
+    static_assert(true, "")
+
+#define ThorsAnvil_TTemplate_MakeTrait(Count, ...)                      \
+    ThorsAnvil_MakeTrait_Base( , Map, Template, template<typename>, Count, __VA_ARGS__, 1);       \
     static_assert(true, "")
 
 #define ThorsAnvil_MakeTrait(...)                                       \
-    ThorsAnvil_MakeTrait_Base( , Map, 00, __VA_ARGS__, 1);              \
+    ThorsAnvil_MakeTrait_Base( , Map, , , 00, __VA_ARGS__, 1);          \
     ThorsAnvil_RegisterPolyMorphicType_Internal(__VA_ARGS__, 1)         \
     static_assert(true, "")
 
@@ -668,11 +788,15 @@ class Traits<DataType>                                                  \
 DO_ASSERT(DataType)
 
 #define ThorsAnvil_Template_ExpandTrait(Count, ParentType, ...)         \
-    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(00, ParentType, __VA_ARGS__, 1), Parent, Count, __VA_ARGS__, 1); \
+    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(00, ParentType, __VA_ARGS__, 1), Parent, , , Count, __VA_ARGS__, 1); \
+    static_assert(true, "")
+
+#define ThorsAnvil_TTemplate_ExpandTrait(Count, ParentType, ...)        \
+    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(00, ParentType, __VA_ARGS__, 1), Parent, Template, template<typename>, Count, __VA_ARGS__, 1); \
     static_assert(true, "")
 
 #define ThorsAnvil_Template_ExpandTemplate(Count, ParentCount, ParentType, ...)         \
-    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(ParentCount, ParentType, __VA_ARGS__, 1), Parent, Count, __VA_ARGS__, 1); \
+    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(ParentCount, ParentType, __VA_ARGS__, 1), Parent, , , Count, __VA_ARGS__, 1); \
     static_assert(true, "")
 
 #define ThorsAnvil_ExpandTrait(ParentType, ...)                     ThorsAnvil_ExpandTrait_Base(ParentType, __VA_ARGS__, 1)
@@ -681,10 +805,10 @@ DO_ASSERT(DataType)
         std::is_base_of<typename ThorsAnvil::Serialize::GetPrimaryParentType<ParentType>::type, DataType>::value,                  \
         "ParentType must be a base class of DataType");                 \
     static_assert(                                                      \
-        ::ThorsAnvil::Serialize::Traits<ParentType>::type != ThorsAnvil::Serialize::TraitType::Invalid, \
+        ::ThorsAnvil::Serialize::Traits<std::remove_cv_t<ParentType>>::type != ThorsAnvil::Serialize::TraitType::Invalid, \
         "Parent type must have Serialization Traits defined"            \
     );                                                                  \
-    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(00, ParentType, DataType, __VA_ARGS__), Parent, 00, DataType, __VA_ARGS__); \
+    ThorsAnvil_MakeTrait_Base(ThorsAnvil_Parent(00, ParentType, DataType, __VA_ARGS__), Parent, , , 00, DataType, __VA_ARGS__); \
     ThorsAnvil_RegisterPolyMorphicType_Internal(DataType, 1)            \
     static_assert(true, "")
 
@@ -921,10 +1045,30 @@ class Override
 };
 
 template<typename T>
+struct IsOptional
+{
+    static constexpr bool value = false;
+};
+template<typename M>
+struct IsOptional<std::optional<M>>
+{
+    static constexpr bool value = true;
+};
+template<typename T>
+inline constexpr bool isOptional_v = IsOptional<T>::value;
+
+template<typename T>
 class Filter
 {
     public:
-        static constexpr bool filter(T const& /*object*/, char const* /*name*/)   {return true;}
+        template<typename M>
+        static constexpr bool filter(T const& /*object*/, char const* /*name*/, M const& value)
+        {
+            if constexpr (isOptional_v<M>) {
+                return value.has_value();
+            }
+            return true;
+        }
 };
 
 /*
@@ -950,9 +1094,9 @@ struct GetRootType
     using Root = R;
 };
 template<typename T>
-struct GetRootType<T, typename Traits<T>::Root>
+struct GetRootType<T, typename Traits<std::remove_cv_t<T>>::Root>
 {
-    using Root = typename Traits<T>::Root;
+    using Root = typename Traits<std::remove_cv_t<T>>::Root;
 };
 template<typename T>
 struct GetAllocationType
@@ -1042,7 +1186,7 @@ struct ThorsAnvil_InitPolyMorphicType<T, true>
             []() -> void*
             {
                 using Root = typename GetRootType<T>::Root;
-                return dynamic_cast<Root*>(Traits<T*>::alloc());
+                return dynamic_cast<Root*>(Traits<std::remove_cv_t<T>*>::alloc());
             };
     }
 };
@@ -1053,6 +1197,8 @@ struct ThorsAnvil_InitPolyMorphicType<T, false>
     ThorsAnvil_InitPolyMorphicType(char const*){}
 };
 
+template<typename T>
+struct TemplateFake{};
 struct Fake1{};
 struct Fake2{};
 struct Fake3{};

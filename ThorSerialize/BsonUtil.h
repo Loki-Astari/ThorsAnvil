@@ -1,5 +1,5 @@
-#ifndef THORS_ANVIL_SERIALIZE_BSON_UTIL_H
-#define THORS_ANVIL_SERIALIZE_BSON_UTIL_H
+#ifndef THORSANVIL_SERIALIZE_BSON_UTIL_H
+#define THORSANVIL_SERIALIZE_BSON_UTIL_H
 /*
  * BsonaryPrinter<T>
  *  See documentation in BsonParser.h

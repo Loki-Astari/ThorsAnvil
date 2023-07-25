@@ -1,5 +1,5 @@
-#ifndef THORS_ANVIL_SERIALIZE_JSON_H
-#define THORS_ANVIL_SERIALIZE_JSON_H
+#ifndef THORSANVIL_SERIALIZE_JSON_H
+#define THORSANVIL_SERIALIZE_JSON_H
 /*
  * Defines the Json Serialization interface
  *      ThorsAnvil::Serialize::Json

@@ -9,7 +9,7 @@ extern "C"
     int thorsanvilYamlStreamReader(void* data, unsigned char* buffer, size_t size, size_t* size_read);
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 int thorsanvilYamlStreamReader(void* data, unsigned char* buffer, size_t size, size_t* size_read)
 {
     YamlParser*     owner = reinterpret_cast<YamlParser*>(data);
@@ -26,7 +26,7 @@ int thorsanvilYamlStreamReader(void* data, unsigned char* buffer, size_t size, s
     return result;
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 YamlParser::YamlParser(std::istream& input, ParserConfig config)
     : ParserInterface(input, config)
     , first(true)
@@ -36,7 +36,7 @@ YamlParser::YamlParser(std::istream& input, ParserConfig config)
     yaml_parser_set_input(&parser, thorsanvilYamlStreamReader, this);
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 YamlParser::~YamlParser()
 {
     if (!first)
@@ -46,7 +46,7 @@ YamlParser::~YamlParser()
     yaml_parser_delete(&parser);
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 ParserInterface::ParserToken YamlParser::getNextToken()
 {
     // enum class ParserToken {Error, DocStart, DocEnd, MapStart, MapEnd, ArrayStart, ArrayEnd, Key, Value};
@@ -137,14 +137,14 @@ ParserInterface::ParserToken YamlParser::getNextToken()
     return ParserToken::Error;
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 ParserInterface::ParserToken YamlParser::parsingError()
 {
     error = true;
     return ParserToken::Error;
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void YamlParser::generateParsingException(std::function<bool ()> test, std::string const& msg)
 {
     if (test())
@@ -156,7 +156,7 @@ void YamlParser::generateParsingException(std::function<bool ()> test, std::stri
     }
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 std::string YamlParser::getString()
 {
 //int   plain_implicit
@@ -198,21 +198,21 @@ T YamlParser::scan()
 }
 
 
-HEADER_ONLY_INCLUDE void YamlParser::getValue(short int& value)             {value   = scan<short int>();}
-HEADER_ONLY_INCLUDE void YamlParser::getValue(int& value)                   {value   = scan<int>();}
-HEADER_ONLY_INCLUDE void YamlParser::getValue(long int& value)              {value   = scan<long int>();}
-HEADER_ONLY_INCLUDE void YamlParser::getValue(long long int& value)         {value   = scan<long long int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void YamlParser::getValue(short int& value)             {value   = scan<short int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void YamlParser::getValue(int& value)                   {value   = scan<int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void YamlParser::getValue(long int& value)              {value   = scan<long int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void YamlParser::getValue(long long int& value)         {value   = scan<long long int>();}
 
-HEADER_ONLY_INCLUDE void YamlParser::getValue(unsigned short int& value)    {value   = scan<unsigned short int>();}
-HEADER_ONLY_INCLUDE void YamlParser::getValue(unsigned int& value)          {value   = scan<unsigned int>();}
-HEADER_ONLY_INCLUDE void YamlParser::getValue(unsigned long int& value)     {value   = scan<unsigned long int>();}
-HEADER_ONLY_INCLUDE void YamlParser::getValue(unsigned long long int& value){value   = scan<unsigned long long int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void YamlParser::getValue(unsigned short int& value)    {value   = scan<unsigned short int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void YamlParser::getValue(unsigned int& value)          {value   = scan<unsigned int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void YamlParser::getValue(unsigned long int& value)     {value   = scan<unsigned long int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void YamlParser::getValue(unsigned long long int& value){value   = scan<unsigned long long int>();}
 
-HEADER_ONLY_INCLUDE void YamlParser::getValue(float& value)                 {value   = scan<float>();}
-HEADER_ONLY_INCLUDE void YamlParser::getValue(double& value)                {value   = scan<double>();}
-HEADER_ONLY_INCLUDE void YamlParser::getValue(long double& value)           {value   = scan<long double>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void YamlParser::getValue(float& value)                 {value   = scan<float>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void YamlParser::getValue(double& value)                {value   = scan<double>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void YamlParser::getValue(long double& value)           {value   = scan<long double>();}
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void YamlParser::getValue(bool& value)
 {
     char const* buffer  = reinterpret_cast<char const*>(event.data.scalar.value);
@@ -234,13 +234,13 @@ void YamlParser::getValue(bool& value)
     }
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void YamlParser::getValue(std::string& value)
 {
     value = getString();
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 bool YamlParser::isValueNull()
 {
     char const* buffer  = reinterpret_cast<char const*>(event.data.scalar.value);
@@ -250,7 +250,7 @@ bool YamlParser::isValueNull()
        ||  (length == 1 && strncmp(buffer, "~", 1) == 0);
 }
 
-HEADER_ONLY_INCLUDE
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 std::string YamlParser::getRawValue()
 {
     return getString();
