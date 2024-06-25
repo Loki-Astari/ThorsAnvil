@@ -167,7 +167,6 @@ void BsonParser::ignoreDataMap(bool begin)
 {
     if (begin)
     {
-        std::cerr << "Adding Map Beg to output\n";
         std::int32_t    size = 0;
         config.ignoreCallBack.append("\x03", 1);
         config.ignoreCallBack.append(nextKey.c_str(), nextKey.size() + 1);
@@ -175,7 +174,6 @@ void BsonParser::ignoreDataMap(bool begin)
     }
     else
     {
-        std::cerr << "Adding Map End to output\n";
         config.ignoreCallBack.append("\0x00", 1);
     }
 }
@@ -185,7 +183,6 @@ void BsonParser::ignoreDataArray(bool begin)
 {
     if (begin)
     {
-        std::cerr << "Adding Array Beg to output\n";
         std::int32_t    size = 0;
         config.ignoreCallBack.append("\x04", 1);
         config.ignoreCallBack.append(nextKey.c_str(), nextKey.size() + 1);
@@ -193,7 +190,6 @@ void BsonParser::ignoreDataArray(bool begin)
     }
     else
     {
-        std::cerr << "Adding Array End to output\n";
         config.ignoreCallBack.append("\0x00", 1);
     }
 }
