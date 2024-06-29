@@ -14,7 +14,7 @@ using namespace ThorsAnvil::Serialize::MongoUtility;
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 int& ObjectID::classCounter()
 {
-    static int classCounterStoreage = 32769;
+    static int classCounterStoreage = 32769 + std::rand();
     return classCounterStoreage;
 }
 
