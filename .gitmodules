@@ -19,3 +19,9 @@
 [submodule "third/ThorsIOUtil"]
 	path = third/ThorsIOUtil
 	url = ../ThorsIOUtil.git
+[submodule "third/ThorsMongoAPI"]
+	path = third/ThorsMongoAPI
+	url = ../ThorsMongoAPI.git
+[submodule "third/ThorsSerializer"]
+	path = third/ThorsSerializer
+	url = ../ThorsSerializer

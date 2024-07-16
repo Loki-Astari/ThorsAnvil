@@ -1,16 +1,21 @@
 
+THOR_CONAN_ENABLE=@THOR_CONAN_ENABLE@
+
 MagicEnumHeaderOnly_ROOT_DIR=@MagicEnumHeaderOnly_ROOT_DIR@
 
-
+snappy_ROOT_DIR=@snappy_ROOT_DIR@
+snappy_ROOT_LIB=@snappy_ROOT_LIB@
 
 yaml_ROOT_DIR=@yaml_ROOT_DIR@
 yaml_ROOT_LIB=@yaml_ROOT_LIB@
 
-crypto_ROOT_DIR=$(THORSANVIL_ROOT)/build
-crypto_ROOT_LIB=ssl crypto
+crypto_ROOT_DIR=@crypto_ROOT_DIR@
+crypto_ROOT_LIB=@crypto_ROOT_LIB@
+
+ZLIB_ROOT_DIR=@ZLIB_ROOT_DIR@
+ZLIB_ROOT_LIB=@ZLIB_ROOT_LIB@
 
 ThorSerialize_ROOT_DIR=$(THORSANVIL_ROOT)/build
-ThorSerialize_ROOT_LIB=ThorSerialize ThorsLogging
 ThorSerializeHeaderOnly_ROOT_DIR=
 
 

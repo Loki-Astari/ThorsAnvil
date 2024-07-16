@@ -1,65 +1,59 @@
-# ThorsSerializer
+# ThorsMonfo
 
-## Support for
-
-* [Json](https://www.json.org/json-en.html)
-* [Yaml](https://yaml.org/)
-* [Bson](http://bsonspec.org/) **NEW**
-
-
-[![Build Status](https://travis-ci.com/Loki-Astari/ThorsSerializer.svg?branch=master)](https://travis-ci.com/Loki-Astari/ThorsSerializer)
-[![codecov.io](http://codecov.io/github/Loki-Astari/ThorsSerializer/coverage.svg?branch=master)](http://codecov.io/github/Loki-Astari/ThorsSerializer?branch=master)   
-[![Code Review](http://www.zomis.net/codereview/shield/?qid=81920)](http://codereview.stackexchange.com/q/81920/507)
-[![Code Review](http://www.zomis.net/codereview/shield/?qid=79281)](http://codereview.stackexchange.com/q/79281/507)
-[![Code Review](http://www.zomis.net/codereview/shield/?qid=7567)](http://codereview.stackexchange.com/q/7567/507)
-[![Code Review](http://www.zomis.net/codereview/shield/?qid=7536)](http://codereview.stackexchange.com/q/7536/507)
-
-[![Conan package](https://img.shields.io/badge/Conan-package-blueviolet)](https://conan.io/center/thors-serializer)
 [![Brew package](https://img.shields.io/badge/Brew-package-blueviolet)](https://formulae.brew.sh/formula/thors-serializer)
 
+![ThorStream](img/thorsmongo.jpg)
 
-## Benchmark Results
-Conformance [mac](https://LokiAstari.com/Json/Conformance.osx.html) [linux](https://LokiAstari.com/Json/Conformance.linux.html)  
-Performance [max](https://LokiAstari.com/Json/Performance.osx.html) [linux](https://LokiAstari.com/Json/Performance.linux.html)  
-For details see: [JsonBenchmark](https://github.com/Loki-Astari/JsonBenchmark)  
+A modern C++20 library to interact with MongoDB.
 
-![ThorStream](img/stream.jpg)
+This library provides a simple and intuitive library for interacting with a MongoDB.
 
-Yet another JSON/YAML/BSON serialization library for C++.
+There are two main parts:
 
-Unlike other libraries this one does not require you to build DOM of you object before serialization. Using a declarative C++ style you define what C++ classes (and members) you want to serialize "ThorSerializer" will generate the appropriate code automagically.
+1. [ThorsSerializer](https://github.com/Loki-Astari/ThorsSerializer) that automatically converts C++ objects into BSON.
+2. [ThorsMongoAPI](https://github.com/Loki-Astari/ThorsMongoAPI) that sends and receives MongoDB wire protocol messages.
 
-* [Objective](doc/objective.md)
-* [Trivial Example](doc/example0.md)
-* [Simple Example](doc/example1.md)
-* [Enum Example](doc/exampleE.md)
-* [Bigger Example](doc/example2.md)
-* [PolyMorphic Example](doc/example3.md)
-* [Installing](doc/building.md)
-* [Documentation Usage](doc/usage.md)
-* [Documentation Internal](https://lokiastari.com/ThorsSerializer/)
 
-## HomeBrew
+# Installing
+
+## Easy: Using Brew
 
 Can be installed via brew on Mac and Linux
 
-    brew install thors-serializer
+    > brew install thors-serializer
 
 * Mac: https://formulae.brew.sh/formula/thors-serializer
 * Linux: https://formulae.brew.sh/formula-linux/thors-serializer
+
+## Building Manually
+
+    > git clone git@github.com:Loki-Astari/ThorsMongo.git
+    > cd ThorsMongo
+    > ./configure
+    > make
+
+Note: The `configure` script will tell you about any missing dependencies and how to install them.
+
+## Building Conan
+
+If you have conan installed the conan build processes should work.
+
+    > git clone git@github.com:Loki-Astari/ThorsMongo.git
+    > cd ThorsMongo
+    > conan build -s compiler.cppstd=20 conanfile.py
 
 ## Header Only
 
 To install header only version
 
-    git clone --single-branch --branch header-only https://github.com/Loki-Astari/ThorsSerializer.git
+    > git clone --single-branch --branch header-only https://github.com/Loki-Astari/ThorsMongo.git
 
-Some dependencies:
+Some dependencies you will need to install manually for header only builds.
 
-    For All:    Magic Enum: https://github.com/Neargye/magic_enum
-    For Json:   None        :-)
-    For Bson:   boost       https://www.boost.org/                  needs  boost/endian/conversion.hpp
-    For Yaml:   libYaml     https://github.com/yaml/libyaml
+    Magic Enum: https://github.com/Neargye/magic_enum
+    libYaml     https://github.com/yaml/libyaml
+    libSnappy   https://github.com/google/snappy
+    libZ        https://www.zlib.net/
 
 ## Building With Visual Studio
 
@@ -69,9 +63,4 @@ To build on windows you will need to add the flag: [`/Zc:preprocessor`](https://
 ## Contributors
 
 Added the all-contributers bot to generate the table.
-
-
------
-
-[One Page](doc/full.md)
 

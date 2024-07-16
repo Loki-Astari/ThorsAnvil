@@ -575,23 +575,6 @@ If you want to submit "pull requests" you are going to need vera++. Vera++ is a 
 
 If you are simply building for yourself you may not care about the style guide. In this case you can switch it off by adding `--disable-vera` to the `configure` command above.
 
-If you do want to use `vera++` there are several requirements:
-
-* boost 
-* boost-python
-* cmake
-* tcl/tk
-
-I install all the above with:
-````bash
-    brew install boost --with-python
-    brew install boost-python
-    brew install cmake
-    brew install tcl-tk
-    # Have to create unversioned boost_python libs.
-    for a in /usr/local/lib/libboost_python[0-9][0-9]* ; do sudo ln -s ${a} ${a/[0-9][0-9]/}; done
-````
-
 ### Description
 By default installation will be in `/usr/local/include` and `/usr/local/lib`. You can override this with the normal auto-tools defaults. Use `./configure --help` to get details.
 

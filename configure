@@ -593,7 +593,7 @@ PACKAGE_STRING='ThorsSerialize 0.1'
 PACKAGE_BUGREPORT='Loki.Astari+ThorsAnvil@gmail.com'
 PACKAGE_URL=''
 
-ac_unique_file="src/Serialize/JsonParser.cpp"
+ac_unique_file=""
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stddef.h>
@@ -695,12 +695,6 @@ SED
 ac_ct_CC
 CFLAGS
 CC
-LIBTOOL
-yaml_ROOT_LIB
-yaml_ROOT_DIR
-MagicEnumHeaderOnly_ROOT_DIR
-BOOST_LDFLAGS
-BOOST_CPPFLAGS
 host_os
 host_vendor
 host_cpu
@@ -709,6 +703,19 @@ build_os
 build_vendor
 build_cpu
 build
+LIBTOOL
+THOR_DISABLE_TEST_WITH_MONGO_QUERY_DISABLE
+THOR_DISABLE_TEST_WITH_LOCKED_FILES_DISABLE
+ZLIB_ROOT_LIB
+ZLIB_ROOT_DIR
+crypto_ROOT_LIB
+crypto_ROOT_DIR
+snappy_ROOT_LIB
+snappy_ROOT_DIR
+yaml_ROOT_LIB
+yaml_ROOT_DIR
+MagicEnumHeaderOnly_ROOT_DIR
+THOR_CONAN_ENABLE
 UNZIP
 CXX_STD_FLAG
 CXXSTDVER
@@ -793,11 +800,20 @@ enable_vera
 enable_colour
 enable_dark_mode
 with_standard_version
-with_boost
-with_boost_libdir
+enable_test_with_conan
 with_magicenum_header_only_root
 with_yaml_root
+with_snappy_root
+with_crypto_root
+with_zlib_root
 enable_test_with_locked_file
+enable_test_with_mongo_query
+enable_Mongo_Service
+with_TestMongoHost
+with_TestMongoUser
+with_TestMongoPass
+with_TestMongoDatabase
+with_mongosh_tool
 enable_shared
 enable_static
 with_pic
@@ -1456,13 +1472,23 @@ Optional Features:
   --enable-dark-mode      If your background is black some text that was grey
                           is turned yellow
 
+  --enable-test-with-conan
+                          Set the Makefile variable "THOR_ENABLE_CONAN". This
+                          is used by the standard Makefiles to add.
+
   --disable-test-with-locked-file
                           Windows does not provide the same locking
                           capabilities as Linux. Thus during testing when we
-                          try and lock files, it does not work, so that an
-                          attempt to open them would fail. Unfortunately we
-                          can't lock the files and thus the test pass. Don't
-                          run these tests on Windows.
+                          try and lock files
+
+  --disable-test-with-mongo-query
+                          There are three versions of the mongo wire protocol.
+                          Newer versions of Mongo do not support the older
+                          protocols. This flags disables tests that use the
+                          older wire protocol and only performs tests that use
+                          the now standard OP_MSG protocol.
+
+  --disable-Mongo-Service Disable Mongo Service Test
 
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
@@ -1481,23 +1507,39 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-standard-version=<version>
                           Use the specified version <version> of the C++
-                          standard. Default 17
+                          standard. Default 20
 
-  --with-boost[=ARG]      use Boost library from a standard location
-                          (ARG=yes), from the specified location (ARG=<path>),
-                          or disable it (ARG=no) [ARG=yes]
-  --with-boost-libdir=LIB_DIR
-                          Force given directory for boost libraries. Note that
-                          this will override library path detection, so use
-                          this parameter only if default library detection
-                          fails and you know exactly where your boost
-                          libraries are located.
   --with-magicenum-header-only-root=<location>
                           Directory of MagicEnumHeaderOnly include folder: the
                           folder that has the include file
 
   --with-yaml-root=<location>
                           Define the root directory of package YAML
+
+  --with-snappy-root=<location>
+                          Define the root directory of package SNAPPY
+
+  --with-crypto-root=<location>
+                          Define the root directory of package CRYPTO
+
+  --with-zlib-root=<location>
+                          Define the root directory of package ZLIB
+
+  --with-TestMongoHost=<Host>
+                          Use an alternative mongosh host for testing with
+                          Default(127.0.0.1)
+  --with-TestMongoUser=<User>
+                          Use an alternative mongosh user for testing with
+                          (test)
+  --with-TestMongoPass=<Pass>
+                          Use an alternative mongosh password for testing with
+                          (testPassword)
+  --with-TestMongoDatabase=<DB>
+                          Use an alternative mongosh database for testing with
+                          (test)
+  --with-mongosh-tool=<alternative cli>
+                          The default tool name is mongosh. But this can be
+                          overridden with this flag
 
   --with-pic[=PKGS]       try to use only PIC/non-PIC objects [default=use
                           both]
@@ -2798,7 +2840,7 @@ main (int argc, char **argv)
 
 
 # Auxiliary files required by this configure script.
-ac_aux_files="missing install-sh compile ltmain.sh config.guess config.sub"
+ac_aux_files="missing install-sh compile config.guess config.sub ltmain.sh"
 
 # Locations in which to look for auxiliary files.
 ac_aux_dir_candidates="${srcdir}/build/autotools/build"
@@ -3872,6 +3914,11 @@ fi
 
 
 
+    if test "" != ""
+then :
+
+
+fi
 
 
 
@@ -4194,7 +4241,7 @@ fi
 
     if test "x20" == "x"
 then :
-  askedLangFeature=17
+  askedLangFeature=20
 else case e in #(
   e) askedLangFeature=20
      ;;
@@ -4748,442 +4795,34 @@ test -n "$UNZIP" || UNZIP=":"
 
 
 
-printf "%s\n" "#define THORS_SERIALIZER_HEADER_ONLY 0" >>confdefs.h
-
-
-printf "%s\n" "#define THORS_SERIALIZER_HEADER_ONLY_INCLUDE /**/" >>confdefs.h
-
-
-
-
-
-
-  # Make sure we can run config.sub.
-$SHELL "${ac_aux_dir}config.sub" sun4 >/dev/null 2>&1 ||
-  as_fn_error $? "cannot run $SHELL ${ac_aux_dir}config.sub" "$LINENO" 5
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking build system type" >&5
-printf %s "checking build system type... " >&6; }
-if test ${ac_cv_build+y}
+    # Check whether --enable-test-with-conan was given.
+if test ${enable_test_with_conan+y}
 then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ac_build_alias=$build_alias
-test "x$ac_build_alias" = x &&
-  ac_build_alias=`$SHELL "${ac_aux_dir}config.guess"`
-test "x$ac_build_alias" = x &&
-  as_fn_error $? "cannot guess build type; you must specify one" "$LINENO" 5
-ac_cv_build=`$SHELL "${ac_aux_dir}config.sub" $ac_build_alias` ||
-  as_fn_error $? "$SHELL ${ac_aux_dir}config.sub $ac_build_alias failed" "$LINENO" 5
- ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_build" >&5
-printf "%s\n" "$ac_cv_build" >&6; }
-case $ac_cv_build in
-*-*-*) ;;
-*) as_fn_error $? "invalid value of canonical build" "$LINENO" 5;;
-esac
-build=$ac_cv_build
-ac_save_IFS=$IFS; IFS='-'
-set x $ac_cv_build
-shift
-build_cpu=$1
-build_vendor=$2
-shift; shift
-# Remember, the first character of IFS is used to create $*,
-# except with old shells:
-build_os=$*
-IFS=$ac_save_IFS
-case $build_os in *\ *) build_os=`echo "$build_os" | sed 's/ /-/g'`;; esac
-
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking host system type" >&5
-printf %s "checking host system type... " >&6; }
-if test ${ac_cv_host+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) if test "x$host_alias" = x; then
-  ac_cv_host=$ac_cv_build
-else
-  ac_cv_host=`$SHELL "${ac_aux_dir}config.sub" $host_alias` ||
-    as_fn_error $? "$SHELL ${ac_aux_dir}config.sub $host_alias failed" "$LINENO" 5
-fi
- ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_host" >&5
-printf "%s\n" "$ac_cv_host" >&6; }
-case $ac_cv_host in
-*-*-*) ;;
-*) as_fn_error $? "invalid value of canonical host" "$LINENO" 5;;
-esac
-host=$ac_cv_host
-ac_save_IFS=$IFS; IFS='-'
-set x $ac_cv_host
-shift
-host_cpu=$1
-host_vendor=$2
-shift; shift
-# Remember, the first character of IFS is used to create $*,
-# except with old shells:
-host_os=$*
-IFS=$ac_save_IFS
-case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
-
-
-
-
-# Check whether --with-boost was given.
-if test ${with_boost+y}
-then :
-  withval=$with_boost;
-     case $withval in #(
-  no) :
-    want_boost="no";_AX_BOOST_BASE_boost_path="" ;; #(
-  yes) :
-    want_boost="yes";_AX_BOOST_BASE_boost_path="" ;; #(
-  *) :
-    want_boost="yes";_AX_BOOST_BASE_boost_path="$withval" ;;
-esac
-
-else case e in #(
-  e) want_boost="yes" ;;
-esac
+  enableval=$enable_test_with_conan;
 fi
 
 
-
-
-# Check whether --with-boost-libdir was given.
-if test ${with_boost_libdir+y}
-then :
-  withval=$with_boost_libdir;
-   if test -d "$withval"
-then :
-  _AX_BOOST_BASE_boost_lib_path="$withval"
-else case e in #(
-  e) as_fn_error $? "--with-boost-libdir expected directory name" "$LINENO" 5 ;;
-esac
-fi
-
-else case e in #(
-  e) _AX_BOOST_BASE_boost_lib_path="" ;;
-esac
-fi
-
-
-BOOST_LDFLAGS=""
-BOOST_CPPFLAGS=""
-if test "x$want_boost" = "xyes"
+    if test "x${enable_test_with_conan}" == "xyes"
 then :
 
 
-  if test "x" = "x"
-then :
-  _AX_BOOST_BASE_TONUMERICVERSION_req="1.20.0"
-else case e in #(
-  e) _AX_BOOST_BASE_TONUMERICVERSION_req="" ;;
-esac
-fi
-  _AX_BOOST_BASE_TONUMERICVERSION_req_shorten=`expr $_AX_BOOST_BASE_TONUMERICVERSION_req : '\([0-9]*\.[0-9]*\)'`
-  _AX_BOOST_BASE_TONUMERICVERSION_req_major=`expr $_AX_BOOST_BASE_TONUMERICVERSION_req : '\([0-9]*\)'`
-  if test "x$_AX_BOOST_BASE_TONUMERICVERSION_req_major" = "x"
-then :
-  as_fn_error $? "You should at least specify libboost major version" "$LINENO" 5
-fi
-  _AX_BOOST_BASE_TONUMERICVERSION_req_minor=`expr $_AX_BOOST_BASE_TONUMERICVERSION_req : '[0-9]*\.\([0-9]*\)'`
-  if test "x$_AX_BOOST_BASE_TONUMERICVERSION_req_minor" = "x"
-then :
-  _AX_BOOST_BASE_TONUMERICVERSION_req_minor="0"
-fi
-  _AX_BOOST_BASE_TONUMERICVERSION_req_sub_minor=`expr $_AX_BOOST_BASE_TONUMERICVERSION_req : '[0-9]*\.[0-9]*\.\([0-9]*\)'`
-  if test "X$_AX_BOOST_BASE_TONUMERICVERSION_req_sub_minor" = "X"
-then :
-  _AX_BOOST_BASE_TONUMERICVERSION_req_sub_minor="0"
-fi
-  _AX_BOOST_BASE_TONUMERICVERSION_RET=`expr $_AX_BOOST_BASE_TONUMERICVERSION_req_major \* 100000 \+  $_AX_BOOST_BASE_TONUMERICVERSION_req_minor \* 100 \+ $_AX_BOOST_BASE_TONUMERICVERSION_req_sub_minor`
-  WANT_BOOST_VERSION=$_AX_BOOST_BASE_TONUMERICVERSION_RET
+printf "%s\n" "#define THOR_CONAN 1" >>confdefs.h
 
-    succeeded=no
+            THOR_CONAN_ENABLE=CONAN
 
-
-
-                        case ${host_cpu} in #(
-  x86_64) :
-    libsubdirs="lib64 libx32 lib lib64" ;; #(
-  mips*64*) :
-    libsubdirs="lib64 lib32 lib lib64" ;; #(
-  ppc64|powerpc64|s390x|sparc64|aarch64|ppc64le|powerpc64le|riscv64) :
-    libsubdirs="lib64 lib lib64" ;; #(
-  *) :
-    libsubdirs="lib"
-     ;;
-esac
-
-                case ${host_cpu} in #(
-  i?86) :
-    multiarch_libsubdir="lib/i386-${host_os}" ;; #(
-  *) :
-    multiarch_libsubdir="lib/${host_cpu}-${host_os}"
-     ;;
-esac
-
-                if test "x$_AX_BOOST_BASE_boost_path" != "x"
-then :
-
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for boostlib >=  ($WANT_BOOST_VERSION) includes in \"$_AX_BOOST_BASE_boost_path/include\"" >&5
-printf %s "checking for boostlib >=  ($WANT_BOOST_VERSION) includes in \"$_AX_BOOST_BASE_boost_path/include\"... " >&6; }
-         if test -d "$_AX_BOOST_BASE_boost_path/include" && test -r "$_AX_BOOST_BASE_boost_path/include"
-then :
-
-           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-           BOOST_CPPFLAGS="-I$_AX_BOOST_BASE_boost_path/include"
-           for _AX_BOOST_BASE_boost_path_tmp in $multiarch_libsubdir $libsubdirs; do
-                { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for boostlib >=  ($WANT_BOOST_VERSION) lib path in \"$_AX_BOOST_BASE_boost_path/$_AX_BOOST_BASE_boost_path_tmp\"" >&5
-printf %s "checking for boostlib >=  ($WANT_BOOST_VERSION) lib path in \"$_AX_BOOST_BASE_boost_path/$_AX_BOOST_BASE_boost_path_tmp\"... " >&6; }
-                if test -d "$_AX_BOOST_BASE_boost_path/$_AX_BOOST_BASE_boost_path_tmp" && test -r "$_AX_BOOST_BASE_boost_path/$_AX_BOOST_BASE_boost_path_tmp"
-then :
-
-                        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-                        BOOST_LDFLAGS="-L$_AX_BOOST_BASE_boost_path/$_AX_BOOST_BASE_boost_path_tmp";
-                        break;
-
-else case e in #(
-  e) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; } ;;
-esac
-fi
-           done
-else case e in #(
-  e)
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; } ;;
-esac
-fi
+            subconfigure="${subconfigure} --enable-test-with-conan";
 
 else case e in #(
   e)
-        if test X"$cross_compiling" = Xyes; then
-            search_libsubdirs=$multiarch_libsubdir
-        else
-            search_libsubdirs="$multiarch_libsubdir $libsubdirs"
-        fi
-        for _AX_BOOST_BASE_boost_path_tmp in /usr /usr/local /opt /opt/local ; do
-            if test -d "$_AX_BOOST_BASE_boost_path_tmp/include/boost" && test -r "$_AX_BOOST_BASE_boost_path_tmp/include/boost" ; then
-                for libsubdir in $search_libsubdirs ; do
-                    if ls "$_AX_BOOST_BASE_boost_path_tmp/$libsubdir/libboost_"* >/dev/null 2>&1 ; then break; fi
-                done
-                BOOST_LDFLAGS="-L$_AX_BOOST_BASE_boost_path_tmp/$libsubdir"
-                BOOST_CPPFLAGS="-I$_AX_BOOST_BASE_boost_path_tmp/include"
-                break;
-            fi
-        done
+
+printf "%s\n" "#define THOR_CONAN 0" >>confdefs.h
+
+
+
      ;;
 esac
 fi
 
-            if test "x$_AX_BOOST_BASE_boost_lib_path" != "x"
-then :
-  BOOST_LDFLAGS="-L$_AX_BOOST_BASE_boost_lib_path"
-fi
-
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for boostlib >=  ($WANT_BOOST_VERSION)" >&5
-printf %s "checking for boostlib >=  ($WANT_BOOST_VERSION)... " >&6; }
-    CPPFLAGS_SAVED="$CPPFLAGS"
-    CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-    export CPPFLAGS
-
-    LDFLAGS_SAVED="$LDFLAGS"
-    LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"
-    export LDFLAGS
-
-
-    ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <boost/version.hpp>
-
-int
-main (void)
-{
-
-(void) ((void)sizeof(char[1 - 2*!!((BOOST_VERSION) < ($WANT_BOOST_VERSION))]));
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"
-then :
-
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-    succeeded=yes
-    found_system=yes
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-    ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-
-
-            if test "x$succeeded" != "xyes" ; then
-        CPPFLAGS="$CPPFLAGS_SAVED"
-        LDFLAGS="$LDFLAGS_SAVED"
-        BOOST_CPPFLAGS=
-        if test -z "$_AX_BOOST_BASE_boost_lib_path" ; then
-            BOOST_LDFLAGS=
-        fi
-        _version=0
-        if test -n "$_AX_BOOST_BASE_boost_path" ; then
-            if test -d "$_AX_BOOST_BASE_boost_path" && test -r "$_AX_BOOST_BASE_boost_path"; then
-                for i in `ls -d $_AX_BOOST_BASE_boost_path/include/boost-* 2>/dev/null`; do
-                    _version_tmp=`echo $i | sed "s#$_AX_BOOST_BASE_boost_path##" | sed 's/\/include\/boost-//' | sed 's/_/./'`
-                    V_CHECK=`expr $_version_tmp \> $_version`
-                    if test "x$V_CHECK" = "x1" ; then
-                        _version=$_version_tmp
-                    fi
-                    VERSION_UNDERSCORE=`echo $_version | sed 's/\./_/'`
-                    BOOST_CPPFLAGS="-I$_AX_BOOST_BASE_boost_path/include/boost-$VERSION_UNDERSCORE"
-                done
-                                if test -z "$BOOST_CPPFLAGS"; then
-                    if test -d "$_AX_BOOST_BASE_boost_path/boost" && test -r "$_AX_BOOST_BASE_boost_path/boost"; then
-                        BOOST_CPPFLAGS="-I$_AX_BOOST_BASE_boost_path"
-                    fi
-                fi
-                                                if test -n "$BOOST_CPPFLAGS" && test -z "$BOOST_LDFLAGS"; then
-                    for libsubdir in $libsubdirs ; do
-                        if ls "$_AX_BOOST_BASE_boost_path/$libsubdir/libboost_"* >/dev/null 2>&1 ; then break; fi
-                    done
-                    BOOST_LDFLAGS="-L$_AX_BOOST_BASE_boost_path/$libsubdir"
-                fi
-            fi
-        else
-            if test "x$cross_compiling" != "xyes" ; then
-                for _AX_BOOST_BASE_boost_path in /usr /usr/local /opt /opt/local ; do
-                    if test -d "$_AX_BOOST_BASE_boost_path" && test -r "$_AX_BOOST_BASE_boost_path" ; then
-                        for i in `ls -d $_AX_BOOST_BASE_boost_path/include/boost-* 2>/dev/null`; do
-                            _version_tmp=`echo $i | sed "s#$_AX_BOOST_BASE_boost_path##" | sed 's/\/include\/boost-//' | sed 's/_/./'`
-                            V_CHECK=`expr $_version_tmp \> $_version`
-                            if test "x$V_CHECK" = "x1" ; then
-                                _version=$_version_tmp
-                                best_path=$_AX_BOOST_BASE_boost_path
-                            fi
-                        done
-                    fi
-                done
-
-                VERSION_UNDERSCORE=`echo $_version | sed 's/\./_/'`
-                BOOST_CPPFLAGS="-I$best_path/include/boost-$VERSION_UNDERSCORE"
-                if test -z "$_AX_BOOST_BASE_boost_lib_path" ; then
-                    for libsubdir in $libsubdirs ; do
-                        if ls "$best_path/$libsubdir/libboost_"* >/dev/null 2>&1 ; then break; fi
-                    done
-                    BOOST_LDFLAGS="-L$best_path/$libsubdir"
-                fi
-            fi
-
-            if test -n "$BOOST_ROOT" ; then
-                for libsubdir in $libsubdirs ; do
-                    if ls "$BOOST_ROOT/stage/$libsubdir/libboost_"* >/dev/null 2>&1 ; then break; fi
-                done
-                if test -d "$BOOST_ROOT" && test -r "$BOOST_ROOT" && test -d "$BOOST_ROOT/stage/$libsubdir" && test -r "$BOOST_ROOT/stage/$libsubdir"; then
-                    version_dir=`expr //$BOOST_ROOT : '.*/\(.*\)'`
-                    stage_version=`echo $version_dir | sed 's/boost_//' | sed 's/_/./g'`
-                        stage_version_shorten=`expr $stage_version : '\([0-9]*\.[0-9]*\)'`
-                    V_CHECK=`expr $stage_version_shorten \>\= $_version`
-                    if test "x$V_CHECK" = "x1" && test -z "$_AX_BOOST_BASE_boost_lib_path" ; then
-                        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: We will use a staged boost library from $BOOST_ROOT" >&5
-printf "%s\n" "$as_me: We will use a staged boost library from $BOOST_ROOT" >&6;}
-                        BOOST_CPPFLAGS="-I$BOOST_ROOT"
-                        BOOST_LDFLAGS="-L$BOOST_ROOT/stage/$libsubdir"
-                    fi
-                fi
-            fi
-        fi
-
-        CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-        export CPPFLAGS
-        LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"
-        export LDFLAGS
-
-        ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <boost/version.hpp>
-
-int
-main (void)
-{
-
-(void) ((void)sizeof(char[1 - 2*!!((BOOST_VERSION) < ($WANT_BOOST_VERSION))]));
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"
-then :
-
-            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-        succeeded=yes
-        found_system=yes
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-        ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-    fi
-
-    if test "x$succeeded" != "xyes" ; then
-        if test "x$_version" = "x0" ; then
-            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: We could not detect the boost libraries (version  or higher). If you have a staged boost library (still not installed) please specify \$BOOST_ROOT in your environment and do not give a PATH to --with-boost option.  If you are sure you have boost installed, then check your version number looking in <boost/version.hpp>. See http://randspringer.de/boost for more documentation." >&5
-printf "%s\n" "$as_me: We could not detect the boost libraries (version  or higher). If you have a staged boost library (still not installed) please specify \$BOOST_ROOT in your environment and do not give a PATH to --with-boost option.  If you are sure you have boost installed, then check your version number looking in <boost/version.hpp>. See http://randspringer.de/boost for more documentation." >&6;}
-        else
-            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Your boost libraries seems to old (version $_version)." >&5
-printf "%s\n" "$as_me: Your boost libraries seems to old (version $_version)." >&6;}
-        fi
-        # execute ACTION-IF-NOT-FOUND (if present):
-        :
-    else
-
-printf "%s\n" "#define HAVE_BOOST /**/" >>confdefs.h
-
-        # execute ACTION-IF-FOUND (if present):
-        :
-    fi
-
-    CPPFLAGS="$CPPFLAGS_SAVED"
-    LDFLAGS="$LDFLAGS_SAVED"
-
-
-fi
 
 
 
@@ -5422,6 +5061,427 @@ fi
 
 
 
+# Check whether --with-snappy-root was given.
+if test ${with_snappy_root+y}
+then :
+  withval=$with_snappy_root;
+fi
+
+
+    LIBRARY_DIR="-L ${with_snappy_root}/lib"
+    if test "x${with_snappy_root}" == "x"
+then :
+  LIBRARY_DIR="-L ${DefaultLinkDir}/lib"
+
+fi
+
+    if test "x${snappy_header_only_defined}" == "x"
+then :
+
+            ORIG_LDFLAGS="${LDFLAGS}"
+            LDFLAGS="$LDFLAGS ${LIBRARY_DIR}"
+
+            echo "Building: NotThor"
+            echo "Mark:     $BUILDING_NotThor"
+            echo "Checking"
+            if test "x$BUILDING_NotThor" == "x1"
+then :
+
+
+    if test "x${with_snappy_root}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_SNAPPY 1" >>confdefs.h
+
+            snappy_ROOT_DIR=${with_snappy_root}
+
+            subconfigure="${subconfigure} --with-snappy-root=${with_snappy_root}"
+
+
+fi
+    echo "Setting: snappy_ROOT_LIB TO snappy"
+    snappy_ROOT_LIB="snappy"
+
+
+
+else case e in #(
+  e)
+                    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for snappy_compress in -lsnappy" >&5
+printf %s "checking for snappy_compress in -lsnappy... " >&6; }
+if test ${ac_cv_lib_snappy_snappy_compress+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_check_lib_save_LIBS=$LIBS
+LIBS="-lsnappy  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+namespace conftest {
+  extern "C" int snappy_compress ();
+}
+int
+main (void)
+{
+return conftest::snappy_compress ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"
+then :
+  ac_cv_lib_snappy_snappy_compress=yes
+else case e in #(
+  e) ac_cv_lib_snappy_snappy_compress=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_snappy_snappy_compress" >&5
+printf "%s\n" "$ac_cv_lib_snappy_snappy_compress" >&6; }
+if test "x$ac_cv_lib_snappy_snappy_compress" = xyes
+then :
+
+
+    if test "x${with_snappy_root}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_SNAPPY 1" >>confdefs.h
+
+            snappy_ROOT_DIR=${with_snappy_root}
+
+            subconfigure="${subconfigure} --with-snappy-root=${with_snappy_root}"
+
+
+fi
+    echo "Setting: snappy_ROOT_LIB TO snappy"
+    snappy_ROOT_LIB="snappy"
+
+
+
+else case e in #(
+  e)
+                            echo "FAIL: Using: >${with_snappy_root}<"
+                            as_fn_error $? "
+Error: Could not find libsnappy
+
+You can solve this by installing libsnappy
+    brew install snappy
+
+Alternately specify install location with:
+    --with-snappy-root=<location of snappy installation>
+
+
+    " "$LINENO" 5
+                            echo "FAIL DONE"
+
+                     ;;
+esac
+fi
+
+
+             ;;
+esac
+fi
+            echo "Checking DONE"
+
+            LDFLAGS="${ORIG_LDFLAGS}"
+
+
+fi
+
+
+
+
+
+# Check whether --with-crypto-root was given.
+if test ${with_crypto_root+y}
+then :
+  withval=$with_crypto_root;
+fi
+
+
+    LIBRARY_DIR="-L ${with_crypto_root}/lib"
+    if test "x${with_crypto_root}" == "x"
+then :
+  LIBRARY_DIR="-L ${DefaultLinkDir}/lib"
+
+fi
+
+    if test "x${crypto_header_only_defined}" == "x"
+then :
+
+            ORIG_LDFLAGS="${LDFLAGS}"
+            LDFLAGS="$LDFLAGS ${LIBRARY_DIR}"
+
+            echo "Building: NotThor"
+            echo "Mark:     $BUILDING_NotThor"
+            echo "Checking"
+            if test "x$BUILDING_NotThor" == "x1"
+then :
+
+
+    if test "x${with_crypto_root}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_CRYPTO 1" >>confdefs.h
+
+            crypto_ROOT_DIR=${with_crypto_root}
+
+            subconfigure="${subconfigure} --with-crypto-root=${with_crypto_root}"
+
+
+fi
+    echo "Setting: crypto_ROOT_LIB TO ssl crypto"
+    crypto_ROOT_LIB="ssl crypto"
+
+
+
+else case e in #(
+  e)
+                    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for SHA1_Init in -lcrypto" >&5
+printf %s "checking for SHA1_Init in -lcrypto... " >&6; }
+if test ${ac_cv_lib_crypto_SHA1_Init+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcrypto  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+namespace conftest {
+  extern "C" int SHA1_Init ();
+}
+int
+main (void)
+{
+return conftest::SHA1_Init ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"
+then :
+  ac_cv_lib_crypto_SHA1_Init=yes
+else case e in #(
+  e) ac_cv_lib_crypto_SHA1_Init=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_SHA1_Init" >&5
+printf "%s\n" "$ac_cv_lib_crypto_SHA1_Init" >&6; }
+if test "x$ac_cv_lib_crypto_SHA1_Init" = xyes
+then :
+
+
+    if test "x${with_crypto_root}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_CRYPTO 1" >>confdefs.h
+
+            crypto_ROOT_DIR=${with_crypto_root}
+
+            subconfigure="${subconfigure} --with-crypto-root=${with_crypto_root}"
+
+
+fi
+    echo "Setting: crypto_ROOT_LIB TO ssl crypto"
+    crypto_ROOT_LIB="ssl crypto"
+
+
+
+else case e in #(
+  e)
+                            echo "FAIL: Using: >${with_crypto_root}<"
+                            as_fn_error $? "
+
+Error: Could not find libcrypto
+
+        On a mac you will need to install openssl
+        and define the crypto root directory to configuration.
+
+            brew install openssl
+            ./configure --with-crypto-root=/usr/local/Cellar/openssl/1.0.2j/
+
+        On Linux you will need to install openssl
+
+            sudo apt-get install openssl
+            sudo apt-get install libssl-dev
+
+
+
+    " "$LINENO" 5
+                            echo "FAIL DONE"
+
+                     ;;
+esac
+fi
+
+
+             ;;
+esac
+fi
+            echo "Checking DONE"
+
+            LDFLAGS="${ORIG_LDFLAGS}"
+
+
+fi
+
+
+
+
+
+# Check whether --with-zlib-root was given.
+if test ${with_zlib_root+y}
+then :
+  withval=$with_zlib_root;
+fi
+
+
+    LIBRARY_DIR="-L ${with_zlib_root}/lib"
+    if test "x${with_zlib_root}" == "x"
+then :
+  LIBRARY_DIR="-L ${DefaultLinkDir}/lib"
+
+fi
+
+    if test "x${zlib_header_only_defined}" == "x"
+then :
+
+            ORIG_LDFLAGS="${LDFLAGS}"
+            LDFLAGS="$LDFLAGS ${LIBRARY_DIR}"
+
+            echo "Building: NotThor"
+            echo "Mark:     $BUILDING_NotThor"
+            echo "Checking"
+            if test "x$BUILDING_NotThor" == "x1"
+then :
+
+
+    if test "x${with_zlib_root}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_ZLIB 1" >>confdefs.h
+
+            ZLIB_ROOT_DIR=${with_zlib_root}
+
+            subconfigure="${subconfigure} --with-zlib-root=${with_zlib_root}"
+
+
+fi
+    echo "Setting: ZLIB_ROOT_LIB TO z"
+    ZLIB_ROOT_LIB="z"
+
+
+
+else case e in #(
+  e)
+                    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for uncompress in -lz" >&5
+printf %s "checking for uncompress in -lz... " >&6; }
+if test ${ac_cv_lib_z_uncompress+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_check_lib_save_LIBS=$LIBS
+LIBS="-lz  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+namespace conftest {
+  extern "C" int uncompress ();
+}
+int
+main (void)
+{
+return conftest::uncompress ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"
+then :
+  ac_cv_lib_z_uncompress=yes
+else case e in #(
+  e) ac_cv_lib_z_uncompress=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_z_uncompress" >&5
+printf "%s\n" "$ac_cv_lib_z_uncompress" >&6; }
+if test "x$ac_cv_lib_z_uncompress" = xyes
+then :
+
+
+    if test "x${with_zlib_root}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_ZLIB 1" >>confdefs.h
+
+            ZLIB_ROOT_DIR=${with_zlib_root}
+
+            subconfigure="${subconfigure} --with-zlib-root=${with_zlib_root}"
+
+
+fi
+    echo "Setting: ZLIB_ROOT_LIB TO z"
+    ZLIB_ROOT_LIB="z"
+
+
+
+else case e in #(
+  e)
+                            echo "FAIL: Using: >${with_zlib_root}<"
+                            as_fn_error $? "
+
+Error: Could not find libz
+
+            brew install libz
+            ./configure --with-zlib-root=/usr/local/Cellar/libz/1.0.2j/
+
+
+
+
+    " "$LINENO" 5
+                            echo "FAIL DONE"
+
+                     ;;
+esac
+fi
+
+
+             ;;
+esac
+fi
+            echo "Checking DONE"
+
+            LDFLAGS="${ORIG_LDFLAGS}"
+
+
+fi
+
+
+
+
+
     # Check whether --enable-test-with-locked-file was given.
 if test ${enable_test_with_locked_file+y}
 then :
@@ -5435,12 +5495,183 @@ then :
 
 printf "%s\n" "#define THOR_DISABLE_TEST_WITH_LOCKED_FILES 1" >>confdefs.h
 
+            THOR_DISABLE_TEST_WITH_LOCKED_FILES_DISABLE=LOCKED_FILES
+
             subconfigure="${subconfigure} --disable-test-with-locked-file";
 
 else case e in #(
   e)
 
 printf "%s\n" "#define THOR_DISABLE_TEST_WITH_LOCKED_FILES 0" >>confdefs.h
+
+
+
+     ;;
+esac
+fi
+
+
+
+
+
+    # Check whether --enable-test-with-mongo-query was given.
+if test ${enable_test_with_mongo_query+y}
+then :
+  enableval=$enable_test_with_mongo_query;
+fi
+
+
+    if test "x${enable_test_with_mongo_query}" == "xno"
+then :
+
+
+printf "%s\n" "#define THOR_DISABLE_TEST_WITH_MONGO_QUERY 1" >>confdefs.h
+
+            THOR_DISABLE_TEST_WITH_MONGO_QUERY_DISABLE=MONGO
+
+            subconfigure="${subconfigure} --disable-test-with-mongo-query";
+
+else case e in #(
+  e)
+
+printf "%s\n" "#define THOR_DISABLE_TEST_WITH_MONGO_QUERY 0" >>confdefs.h
+
+
+
+     ;;
+esac
+fi
+
+
+
+
+
+
+
+    # Check whether --enable-Mongo_Service was given.
+if test ${enable_Mongo_Service+y}
+then :
+  enableval=$enable_Mongo_Service;
+fi
+
+
+
+# Check whether --with-TestMongoHost was given.
+if test ${with_TestMongoHost+y}
+then :
+  withval=$with_TestMongoHost;
+fi
+
+
+# Check whether --with-TestMongoUser was given.
+if test ${with_TestMongoUser+y}
+then :
+  withval=$with_TestMongoUser;
+fi
+
+
+# Check whether --with-TestMongoPass was given.
+if test ${with_TestMongoPass+y}
+then :
+  withval=$with_TestMongoPass;
+fi
+
+
+# Check whether --with-TestMongoDatabase was given.
+if test ${with_TestMongoDatabase+y}
+then :
+  withval=$with_TestMongoDatabase;
+fi
+
+
+    mongosh_test_host="127.0.0.1"
+    mongosh_test_user="test"
+    mongosh_test_pw="testPassword"
+    mongosh_test_db="test"
+
+    if test "x$have_TestMongoHost" = "xyes"
+then :
+  mongosh_test_host=$with_TestMongoHost
+fi
+    if test "x$have_TestMongoUser" = "xyes"
+then :
+  mongosh_test_user=$with_TestMongoUser
+fi
+    if test "x$have_TestMongoPass" = "xyes"
+then :
+  mongosh_test_pw=$with_TestMongoPass
+fi
+    if test "x$have_TestMongoDatabase" = "xyes"
+then :
+  mongosh_test_db=$with_TestMongoDatabase
+fi
+
+
+printf "%s\n" "#define THOR_TESTING_MONGO_HOST \"$mongosh_test_host\"" >>confdefs.h
+
+
+printf "%s\n" "#define THOR_TESTING_MONGO_USER \"$mongosh_test_user\"" >>confdefs.h
+
+
+printf "%s\n" "#define THOR_TESTING_MONGO_PASS \"$mongosh_test_pw\"" >>confdefs.h
+
+
+printf "%s\n" "#define THOR_TESTING_MONGO_DB \"$mongosh_test_db\"" >>confdefs.h
+
+
+    cli_tool=mongosh
+
+
+# Check whether --with-mongosh-tool was given.
+if test ${with_mongosh_tool+y}
+then :
+  withval=$with_mongosh_tool;
+fi
+
+
+    if test "x${with_mongosh_tool}" != "x"
+then :
+  cli_tool=${with_mongosh_tool}
+
+fi
+
+    if test "x$enable_Mongo_Service" == "xno"
+then :
+
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: \"You have disabled the check for Mongo Service\"" >&5
+printf "%s\n" "$as_me: WARNING: \"You have disabled the check for Mongo Service\"" >&2;}
+            subconfigure="${subconfigure} --disable-Mongo-Service"
+
+else case e in #(
+  e)
+
+    echo "COMMAND: >db.Blob.stats().nindexes<"
+    echo "DB LINK: >${cli_tool} --host $mongosh_test_host --username $mongosh_test_user --password $mongosh_test_pw $mongosh_test_db<" | sed -e 's/Ppass/aasp/g'
+    echo "db.Blob.stats().nindexes" |  ${cli_tool} --host $mongosh_test_host --username $mongosh_test_user --password $mongosh_test_pw $mongosh_test_db
+    test_connect=`echo "db.Blob.stats().nindexes" |  ${cli_tool} --host $mongosh_test_host --username $mongosh_test_user --password $mongosh_test_pw $mongosh_test_db 2> /dev/null | tail -2 | head -1 | sed -e 's/test>//' | xargs`
+    echo "RESULT:  >${test_connect}<"
+    if test "x$test_connect" != "x1"
+then :
+
+            as_fn_error $? "
+
+    Error: Can not connect to server(MONGO) using ${cli_tool} (Note: Default mongosh).
+
+            This may be because the mongosh server is not running or the test data has not been created.
+
+            1: Install Mongo server
+            2: Make sure Mongo is running
+            3: Install the test data and users.
+                    cat ./src/Mongo/test/data/init.mongo | ${cli_tool} --host $mongosh_test_host --username root --password
+                    cat ./src/Mongo/test/data/data.mongo | ${cli_tool} --host $mongosh_test_host --username $mongosh_test_user --password $mongosh_test_pw $mongosh_test_db
+
+            " "$LINENO" 5
+
+fi
+
+    version=` ${cli_tool} --host $mongosh_test_host --username $mongosh_test_user --password $mongosh_test_pw --eval 'db.version()' $mongosh_test_db | tail -1 | awk '{print $1}' | awk -F\. '{print $1}'`
+
+printf "%s\n" "#define MONGO_MAJOR_VERSION ${version}" >>confdefs.h
 
 
      ;;
@@ -5504,6 +5735,7 @@ fi
 
 
 
+
 case `pwd` in
   *\ * | *\	*)
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Libtool does not cope well with whitespace in \`pwd\`" >&5
@@ -5529,6 +5761,83 @@ macro_revision='2.4.7'
 
 
 ltmain=$ac_aux_dir/ltmain.sh
+
+
+
+  # Make sure we can run config.sub.
+$SHELL "${ac_aux_dir}config.sub" sun4 >/dev/null 2>&1 ||
+  as_fn_error $? "cannot run $SHELL ${ac_aux_dir}config.sub" "$LINENO" 5
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking build system type" >&5
+printf %s "checking build system type... " >&6; }
+if test ${ac_cv_build+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_build_alias=$build_alias
+test "x$ac_build_alias" = x &&
+  ac_build_alias=`$SHELL "${ac_aux_dir}config.guess"`
+test "x$ac_build_alias" = x &&
+  as_fn_error $? "cannot guess build type; you must specify one" "$LINENO" 5
+ac_cv_build=`$SHELL "${ac_aux_dir}config.sub" $ac_build_alias` ||
+  as_fn_error $? "$SHELL ${ac_aux_dir}config.sub $ac_build_alias failed" "$LINENO" 5
+ ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_build" >&5
+printf "%s\n" "$ac_cv_build" >&6; }
+case $ac_cv_build in
+*-*-*) ;;
+*) as_fn_error $? "invalid value of canonical build" "$LINENO" 5;;
+esac
+build=$ac_cv_build
+ac_save_IFS=$IFS; IFS='-'
+set x $ac_cv_build
+shift
+build_cpu=$1
+build_vendor=$2
+shift; shift
+# Remember, the first character of IFS is used to create $*,
+# except with old shells:
+build_os=$*
+IFS=$ac_save_IFS
+case $build_os in *\ *) build_os=`echo "$build_os" | sed 's/ /-/g'`;; esac
+
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking host system type" >&5
+printf %s "checking host system type... " >&6; }
+if test ${ac_cv_host+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) if test "x$host_alias" = x; then
+  ac_cv_host=$ac_cv_build
+else
+  ac_cv_host=`$SHELL "${ac_aux_dir}config.sub" $host_alias` ||
+    as_fn_error $? "$SHELL ${ac_aux_dir}config.sub $host_alias failed" "$LINENO" 5
+fi
+ ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_host" >&5
+printf "%s\n" "$ac_cv_host" >&6; }
+case $ac_cv_host in
+*-*-*) ;;
+*) as_fn_error $? "invalid value of canonical host" "$LINENO" 5;;
+esac
+host=$ac_cv_host
+ac_save_IFS=$IFS; IFS='-'
+set x $ac_cv_host
+shift
+host_cpu=$1
+host_vendor=$2
+shift; shift
+# Remember, the first character of IFS is used to create $*,
+# except with old shells:
+host_os=$*
+IFS=$ac_save_IFS
+case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
+
 
 # Backslashify metacharacters that are still active within
 # double-quoted strings.
@@ -17916,6 +18225,14 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 subconfigure="${subconfigure} --with-thorserialize-root=$(pwd)/build "
 
+
+
+printf "%s\n" "#define THORS_SERIALIZER_HEADER_ONLY 0" >>confdefs.h
+
+
+printf "%s\n" "#define THORS_SERIALIZER_HEADER_ONLY_INCLUDE /**/" >>confdefs.h
+
+
 am__api_version='1.16'
 
 
@@ -18473,14 +18790,7 @@ fi
             echo "================ DONE ================="
             echo
             popd
-
-    export BUILDING_${third}=1
-
-printf "%s\n" "#define THOR_PACKAGE_NAME \${third}" >>confdefs.h
-
-    THOR_PACKAGE_NAME=${third}
-
-
+            ## AX_THOR_BUILDING(${third})
         done
         popd
     fi
@@ -18870,7 +19180,7 @@ fi
 
 
 
-    ac_config_headers="$ac_config_headers config.h src/Serialize/SerializeConfig.h src/GitUtility/GitUtilityConfig.h"
+    ac_config_headers="$ac_config_headers config.h src/Serialize/SerializeConfig.h:config.h.in"
 
     ac_config_files="$ac_config_files Makefile.extra Makefile.config:build/autotools/build/Makefile.config.in:Makefile.config.in"
 
@@ -19989,8 +20299,7 @@ do
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
-    "src/Serialize/SerializeConfig.h") CONFIG_HEADERS="$CONFIG_HEADERS src/Serialize/SerializeConfig.h" ;;
-    "src/GitUtility/GitUtilityConfig.h") CONFIG_HEADERS="$CONFIG_HEADERS src/GitUtility/GitUtilityConfig.h" ;;
+    "src/Serialize/SerializeConfig.h") CONFIG_HEADERS="$CONFIG_HEADERS src/Serialize/SerializeConfig.h:config.h.in" ;;
     "Makefile.extra") CONFIG_FILES="$CONFIG_FILES Makefile.extra" ;;
     "Makefile.config") CONFIG_FILES="$CONFIG_FILES Makefile.config:build/autotools/build/Makefile.config.in:Makefile.config.in" ;;
 
