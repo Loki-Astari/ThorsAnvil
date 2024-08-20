@@ -36,13 +36,13 @@ struct Json
 // @param config.catchExceptions    'false:    exceptions propogate.   'true':   parsing exceptions are stopped.
 // @return                          Object that can be passed to operator<< for serialization.
 template<typename T>
-Exporter<Json, T> jsonExporter(T const& value, PrinterInterface::PrinterConfig config = PrinterInterface::PrinterConfig{})
+Exporter<Json, T> jsonExporter(T const& value, PrinterConfig config = PrinterConfig{})
 {
     return Exporter<Json, T>(value, config);
 }
 template<typename T>
 [[deprecated("Upgrade to use jsonExporter(). It has a more consistent interface. The difference is exceptions are caught by default and you need to manually turn the    m off. Turning the exceptions on/off is now part of the config object rahter than a seprate parameter.")]]
-Exporter<Json, T> jsonExport(T const& value, PrinterInterface::PrinterConfig config = PrinterInterface::PrinterConfig{}, bool catchExceptions = false)
+Exporter<Json, T> jsonExport(T const& value, PrinterConfig config = PrinterConfig{}, bool catchExceptions = false)
 {
     config.catchExceptions = catchExceptions;
     return jsonExporter(value, config);
@@ -54,13 +54,13 @@ Exporter<Json, T> jsonExport(T const& value, PrinterInterface::PrinterConfig con
 // @param config.catchExceptions    'false:    exceptions propogate.        'true':   parsing exceptions are stopped.
 // @return                          Object that can be passed to operator>> for de-serialization.
 template<typename T>
-Importer<Json, T> jsonImporter(T& value, ParserInterface::ParserConfig config = ParserInterface::ParserConfig{})
+Importer<Json, T> jsonImporter(T& value, ParserConfig config = ParserConfig{})
 {
     return Importer<Json, T>(value, config);
 }
 template<typename T>
 [[deprecated("Upgrade to use jsonImporter(). It has a more consistent interface. The difference is exceptions are caught by default and you need to manually turn the    m off. Turning the exceptions on/off is now part of the config object rahter than a seprate parameter.")]]
-Importer<Json, T> jsonImport(T& value, ParserInterface::ParserConfig config = ParserInterface::ParserConfig{}, bool catchExceptions = false)
+Importer<Json, T> jsonImport(T& value, ParserConfig config = ParserConfig{}, bool catchExceptions = false)
 {
     config.catchExceptions = catchExceptions;
     return jsonImporter(value, config);

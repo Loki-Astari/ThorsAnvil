@@ -59,6 +59,10 @@ CountResult Collection::countDocuments(F const& query, CountConfig const& config
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
         }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
+        }
     }
     return response;
 }
@@ -77,6 +81,10 @@ CountResult Collection::countDocuments(CountConfig const& config)
             // The message was sent and reply read correctly.
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
+        }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
         }
     }
     return response;

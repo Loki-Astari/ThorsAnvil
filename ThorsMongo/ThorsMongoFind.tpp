@@ -87,6 +87,10 @@ FindRange<T> Collection::find(FindConfig const& config)
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
         }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
+        }
     }
     return response;
 }
@@ -106,6 +110,10 @@ FindRange<T> Collection::find(F const& search, FindConfig const& config)
             // The message was sent and reply read correctly.
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
+        }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
         }
     }
     return response;

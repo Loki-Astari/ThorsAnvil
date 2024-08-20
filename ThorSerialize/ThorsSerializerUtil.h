@@ -173,56 +173,70 @@ struct IgnoreCallBack
     IgnoreFunc  ignore  = [](std::istream& s, std::size_t size)         {s.ignore(size);};
 };
 
+enum class ParseType   {Weak, Strict, Exact};
+enum class ParserToken {Error, DocStart, DocEnd, MapStart, MapEnd, ArrayStart, ArrayEnd, Key, Value};
+struct ParserConfig
+{
+    /*
+     * These constructor are maintained for backwards compatability
+     * Please use a the default constructor followed by the Set<Attribute>() methods
+     */
+    ParserConfig(IgnoreCallBack&& cb,
+                 ParseType parseStrictness = ParseType::Weak,
+                 std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
+                 bool catchExceptions = true)
+        : parseStrictness(parseStrictness)
+        , polymorphicMarker(polymorphicMarker)
+        , catchExceptions(catchExceptions)
+        , parserInfo(0)
+        , ignoreCallBack(std::move(cb))
+    {}
+    ParserConfig(ParseType parseStrictness,
+                 std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
+                 bool catchExceptions = true)
+        : parseStrictness(parseStrictness)
+        , polymorphicMarker(polymorphicMarker)
+        , catchExceptions(catchExceptions)
+        , parserInfo(0)
+    {}
+    ParserConfig(std::string const& polymorphicMarker, bool catchExceptions = true)
+        : parseStrictness(ParseType::Weak)
+        , polymorphicMarker(polymorphicMarker)
+        , catchExceptions(catchExceptions)
+        , parserInfo(0)
+    {}
+    ParserConfig(bool catchExceptions)
+        : parseStrictness(ParseType::Weak)
+        , polymorphicMarker(Private::getDefaultPolymorphicMarker())
+        , catchExceptions(catchExceptions)
+        , parserInfo(0)
+    {}
+    ParserConfig(ParseType parseStrictness, bool catchExceptions)
+        : parseStrictness(parseStrictness)
+        , polymorphicMarker(Private::getDefaultPolymorphicMarker())
+        , catchExceptions(catchExceptions)
+        , parserInfo(0)
+    {}
+    // Use this constructor.
+    ParserConfig()
+        : parseStrictness(ParseType::Weak)
+        , polymorphicMarker(Private::getDefaultPolymorphicMarker())
+        , catchExceptions(true)
+        , parserInfo(0)
+    {}
+    ParserConfig& setParseStrictness(ParseType p_parseStrictness)               {parseStrictness = p_parseStrictness;       return *this;}
+    ParserConfig& setPolymorphicMarker(std::string const& p_polymorphicMarker)  {polymorphicMarker = p_polymorphicMarker;   return *this;}
+    ParserConfig& setCatchExceptions(bool p_catchExceptions)                    {catchExceptions = p_catchExceptions;       return *this;}
+    ParseType       parseStrictness;
+    std::string     polymorphicMarker;
+    bool            catchExceptions;
+    long            parserInfo;
+    IgnoreCallBack  ignoreCallBack;
+};
+
 class ParserInterface
 {
     public:
-        enum class ParseType   {Weak, Strict, Exact};
-        enum class ParserToken {Error, DocStart, DocEnd, MapStart, MapEnd, ArrayStart, ArrayEnd, Key, Value};
-        struct ParserConfig
-        {
-            ParserConfig(IgnoreCallBack&& cb,
-                         ParseType parseStrictness = ParseType::Weak,
-                         std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
-                         bool catchExceptions = true)
-                : parseStrictness(parseStrictness)
-                , polymorphicMarker(polymorphicMarker)
-                , catchExceptions(catchExceptions)
-                , parserInfo(0)
-                , ignoreCallBack(std::move(cb))
-            {}
-            ParserConfig(ParseType parseStrictness = ParseType::Weak,
-                         std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
-                         bool catchExceptions = true)
-                : parseStrictness(parseStrictness)
-                , polymorphicMarker(polymorphicMarker)
-                , catchExceptions(catchExceptions)
-                , parserInfo(0)
-            {}
-            ParserConfig(std::string const& polymorphicMarker, bool catchExceptions = true)
-                : parseStrictness(ParseType::Weak)
-                , polymorphicMarker(polymorphicMarker)
-                , catchExceptions(catchExceptions)
-                , parserInfo(0)
-            {}
-            ParserConfig(bool catchExceptions)
-                : parseStrictness(ParseType::Weak)
-                , polymorphicMarker(Private::getDefaultPolymorphicMarker())
-                , catchExceptions(catchExceptions)
-                , parserInfo(0)
-            {}
-            ParserConfig(ParseType parseStrictness, bool catchExceptions)
-                : parseStrictness(parseStrictness)
-                , polymorphicMarker(Private::getDefaultPolymorphicMarker())
-                , catchExceptions(catchExceptions)
-                , parserInfo(0)
-            {}
-            ParseType       parseStrictness;
-            std::string     polymorphicMarker;
-            bool            catchExceptions;
-            long            parserInfo;
-            IgnoreCallBack  ignoreCallBack;
-        };
-
         std::istream&   input;
         ParserToken     pushBack;
         ParserConfig    config;
@@ -275,48 +289,69 @@ class ParserInterface
 
 };
 
+// Default:     What ever the implementation likes.
+// Stream:      Compressed for over the wire protocol.
+// Config:      Human readable (potentially config file like)
+enum class OutputType {Default, Stream, Config};
+
+
+struct PrinterConfig
+{
+    /*
+     * These constructors are maintained for backward compatibility.
+     * But should not be used in new code.
+     * Please use the set<Attribute>() methods.
+     */
+    PrinterConfig(OutputType characteristics,
+                  std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
+                  bool catchExceptions = true)
+        : characteristics(characteristics)
+        , polymorphicMarker(polymorphicMarker)
+        , catchExceptions(catchExceptions)
+        , parserInfo(0)
+    {}
+    PrinterConfig(std::string const& polymorphicMarker,
+                  bool catchExceptions = true)
+        : characteristics(OutputType::Default)
+        , polymorphicMarker(polymorphicMarker)
+        , catchExceptions(catchExceptions)
+        , parserInfo(0)
+    {}
+    PrinterConfig(bool catchExceptions)
+        : characteristics(OutputType::Default)
+        , polymorphicMarker(Private::getDefaultPolymorphicMarker())
+        , catchExceptions(catchExceptions)
+        , parserInfo(0)
+    {}
+    PrinterConfig(OutputType characteristic, bool catchExceptions)
+        : characteristics(characteristic)
+        , polymorphicMarker(Private::getDefaultPolymorphicMarker())
+        , catchExceptions(catchExceptions)
+        , parserInfo(0)
+    {}
+
+    /* Please use the default constructor
+     * Then call the appropriate set<Attributes>() to define the characteristics you need.
+     */
+    PrinterConfig()
+        : characteristics(OutputType::Default)
+        , polymorphicMarker(Private::getDefaultPolymorphicMarker())
+        , catchExceptions(true)
+        , parserInfo(0)
+    {}
+    PrinterConfig& setOutputType(OutputType p_characteristics)                  {characteristics = p_characteristics;      return *this;}
+    PrinterConfig& setPolymorphicMarker(std::string const& p_polymorphicMarker) {polymorphicMarker = p_polymorphicMarker;  return *this;}
+    PrinterConfig& setCatchExceptions(bool p_catchExceptions)                   {catchExceptions = p_catchExceptions;      return *this;}
+
+    OutputType      characteristics;
+    std::string     polymorphicMarker;
+    bool            catchExceptions;
+    long            parserInfo;
+};
+
 class PrinterInterface
 {
     public:
-        enum class OutputType {Default, Stream, Config};
-        struct PrinterConfig
-        {
-            PrinterConfig(OutputType characteristics = OutputType::Default,
-                          std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
-                          bool catchExceptions = true)
-                : characteristics(characteristics)
-                , polymorphicMarker(polymorphicMarker)
-                , catchExceptions(catchExceptions)
-                , parserInfo(0)
-            {}
-            PrinterConfig(std::string const& polymorphicMarker,
-                          bool catchExceptions = true)
-                : characteristics(OutputType::Default)
-                , polymorphicMarker(polymorphicMarker)
-                , catchExceptions(catchExceptions)
-                , parserInfo(0)
-            {}
-            PrinterConfig(bool catchExceptions)
-                : characteristics(OutputType::Default)
-                , polymorphicMarker(Private::getDefaultPolymorphicMarker())
-                , catchExceptions(catchExceptions)
-                , parserInfo(0)
-            {}
-            PrinterConfig(OutputType characteristic, bool catchExceptions)
-                : characteristics(characteristic)
-                , polymorphicMarker(Private::getDefaultPolymorphicMarker())
-                , catchExceptions(catchExceptions)
-                , parserInfo(0)
-            {}
-            OutputType      characteristics;
-            std::string     polymorphicMarker;
-            bool            catchExceptions;
-            long            parserInfo;
-        };
-        // Default:     What ever the implementation likes.
-        // Stream:      Compressed for over the wire protocol.
-        // Config:      Human readable (potentially config file like)
-
         std::ostream&   output;
         PrinterConfig   config;
 

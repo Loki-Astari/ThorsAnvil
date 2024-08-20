@@ -97,9 +97,9 @@ void YamlPrinter::openMap(std::size_t)
     yaml_mapping_style_t    style;
     switch (this->config.characteristics)
     {
-        case PrinterInterface::OutputType::Stream:  style   = YAML_FLOW_MAPPING_STYLE;  break;
-        case PrinterInterface::OutputType::Config:  style   = YAML_BLOCK_MAPPING_STYLE; break;
-        default:                                    style   = YAML_ANY_MAPPING_STYLE;   break;
+        case OutputType::Stream:  style   = YAML_FLOW_MAPPING_STYLE;  break;
+        case OutputType::Config:  style   = YAML_BLOCK_MAPPING_STYLE; break;
+        default:                  style   = YAML_ANY_MAPPING_STYLE;   break;
     }
     checkYamlResultCode(
             [&](yaml_event_t& event){return yaml_mapping_start_event_initialize(&event, NULL, NULL, 1, style);},
@@ -124,9 +124,9 @@ void YamlPrinter::openArray(std::size_t)
     yaml_sequence_style_t    style;
     switch (this->config.characteristics)
     {
-        case PrinterInterface::OutputType::Stream:  style   = YAML_FLOW_SEQUENCE_STYLE; break;
-        case PrinterInterface::OutputType::Config:  style   = YAML_BLOCK_SEQUENCE_STYLE;break;
-        default:                                    style   = YAML_ANY_SEQUENCE_STYLE;  break;
+        case OutputType::Stream:  style   = YAML_FLOW_SEQUENCE_STYLE; break;
+        case OutputType::Config:  style   = YAML_BLOCK_SEQUENCE_STYLE;break;
+        default:                  style   = YAML_ANY_SEQUENCE_STYLE;  break;
     }
     checkYamlResultCode(
             [&](yaml_event_t& event){return yaml_sequence_start_event_initialize(&event, NULL, NULL, 1, style);},

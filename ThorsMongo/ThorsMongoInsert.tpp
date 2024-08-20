@@ -122,6 +122,10 @@ InsertResult Collection::insert(std::vector<T> const& data, InsertConfig const& 
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
         }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
+        }
     }
     return response;
 }
@@ -142,6 +146,10 @@ InsertResult Collection::insert(std::tuple<T...> const& data, InsertConfig const
             // The message was sent and reply read correctly.
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
+        }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
         }
     }
     return response;

@@ -26,6 +26,12 @@ struct Query
         , collation(collation)
         , hint(hint)
     {}
+    Query(Remove r = Remove::All, std::optional<Collation> collation = {}, std::optional<Hint> hint = {})
+        : q()
+        , limit(r == Remove::One ? 1 : 0)
+        , collation(collation)
+        , hint(hint)
+    {}
     T                               q;
     std::uint32_t                   limit;
     std::optional<Collation>        collation;
@@ -34,6 +40,10 @@ struct Query
 
 namespace QueryOp
 {
+
+// Filter that finds everything.
+class Any{};
+
 
 /*** Extractos ***/
 template<typename T>
@@ -439,6 +449,7 @@ struct AnySet
 }
 
 ThorsAnvil_Template_MakeTrait(2, ThorsAnvil::DB::Mongo::Query,              q, limit, collation, hint);
+ThorsAnvil_MakeTrait(            ThorsAnvil::DB::Mongo::QueryOp::Any);
 ThorsAnvil_Template_MakeTrait(1, ThorsAnvil::DB::Mongo::QueryOp::Eq,        $eq);
 ThorsAnvil_Template_MakeTrait(1, ThorsAnvil::DB::Mongo::QueryOp::Ne,        $ne);
 ThorsAnvil_Template_MakeTrait(1, ThorsAnvil::DB::Mongo::QueryOp::Gt,        $gt);

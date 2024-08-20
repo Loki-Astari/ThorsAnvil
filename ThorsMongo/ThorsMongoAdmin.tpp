@@ -103,6 +103,10 @@ AdminResult  Collection::rename(std::string const& name, RenameConfig const& con
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
         }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
+        }
     }
     return response;
 }
@@ -122,6 +126,10 @@ AdminResult  Collection::drop(DropCollectionConfig const& config)
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
         }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
+        }
     }
     return response;
 }
@@ -140,6 +148,10 @@ AdminResult  DB::createCollection(std::string colName, CreateCollectionConfig co
             // The message was sent and reply read correctly.
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
+        }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
         }
     }
     return response;

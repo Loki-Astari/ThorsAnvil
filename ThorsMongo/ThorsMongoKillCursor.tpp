@@ -42,6 +42,10 @@ void ThorsMongo::killCursor(std::string_view dbName, std::string_view colName, s
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
         }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
+        }
     }
 }
 

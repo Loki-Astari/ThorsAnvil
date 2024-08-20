@@ -34,13 +34,13 @@ namespace ThorsAnvil
 using IntTypes  = std::tuple<std::int32_t, std::int64_t>;
 using IdStore   = std::optional<std::reference_wrapper<std::vector<MongoUtility::ObjectID>>>;
 
-struct BsonPrinterConfig: public PrinterInterface::PrinterConfig
+struct BsonPrinterConfig: public PrinterConfig
 {
     IdStore    idStore;
     public:
-        using PrinterInterface::PrinterConfig::PrinterConfig;
-        BsonPrinterConfig(PrinterInterface::PrinterConfig val, IdStore idStore = {})
-            : PrinterInterface::PrinterConfig(std::move(val))
+        using PrinterConfig::PrinterConfig;
+        BsonPrinterConfig(PrinterConfig val, IdStore idStore = {})
+            : PrinterConfig(std::move(val))
             , idStore(idStore)
         {}
 };

@@ -253,11 +253,13 @@ class ActionConfig
     std::optional<PrinterConfig>    printerConfig;
     std::optional<ParserConfig>     parserConfig;
     OP_MsgFlag                      msgFlag         = OP_MsgFlag::empty;
+    bool                            serverErrorAreExceptions = false;
 
     public:
         T& setPrinterConfig(PrinterConfig const& pc)    {printerConfig.emplace(pc); return *static_cast<T*>(this);}
         T& setParserConfig(ParserConfig const& pc)      {parserConfig.emplace(pc);  return *static_cast<T*>(this);}
         T& setMsgFlag(OP_MsgFlag flag)                  {msgFlag = flag;            return *static_cast<T*>(this);}
+        T& setServerErrorAreExceptions(bool f)          {serverErrorAreExceptions=f;return *static_cast<T*>(this);}
         PrinterConfig const& getPrinterConfig() const
         {
             return printerConfig.has_value() ? printerConfig.value() : DefaultConfig::defaultPrinterConfig;
@@ -269,6 +271,10 @@ class ActionConfig
         OP_MsgFlag getMsgFlag() const
         {
             return msgFlag;
+        }
+        bool getServerErrorAreExceptions() const
+        {
+            return serverErrorAreExceptions;
         }
 };
 

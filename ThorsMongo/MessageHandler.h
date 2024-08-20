@@ -12,8 +12,8 @@
 namespace ThorsAnvil::DB::Mongo
 {
 
-using PrinterConfig = ThorsAnvil::Serialize::PrinterInterface::PrinterConfig;
-using ParserConfig  = ThorsAnvil::Serialize::ParserInterface::ParserConfig;
+using PrinterConfig = ThorsAnvil::Serialize::PrinterConfig;
+using ParserConfig  = ThorsAnvil::Serialize::ParserConfig;
 
 // Interface.
 // To be a message that can be sent to Mongo.

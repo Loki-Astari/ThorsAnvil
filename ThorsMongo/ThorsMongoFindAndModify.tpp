@@ -85,6 +85,10 @@ FAModifyResult<T> Collection::findAndReplaceOne(F const& search, T const& replac
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
         }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
+        }
     }
     return response;
 }
@@ -105,6 +109,10 @@ FAModifyResult<T> Collection::findAndRemoveOne(F const& search, FARemoveConfig c
             // The message was sent and reply read correctly.
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
+        }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
         }
     }
     return response;
@@ -127,6 +135,10 @@ FAModifyResult<T> Collection::findAndUpdateOne(F const& search, U const& update,
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
         }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
+        }
     }
     return response;
 }
@@ -147,6 +159,10 @@ FAModifyResult<T> Collection::findAndUpdateOne(F const& search, std::tuple<U con
             // The message was sent and reply read correctly.
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
+        }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
         }
     }
     return response;

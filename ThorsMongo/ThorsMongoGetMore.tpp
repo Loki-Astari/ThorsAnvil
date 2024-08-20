@@ -50,6 +50,10 @@ void ThorsMongo::getMore(CursorData<T>& findResult, std::string_view dbName, std
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
         }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
+        }
     }
     // Even if there is an error we
     // want to move the data.

@@ -14,7 +14,7 @@ namespace ThorsAnvil
     namespace Serialize
     {
 
-template<typename Format, typename T, typename Config = PrinterInterface::PrinterConfig>
+template<typename Format, typename T, typename Config = PrinterConfig>
 class Exporter
 {
     T const&        value;
@@ -69,7 +69,7 @@ class Exporter
 };
 
 template<typename Format, typename T>
-Exporter<Format, T> Export(T const& value, PrinterInterface::PrinterConfig config = PrinterInterface::PrinterConfig{})
+Exporter<Format, T> Export(T const& value, PrinterConfig config = PrinterConfig{})
 {
     return Exporter<Format, T>(value, config);
 }

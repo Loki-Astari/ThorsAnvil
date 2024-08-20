@@ -53,6 +53,10 @@ DistinctResult<T> Collection::distinct(std::string const& key, F const& query, D
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
         }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
+        }
     }
     return response;
 }
@@ -73,6 +77,10 @@ DistinctResult<T> Collection::distinct(std::string const& key, DistinctConfig co
             // The message was sent and reply read correctly.
             // Note: This does not mean it worked.
             //       There may be an error message in the response object
+        }
+        else if (config.getServerErrorAreExceptions())
+        {
+            throw response;
         }
     }
     return response;

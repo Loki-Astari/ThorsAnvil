@@ -126,7 +126,7 @@ class GetValueType<V, TraitType::Value>
     public:
         GetValueType(ParserInterface& parser, V& value)
         {
-            if (parser.getToken() != ThorsAnvil::Serialize::ParserInterface::ParserToken::Value)
+            if (parser.getToken() != ThorsAnvil::Serialize::ParserToken::Value)
             {
                 ThorsLogAndThrow("ThorsAnvil::Serializer::SerMap::GetValueType",
                                  "GetValueType<Value>",

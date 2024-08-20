@@ -9,7 +9,6 @@
 // enum class ParserToken {Error, MapStart, MapEnd, ArrayStart, ArrayEnd, Key, Value};
 namespace ThorsAnvil::Serialize
 {
-using ParserToken = ParserInterface::ParserToken;
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 JsonParser::JsonParser(std::istream& stream, ParserConfig config)

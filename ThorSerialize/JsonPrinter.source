@@ -15,11 +15,11 @@ namespace
         static char const*  comma[];
         static char const*  colon[];
 
-        PrinterInterface::OutputType    characteristics;
-        std::size_t                     size;
-        std::pair<int, TraitType>&      state;
+        OutputType                  characteristics;
+        std::size_t                 size;
+        std::pair<int, TraitType>&  state;
         public:
-            Prefix(PrinterInterface::OutputType characteristics, std::size_t size, std::pair<int, TraitType>& state)
+            Prefix(OutputType characteristics, std::size_t size, std::pair<int, TraitType>& state)
                 : characteristics(characteristics)
                 , size(size)
                 , state(state)
@@ -38,7 +38,7 @@ namespace
         friend std::ostream& operator<<(std::ostream& stream, PrefixKey const& data)
         {
             data.printSeporator(stream, true);
-            if (data.characteristics == PrinterInterface::OutputType::Stream)
+            if (data.characteristics == OutputType::Stream)
             {
                 return stream;
             }
@@ -53,7 +53,7 @@ namespace
             data.printSeporator(stream, false);
             ++data.state.first;
 
-            //if (data.characteristics == PrinterInterface::OutputType::Stream || data.state.second == TraitType::Array)
+            //if (data.characteristics == OutputType::Stream || data.state.second == TraitType::Array)
             {
                 return stream;
             }
@@ -67,7 +67,7 @@ namespace
         {
             data.printSeporator(stream, false);
 
-            if (data.characteristics == PrinterInterface::OutputType::Stream)
+            if (data.characteristics == OutputType::Stream)
             {
                 return stream;
             }
@@ -80,7 +80,7 @@ namespace
         friend std::ostream& operator<<(std::ostream& stream, PrefixMapClose const& data)
         {
             ++data.state.first;
-            if (data.characteristics == PrinterInterface::OutputType::Stream)
+            if (data.characteristics == OutputType::Stream)
             {
                 return stream;
             }

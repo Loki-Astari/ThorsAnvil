@@ -175,9 +175,9 @@ class DeSerializationForBlock
             : parent(parent)
             , parser(parser)
         {
-            ParserInterface::ParserToken    tokenType = parser.getToken();
+            ParserToken    tokenType = parser.getToken();
 
-            if (tokenType != ParserInterface::ParserToken::MapStart)
+            if (tokenType != ParserToken::MapStart)
             {
                 ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Map>",
                                  "DeSerializationForBlock",
@@ -199,7 +199,7 @@ class DeSerializationForBlock
                     memberFound[key] = true;
                 }
             }
-            if (parser.config.parseStrictness == ParserInterface::ParseType::Exact)
+            if (parser.config.parseStrictness == ParseType::Exact)
             {
                 HeedAllValues<T>    check;
                 check(memberFound);
@@ -207,11 +207,11 @@ class DeSerializationForBlock
         }
         bool hasMoreValue()
         {
-            ParserInterface::ParserToken    tokenType = parser.getToken();
-            bool                            result    = tokenType != ParserInterface::ParserToken::MapEnd;
+            ParserToken    tokenType = parser.getToken();
+            bool           result    = tokenType != ParserToken::MapEnd;
             if (result)
             {
-                if (tokenType != ParserInterface::ParserToken::Key)
+                if (tokenType != ParserToken::Key)
                 {
                     ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Map>",
                                      "hasMoreValue",
@@ -241,8 +241,8 @@ class DeSerializationForBlock<TraitType::Value, T>
         {}
         void scanObject(T& object)
         {
-            ParserInterface::ParserToken    tokenType = parser.getToken();
-            if (tokenType != ParserInterface::ParserToken::Value)
+            ParserToken    tokenType = parser.getToken();
+            if (tokenType != ParserToken::Value)
             {
                 ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Value>",
                                  "DeSerializationForBlock",
@@ -264,8 +264,8 @@ DeSerializationForBlock<TraitType::Custom_Depricated, T>
         {}
         void scanObject(T& object)
         {
-            ParserInterface::ParserToken    tokenType = parser.getToken();
-            if (tokenType != ParserInterface::ParserToken::Value)
+            ParserToken    tokenType = parser.getToken();
+            if (tokenType != ParserToken::Value)
             {
                 ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Serialize>",
                                  "DeSerializationForBlock",
@@ -287,8 +287,8 @@ class DeSerializationForBlock<TraitType::Custom_Serialize, T>
         {}
         void scanObject(T& object)
         {
-            ParserInterface::ParserToken    tokenType = parser.getToken();
-            if (tokenType != ParserInterface::ParserToken::Value)
+            ParserToken    tokenType = parser.getToken();
+            if (tokenType != ParserToken::Value)
             {
                 ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Value>",
                                  "DeSerializationForBlock",
@@ -339,9 +339,9 @@ struct ConvertPointer<std::shared_ptr<T>>
 template<class T>
 auto tryParsePolyMorphicObject(DeSerializer& parent, ParserInterface& parser, T& object, int) -> decltype(object->parsePolyMorphicObject(parent, parser), void())
 {
-    ParserInterface::ParserToken    tokenType;
+    ParserToken    tokenType;
     tokenType = parser.getToken();
-    if (tokenType != ParserInterface::ParserToken::MapStart)
+    if (tokenType != ParserToken::MapStart)
     {
         ThorsLogAndThrow("ThorsAnvil::Serialize",
                          "tryParsePolyMorphicObject",
@@ -349,7 +349,7 @@ auto tryParsePolyMorphicObject(DeSerializer& parent, ParserInterface& parser, T&
     }
 
     tokenType = parser.getToken();
-    if (tokenType != ParserInterface::ParserToken::Key)
+    if (tokenType != ParserToken::Key)
     {
         ThorsLogAndThrow("ThorsAnvil::Serialize",
                          "tryParsePolyMorphicObject",
@@ -366,7 +366,7 @@ auto tryParsePolyMorphicObject(DeSerializer& parent, ParserInterface& parser, T&
     }
 
     tokenType = parser.getToken();
-    if (tokenType != ParserInterface::ParserToken::Value)
+    if (tokenType != ParserToken::Value)
     {
         ThorsLogAndThrow("ThorsAnvil::Serialize",
                          "tryParsePolyMorphicObject",
@@ -388,7 +388,7 @@ auto tryParsePolyMorphicObject(DeSerializer& parent, ParserInterface& parser, T&
     //
     // To install this virtual method use the macro
     // ThorsAnvil_PolyMorphicSerializer  See Traits.h for details.
-    parser.pushBackToken(ParserInterface::ParserToken::MapStart);
+    parser.pushBackToken(ParserToken::MapStart);
     object->parsePolyMorphicObject(parent, parser);
 }
 template<class T>
@@ -422,7 +422,7 @@ class DeSerializationForBlock<TraitType::Pointer, T>
         {
             Traits<std::remove_cv_t<T>>::release(object);
 
-            ParserInterface::ParserToken    tokenType = parser.getToken();
+            ParserToken    tokenType = parser.getToken();
             if (parser.isValueNull())
             {
                 parser.ignoreDataValue();
@@ -472,8 +472,8 @@ class DeSerializationForBlock<TraitType::Enum, T>
         {}
         void scanObject(T& object)
         {
-            ParserInterface::ParserToken    tokenType = parser.getToken();
-            if (tokenType != ParserInterface::ParserToken::Value)
+            ParserToken    tokenType = parser.getToken();
+            if (tokenType != ParserToken::Value)
             {
                 ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Enum>",
                                  "DeSerializationForBlock",
@@ -504,9 +504,9 @@ class DeSerializationForBlock<TraitType::Array, T>
             , parser(parser)
             , index(-1)
         {
-            ParserInterface::ParserToken    tokenType = parser.getToken();
+            ParserToken    tokenType = parser.getToken();
 
-            if (tokenType != ParserInterface::ParserToken::ArrayStart)
+            if (tokenType != ParserToken::ArrayStart)
             {
                 ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Array>",
                                  "DeSerializationForBlock",
@@ -523,8 +523,8 @@ class DeSerializationForBlock<TraitType::Array, T>
         }
         bool hasMoreValue()
         {
-            ParserInterface::ParserToken    tokenType = parser.getToken();
-            bool                            result    = tokenType != ParserInterface::ParserToken::ArrayEnd;
+            ParserToken    tokenType = parser.getToken();
+            bool           result    = tokenType != ParserToken::ArrayEnd;
             if (result)
             {
                 parser.pushBackToken(tokenType);

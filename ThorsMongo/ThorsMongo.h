@@ -210,7 +210,6 @@ class Collection
         template<typename T, typename F>    DistinctResult<T>   distinct(std::string const& key, F const& query, DistinctConfig const& config = DistinctConfig{});
         template<typename T>                DistinctResult<T>   distinct(std::string const& key, DistinctConfig const& config = DistinctConfig{});
 
-    private:
         std::string_view        dbName()    const {return {name.data(), name.find("::")};}
         std::string_view        colName()   const {return {name.data() + name.find("::") + 2};}
 

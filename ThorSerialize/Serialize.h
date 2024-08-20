@@ -98,7 +98,6 @@ class DeSerializeMemberValue
 
 class DeSerializer
 {
-    using ParserToken = ParserInterface::ParserToken;
     ParserInterface&    parser;
     bool                root;
 
@@ -234,7 +233,7 @@ struct TraitsInfo<T, M, TraitType::Custom_Serialize>
 };
 
 /* ------------ ParserInterface ------------------------- */
-inline ParserInterface::ParserToken ParserInterface::getToken()
+inline ParserToken ParserInterface::getToken()
 {
     ParserToken result  = ParserToken::Error;
 

@@ -47,7 +47,7 @@ YamlParser::~YamlParser()
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-ParserInterface::ParserToken YamlParser::getNextToken()
+ParserToken YamlParser::getNextToken()
 {
     // enum class ParserToken {Error, DocStart, DocEnd, MapStart, MapEnd, ArrayStart, ArrayEnd, Key, Value};
     if (first)
@@ -138,7 +138,7 @@ ParserInterface::ParserToken YamlParser::getNextToken()
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-ParserInterface::ParserToken YamlParser::parsingError()
+ParserToken YamlParser::parsingError()
 {
     error = true;
     return ParserToken::Error;

@@ -16,7 +16,6 @@ namespace ThorsAnvil
 template<typename Format, typename T>
 class Importer
 {
-    using ParserConfig = ParserInterface::ParserConfig;
     T&              value;
     ParserConfig    config;
     public:
@@ -68,7 +67,7 @@ class Importer
 };
 
 template<typename Format, typename T>
-Importer<Format, T> Import(T const& value, ParserInterface::ParserConfig config = ParserInterface::ParserConfig{})
+Importer<Format, T> Import(T const& value, ParserConfig config = ParserConfig{})
 {
     return Importer<Format, T>(value, config);
 }
