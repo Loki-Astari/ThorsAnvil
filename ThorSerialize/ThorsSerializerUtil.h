@@ -538,12 +538,23 @@ template<> class Traits<std::string>            {public: THORSANVIL_TRAITS_FOR_V
  * If the de-referenced type has a Traits class then it will be normally
  * serialized. Otherwise there will be an error.
  */
+
+template<typename T, bool test = std::is_abstract_v<T>>
+struct TraitsAllocator
+{
+    static T* alloc() {return new T;}
+};
+template<typename T>
+struct TraitsAllocator<T, true>
+{
+    static T* alloc() {return nullptr;}
+};
 template<typename T>
 class Traits<T*>
 {
     public:
         static constexpr TraitType type = TraitType::Pointer;
-        static T*   alloc()         {return new T;}
+        static T*   alloc()         {return TraitsAllocator<T>::alloc();}
         static void release(T* p)   {delete p;}
         static std::size_t getPrintSize(PrinterInterface& printer, T* object, bool)
         {
