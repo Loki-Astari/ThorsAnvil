@@ -796,6 +796,7 @@ am__quote'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+enable_coverage
 enable_vera
 enable_colour
 enable_dark_mode
@@ -1465,6 +1466,8 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --disable-coverage      Disable coverage tool checks
+
   --disable-vera          Disable vera. Disable Static analysis of source.
 
   --disable-colour        Turns off text colouring in the makefile output
@@ -3698,25 +3701,35 @@ fi
 
 
 
-echo "STARTING COVERAGE CHECK"
-    if test "x${COV}x" = "xx"
+    # Check whether --enable-coverage was given.
+if test ${enable_coverage+y}
+then :
+  enableval=$enable_coverage;
+fi
+
+    if test "x$enable_coverage" != "xno"
 then :
 
-            CXXTOOL=${CXX% *}
-            if test "${CXXTOOL}" = "g++"
+        subconfigure="${subconfigure} --disable-coverage"
+echo "STARTING COVERAGE CHECK"
+        if test "x${COV}x" = "xx"
+then :
+
+                CXXTOOL=${CXX% *}
+                if test "${CXXTOOL}" = "g++"
 then :
   COV=gcov
 
 else case e in #(
   e)
 echo "STARTING COVERAGE CHECK: CHECKING CLANG"
-                    if test "${CXXTOOL}" = "clang++"
+                        if test "${CXXTOOL}" = "clang++"
 then :
   COV=llvm-cov
 
 else case e in #(
   e)
-                            as_fn_error $? "
+                                as_fn_error $? "
 
 Could not determine the coverage tool.
 
@@ -3733,27 +3746,30 @@ Another alternative is to explicitly specify the coverage tool to use.
 
     COV=gcov ./confgiure
 
-                            " "$LINENO" 5
+                                " "$LINENO" 5
 
-                     ;;
+                         ;;
 esac
 fi
 
-             ;;
+                 ;;
 esac
 fi
 
 
 fi
-    ${COV} --version 2>&1 | grep -Eo '([[:digit:]]+\.)+[[:digit:]]+' || ${COV} --version 2>&1 | grep -Po '(\d+\.)+\d+' > /dev/null
-    if test $? != 0
+        ${COV} --version 2>&1 | grep -Eo '([[:digit:]]+\.)+[[:digit:]]+' || ${COV} --version 2>&1 | grep -Po '(\d+\.)+\d+' > /dev/null
+        if test $? != 0
 then :
 
-            as_fn_error $? "
+                as_fn_error $? "
 
-The coverage tool \"${COV}\" does not seem to be working.
+    The coverage tool \"${COV}\" does not seem to be working.
 
-            " "$LINENO" 5
+                " "$LINENO" 5
+
+
+fi
 
 
 fi
@@ -5681,6 +5697,7 @@ fi
 
 
 
+
     if test "
 #include <utility>
 int main() {
@@ -5710,18 +5727,86 @@ _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"
 then :
 
-                    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: good" >&5
+
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: good" >&5
 printf "%s\n" "good" >&6; }
+
 
 else case e in #(
   e)
-                    as_fn_error $? "
+
+            as_fn_error $? "
 
 Error: Your compiler does not seem to support the language features required.
        Try updating your compiler to use a more recent version.
 
        Compiler used: ${CXX} ${CXX_STD_FLAG}
-                    " "$LINENO" 5
+            " "$LINENO" 5
+
+
+
+             ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+            CXXFLAGS=${CXXFLAGS_SAVE}
+
+
+
+fi
+
+
+
+
+    if test "
+#include <charconv>
+int main() {
+    char    buffer[100];
+    double  value = 12.345;
+    auto result = std::to_chars(buffer, buffer+100, value, std::chars_format::fixed, 6);
+}" != ""
+then :
+
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}" >&5
+printf %s "checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}... " >&6; }
+            ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+            CXXFLAGS_SAVE="${CXXFLAGS}"
+            CXXFLAGS=${CXX_STD_FLAG}
+
+            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <charconv>
+int main() {
+    char    buffer[100];
+    double  value = 12.345;
+    auto result = std::to_chars(buffer, buffer+100, value, std::chars_format::fixed, 6);
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"
+then :
+
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Supports std::to_chars(beigin, end, 12.4" >&5
+printf "%s\n" "$as_me: Supports std::to_chars(beigin, end, 12.4" >&6;}
+
+
+else case e in #(
+  e)
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Setting HOMEBREW_OLD_VERSION_OF_MAC" >&5
+printf "%s\n" "$as_me: Setting HOMEBREW_OLD_VERSION_OF_MAC" >&6;}
+
+printf "%s\n" "#define HOMEBREW_OLD_VERSION_OF_MAC 1" >>confdefs.h
+
+        subconfigure="${subconfigure} --with-homebrewCLT=${with_homebrewCLT}"
+
+
 
              ;;
 esac

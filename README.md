@@ -10,7 +10,7 @@ This library provides a simple and intuitive library for interacting with a Mong
 
 There are two main parts:
 
-1. [ThorsSerializer](https://github.com/Loki-Astari/ThorsSerializer) automatically converts C++ objects into BSON (JSON/YANL).
+1. [ThorsSerializer](https://github.com/Loki-Astari/ThorsSerializer) automatically converts C++ objects into BSON (JSON/YAML).
 2. [ThorsMongoAPI](https://github.com/Loki-Astari/ThorsMongoAPI) sends and receives MongoDB wire protocol messages.
 
 The main goal of this project is to remove the need to write boilerplate code to save/ restore C++ objects into a MongoDB. Using a declarative style an engineer can define the C++ classes and members that need to be serialized into BSON thus allowing them to be inserted into or retrieved directly to/from a MongoDB.

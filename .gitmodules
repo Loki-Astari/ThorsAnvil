@@ -1,27 +1,27 @@
 [submodule "docSource/themes/documentation"]
 	path = docSource/themes/documentation
-	url = ../andvari-theme-documentation.git
+	url = ../../Loki-Astari/andvari-theme-documentation.git
 [submodule ".build"]
 	path = build
-	url = ../ThorMaker.git
+	url = ../../Loki-Astari/ThorMaker.git
 [submodule "third/ThorsStorage"]
 	path = third/ThorsStorage
-	url = ../ThorsStorage.git
+	url = ../../Loki-Astari/ThorsStorage.git
 [submodule "third/ThorsCrypto"]
 	path = third/ThorsCrypto
-	url = ../ThorsCrypto.git
+	url = ../../Loki-Astari/ThorsCrypto.git
 [submodule "third/ThorsSocket"]
 	path = third/ThorsSocket
-	url = ../ThorsSocket.git
+	url = ../../Loki-Astari/ThorsSocket.git
 [submodule "third/ThorsLogging"]
 	path = third/ThorsLogging
-	url = ../ThorsLogging.git
+	url = ../../Loki-Astari/ThorsLogging.git
 [submodule "third/ThorsIOUtil"]
 	path = third/ThorsIOUtil
-	url = ../ThorsIOUtil.git
+	url = ../../Loki-Astari/ThorsIOUtil.git
 [submodule "third/ThorsMongoAPI"]
 	path = third/ThorsMongoAPI
-	url = ../ThorsMongoAPI.git
+	url = ../../Loki-Astari/ThorsMongoAPI.git
 [submodule "third/ThorsSerializer"]
 	path = third/ThorsSerializer
-	url = ../ThorsSerializer
+	url = ../../Loki-Astari/ThorsSerializer

@@ -55,7 +55,7 @@ No extra work needs to be done to serialize pointers. If the pointer is `nullptr
 The `std::unique_ptr<>` behaves just like a pointer during serialization.
 
 #### std::shared_ptr
-The `std::shared_ptr` is not currently supported.
+The `std::shared_ptr` is correctly de-dupped. i.e. If you have two (or more) shared pointers pointing at the same object then the object is only serialized once (the second time we serialize an id). When de-serializing shared_ptr the reference id is used to reconnect the objects so that the shared pointers now continue to use a shared object.
 
 #### Polymorphic Objects
 ````C++

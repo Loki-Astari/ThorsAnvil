@@ -24,6 +24,23 @@ int main() {
     std::index_sequence<1,2,3,4>    seq;
 }])
 
+AX_THOR_FUNC_TEST_COMP_ACTION([[
+#include <charconv>
+int main() {
+    char    buffer[100];
+    double  value = 12.345;
+    auto result = std::to_chars(buffer, buffer+100, value, std::chars_format::fixed, 6);
+}]],
+    [
+        AC_MSG_NOTICE([Supports std::to_chars(beigin, end, 12.4])
+    ],
+    [
+        AC_MSG_NOTICE([Setting HOMEBREW_OLD_VERSION_OF_MAC])
+        AC_DEFINE([HOMEBREW_OLD_VERSION_OF_MAC], [1], [Check for older build tools and use simpler code with old tools])
+        subconfigure="${subconfigure} --with-homebrewCLT=${with_homebrewCLT}"
+    ]
+)
+
 LT_INIT
 
 subconfigure="${subconfigure} --with-thorserialize-root=$(pwd)/build "

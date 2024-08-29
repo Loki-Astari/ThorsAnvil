@@ -54,6 +54,9 @@
 /* We have found package ZLIB */
 #undef HAVE_ZLIB
 
+/* Check for older build tools and use simpler code with old tools */
+#undef HOMEBREW_OLD_VERSION_OF_MAC
+
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
