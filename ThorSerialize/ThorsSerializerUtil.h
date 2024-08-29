@@ -13,6 +13,8 @@
 #include <cstddef>
 #include <algorithm>
 #include <functional>
+#include <optional>
+#include <memory>
 
 namespace ThorsAnvil::Serialize
 {
