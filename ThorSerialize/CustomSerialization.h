@@ -4,10 +4,8 @@
 #include "SerializeConfig.h"
 #include <cstdlib>
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 class PrinterInterface;
 class ParserInterface;
@@ -35,7 +33,7 @@ struct DefaultCustomSerializer
         virtual void writeBson(BsonPrinter& printer, T const& object)           const;
         virtual void readBson(BsonParser& parser, char byteMarker, T& object)   const;
 };
-    }
+
 }
 
 #include "CustomSerialization.tpp"

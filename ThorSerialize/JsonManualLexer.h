@@ -7,10 +7,8 @@
 #include "ThorsLogging/ThorsLogging.h"
 #include <istream>
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 class JsonManualLexer
 {
@@ -56,7 +54,7 @@ inline T JsonManualLexer::scan()
     }
     return value;
 }
-    }
+
 }
 
 #if defined(THORS_SERIALIZER_HEADER_ONLY) && THORS_SERIALIZER_HEADER_ONLY == 1

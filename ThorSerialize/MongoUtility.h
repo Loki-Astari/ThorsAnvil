@@ -15,12 +15,8 @@
 #include "JsonThor.h"
 #include <chrono>
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize::MongoUtility
 {
-    namespace Serialize
-    {
-        namespace MongoUtility
-        {
 
 /*
  * BSON Elements
@@ -239,154 +235,151 @@ class BsonTimeStamp
         std::uint32_t getSecSinceEpoch() const {return timestamp;}
         std::uint32_t getIncrement()     const {return increment;}
 };
-        }
-    }
-}
-namespace ThorsAnvil::Serialize::MongoUtility
+
+inline
+BsonPrinter& operator<<(BsonPrinter& printer, ObjectID const& data)
 {
-    inline
-    BsonPrinter& operator<<(BsonPrinter& printer, ObjectID const& data)
-    {
-        printer.writeBE<4>(data.timestamp);
-        printer.writeBE<5>(data.random);
-        printer.writeBE<3>(data.counter);
-        return printer;
-    }
+    printer.writeBE<4>(data.timestamp);
+    printer.writeBE<5>(data.random);
+    printer.writeBE<3>(data.counter);
+    return printer;
+}
 
-    inline
-    JsonPrinter& operator<<(JsonPrinter& printer, ObjectID const& data)
-    {
-        printer.stream() << data;
-        return printer;
-    }
+inline
+JsonPrinter& operator<<(JsonPrinter& printer, ObjectID const& data)
+{
+    printer.stream() << data;
+    return printer;
+}
 
-    inline
-    std::ostream& operator<<(std::ostream& stream, ObjectID const& data)
-    {
-        stream << ThorsAnvil::Utility::StreamFormatterNoChange{}
-                         << "\""
-                         << std::hex << std::setfill('0')
-                         << std::setw( 8) << data.timestamp << "-"
-                         << std::setw(10) << data.random    << "-"
-                         << std::setw( 6) << data.counter
-                         << "\"";
-        return stream;
-    }
+inline
+std::ostream& operator<<(std::ostream& stream, ObjectID const& data)
+{
+    stream << ThorsAnvil::Utility::StreamFormatterNoChange{}
+                     << "\""
+                     << std::hex << std::setfill('0')
+                     << std::setw( 8) << data.timestamp << "-"
+                     << std::setw(10) << data.random    << "-"
+                     << std::setw( 6) << data.counter
+                     << "\"";
+    return stream;
+}
 
-    inline
-    BsonParser& operator>>(BsonParser& parser, ObjectID& data)
-    {
-        data.timestamp = parser.readBE<4, std::int32_t>();
-        data.random    = parser.readBE<5, std::int64_t>();
-        data.counter   = parser.readBE<3, std::int32_t>();
-        return parser;
-    }
+inline
+BsonParser& operator>>(BsonParser& parser, ObjectID& data)
+{
+    data.timestamp = parser.readBE<4, std::int32_t>();
+    data.random    = parser.readBE<5, std::int64_t>();
+    data.counter   = parser.readBE<3, std::int32_t>();
+    return parser;
+}
 
-    inline
-    JsonParser& operator>>(JsonParser& parser, ObjectID& data)
-    {
-        parser.stream() >> data;
-        return parser;
-    }
+inline
+JsonParser& operator>>(JsonParser& parser, ObjectID& data)
+{
+    parser.stream() >> data;
+    return parser;
+}
 
-    inline
-    std::istream& operator>>(std::istream& stream, ObjectID& data)
-    {
-        char x1, x2, x3, x4;
-        return stream >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> x1 >> data.timestamp >> x2 >> data.random >> x3 >> data.counter >> x4;
-    }
+inline
+std::istream& operator>>(std::istream& stream, ObjectID& data)
+{
+    char x1, x2, x3, x4;
+    return stream >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> x1 >> data.timestamp >> x2 >> data.random >> x3 >> data.counter >> x4;
+}
 
-    inline
-    BsonPrinter& operator<<(BsonPrinter& printer, UTCDateTime const& data)
-    {
-        printer.writeLE<8, std::int64_t>(data.datetime);
-        return printer;
-    }
+inline
+BsonPrinter& operator<<(BsonPrinter& printer, UTCDateTime const& data)
+{
+    printer.writeLE<8, std::int64_t>(data.datetime);
+    return printer;
+}
 
-    inline
-    JsonPrinter& operator<<(JsonPrinter& printer, UTCDateTime const& data)
-    {
-        printer.stream() << ThorsAnvil::Utility::StreamFormatterNoChange{} << std::hex << std::setw(16) << std::setfill('0') << data.datetime;
-        return printer;
-    }
+inline
+JsonPrinter& operator<<(JsonPrinter& printer, UTCDateTime const& data)
+{
+    printer.stream() << ThorsAnvil::Utility::StreamFormatterNoChange{} << std::hex << std::setw(16) << std::setfill('0') << data.datetime;
+    return printer;
+}
 
-    inline
-    std::ostream& operator<<(std::ostream& stream, UTCDateTime const& data)
-    {
-        std::time_t now_tt = data.datetime / 1000;
-        std::tm tm = *std::localtime(&now_tt);
+inline
+std::ostream& operator<<(std::ostream& stream, UTCDateTime const& data)
+{
+    std::time_t now_tt = data.datetime / 1000;
+    std::tm tm = *std::localtime(&now_tt);
 
-        return stream<< std::put_time(&tm, "%c %Z");
-    }
+    return stream<< std::put_time(&tm, "%c %Z");
+}
 
-    inline
-    BsonParser& operator>>(BsonParser& parser, UTCDateTime& data)
-    {
-        data.datetime = parser.readLE<8, std::int64_t>();
-        return parser;
-    }
+inline
+BsonParser& operator>>(BsonParser& parser, UTCDateTime& data)
+{
+    data.datetime = parser.readLE<8, std::int64_t>();
+    return parser;
+}
 
-    inline
-    JsonParser& operator>>(JsonParser& parser, UTCDateTime& data)
-    {
-        parser.stream() >> data;
-        return parser;
-    }
+inline
+JsonParser& operator>>(JsonParser& parser, UTCDateTime& data)
+{
+    parser.stream() >> data;
+    return parser;
+}
 
-    inline
-    std::istream& operator>>(std::istream& stream, UTCDateTime& data)
-    {
-        return stream >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> data.datetime;
-    }
+inline
+std::istream& operator>>(std::istream& stream, UTCDateTime& data)
+{
+    return stream >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> data.datetime;
+}
 
-    inline
-    BsonPrinter& operator<<(BsonPrinter& printer, BsonTimeStamp const& data)
-    {
-        printer.writeBE<4, std::int32_t>(data.increment);
-        printer.writeBE<4, std::int32_t>(data.timestamp);
-        return printer;
-    }
+inline
+BsonPrinter& operator<<(BsonPrinter& printer, BsonTimeStamp const& data)
+{
+    printer.writeBE<4, std::int32_t>(data.increment);
+    printer.writeBE<4, std::int32_t>(data.timestamp);
+    return printer;
+}
 
-    inline
-    JsonPrinter& operator<<(JsonPrinter& printer, BsonTimeStamp const& data)
-    {
-        printer.stream() << data;
-        return printer;
-    }
+inline
+JsonPrinter& operator<<(JsonPrinter& printer, BsonTimeStamp const& data)
+{
+    printer.stream() << data;
+    return printer;
+}
 
-    inline
-    std::ostream& operator<<(std::ostream& stream, BsonTimeStamp const& data)
-    {
-        stream << ThorsAnvil::Utility::StreamFormatterNoChange{}
-                         << "\""
-                         << std::hex << std::setw(8) << std::setfill('0')
-                         << data.timestamp << "-"
-                         << data.increment
-                         << "\"";
-        return stream;
-    }
+inline
+std::ostream& operator<<(std::ostream& stream, BsonTimeStamp const& data)
+{
+    stream << ThorsAnvil::Utility::StreamFormatterNoChange{}
+                     << "\""
+                     << std::hex << std::setw(8) << std::setfill('0')
+                     << data.timestamp << "-"
+                     << data.increment
+                     << "\"";
+    return stream;
+}
 
-    inline
-    BsonParser& operator>>(BsonParser& parser, BsonTimeStamp& data)
-    {
-        data.increment = parser.readBE<4, std::int32_t>();
-        data.timestamp = parser.readBE<4, std::int32_t>();
-        return parser;
-    }
+inline
+BsonParser& operator>>(BsonParser& parser, BsonTimeStamp& data)
+{
+    data.increment = parser.readBE<4, std::int32_t>();
+    data.timestamp = parser.readBE<4, std::int32_t>();
+    return parser;
+}
 
-    inline
-    JsonParser& operator>>(JsonParser& parser, BsonTimeStamp& data)
-    {
-        parser.stream() >> data;
-        return parser;
-    }
+inline
+JsonParser& operator>>(JsonParser& parser, BsonTimeStamp& data)
+{
+    parser.stream() >> data;
+    return parser;
+}
 
-    inline
-    std::istream& operator>>(std::istream& stream, BsonTimeStamp& data)
-    {
-        char x1, x2, x3;
-        return stream >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> x1 >> data.timestamp >> x2 >> data.increment >> x3;
-    }
+inline
+std::istream& operator>>(std::istream& stream, BsonTimeStamp& data)
+{
+    char x1, x2, x3;
+    return stream >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> x1 >> data.timestamp >> x2 >> data.increment >> x3;
+}
+
 }
 
 

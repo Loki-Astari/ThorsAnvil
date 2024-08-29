@@ -25,10 +25,8 @@
 #include <vector>
 #include <cstdint>
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 inline long convertHexToDec(char x)
 {
@@ -374,7 +372,6 @@ template<typename C> UnicodePushBackIterator<C> make_UnicodePushBackIterator(C& 
 template<typename I> UnicodeWrapperIterator<I>  make_UnicodeWrapperIterator(I iter)     {return UnicodeWrapperIterator<I>(iter, false);}
 template<typename I> UnicodeWrapperIterator<I>  make_EndUnicodeWrapperIterator(I iter)  {return UnicodeWrapperIterator<I>(iter, true);}
 
-    }
 }
 
 #endif

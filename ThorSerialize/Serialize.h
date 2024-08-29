@@ -38,10 +38,12 @@
 #include <iostream>
 #include <utility>
 
-namespace ThorsAnvil
+// SharedInfo is declared in ThorsSerializerUtil.h
+// This is included via Traits.h above.
+ThorsAnvil_Template_MakeTrait(1, ThorsAnvil::Serialize::SharedInfo, sharedPtrName, data);
+
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 
 template<typename T>
@@ -311,7 +313,6 @@ inline Serializer::~Serializer()
     }
 }
 
-    }
 }
 
 #include "Serialize.tpp"

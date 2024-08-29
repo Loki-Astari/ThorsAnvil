@@ -25,10 +25,8 @@
 #include <vector>
 #include <functional>
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 class YamlParser: public ParserInterface
 {
@@ -79,7 +77,6 @@ class YamlParser: public ParserInterface
         virtual std::string getRawValue()                       override;
 };
 
-    }
 }
 
 #if defined(THORS_SERIALIZER_HEADER_ONLY) && THORS_SERIALIZER_HEADER_ONLY == 1

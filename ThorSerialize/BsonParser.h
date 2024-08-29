@@ -34,16 +34,15 @@ static_assert(
 );
 
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
-        class BsonParser;
-        namespace MongoUtility
-        {
-            class UTCDateTime;
-            BsonParser& operator>>(BsonParser& parser, MongoUtility::UTCDateTime& data);
-        }
+
+class BsonParser;
+namespace MongoUtility
+{
+    class UTCDateTime;
+    BsonParser& operator>>(BsonParser& parser, MongoUtility::UTCDateTime& data);
+}
 
 class BsonParser: public ParserInterface
 {
@@ -224,7 +223,6 @@ inline Float BsonParser::getFloatValue()
     badType("Float", nextType);
 }
 
-    }
 }
 
 #if defined(THORS_SERIALIZER_HEADER_ONLY) && THORS_SERIALIZER_HEADER_ONLY == 1

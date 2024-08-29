@@ -8,10 +8,8 @@
 #include "SerializeConfig.h"
 #include "Serialize.h"
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 template<typename Format, typename T>
 class Importer
@@ -73,7 +71,6 @@ Importer<Format, T> Import(T const& value, ParserConfig config = ParserConfig{})
 }
 
 
-    }
 }
 
 #endif

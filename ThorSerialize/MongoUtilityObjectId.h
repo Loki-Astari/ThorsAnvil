@@ -6,18 +6,16 @@
 #include <tuple>
 #include <iostream>
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 class BsonPrinter;
 class BsonParser;
 class JsonPrinter;
 class JsonParser;
 
-        namespace MongoUtility
-        {
+namespace MongoUtility
+{
 
 class ObjectID
 {
@@ -45,8 +43,7 @@ class ObjectID
         friend std::istream& operator>>(std::istream& stream, ObjectID& data);
 };
 
-        }
-    }
+}
 }
 
 #endif

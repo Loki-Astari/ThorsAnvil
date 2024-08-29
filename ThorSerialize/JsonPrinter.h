@@ -9,14 +9,13 @@
 #include "Serialize.h"
 #include <vector>
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
+using PrintState = std::tuple<int, TraitType, bool>;
 class JsonPrinter: public PrinterInterface
 {
-    std::vector<std::pair<int, TraitType>> state;
+    std::vector<PrintState> state;
     public:
         JsonPrinter(std::ostream& output, PrinterConfig config = PrinterConfig{});
         virtual FormatType formatType()                     override {return FormatType::Json;}
@@ -56,7 +55,6 @@ class JsonPrinter: public PrinterInterface
         void addPrefix();
 };
 
-    }
 }
 
 #if defined(THORS_SERIALIZER_HEADER_ONLY) && THORS_SERIALIZER_HEADER_ONLY == 1

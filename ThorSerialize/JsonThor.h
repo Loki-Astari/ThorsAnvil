@@ -18,10 +18,8 @@
 #include "Importer.h"
 #include "SerUtil.h"
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 struct Json
 {
@@ -65,7 +63,7 @@ Importer<Json, T> jsonImport(T& value, ParserConfig config = ParserConfig{}, boo
     config.catchExceptions = catchExceptions;
     return jsonImporter(value, config);
 }
-    }
+
 }
 
 #endif

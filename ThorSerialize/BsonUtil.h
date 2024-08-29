@@ -9,10 +9,8 @@
 #include "Serialize.h"
 #include <vector>
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 enum class BsonContainer  {Map, Array, Value};
 enum class ValueType {Int32, Int64, Double64, Double128, Bool, String, Null, Binary, Obj, Key};
@@ -23,7 +21,6 @@ struct MaxTemplate
     static constexpr std::size_t value = (lhs >= rhs) ? lhs : rhs;
 };
 
-    }
 }
 
 #endif

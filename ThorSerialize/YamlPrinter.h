@@ -9,10 +9,8 @@
 #include <vector>
 #include <memory>
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 class YamlPrinter: public PrinterInterface
 {
@@ -62,7 +60,6 @@ class YamlPrinter: public PrinterInterface
         virtual void addNull()                              override    {emitNull();}
 };
 
-    }
 }
 
 #if defined(THORS_SERIALIZER_HEADER_ONLY) && THORS_SERIALIZER_HEADER_ONLY == 1

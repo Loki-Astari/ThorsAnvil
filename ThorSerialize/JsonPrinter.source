@@ -1,3 +1,4 @@
+#include "JsonThor.h"
 #include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"
 #include <iomanip>
@@ -17,18 +18,20 @@ namespace
 
         OutputType                  characteristics;
         std::size_t                 size;
-        std::pair<int, TraitType>&  state;
+        PrintState&                 state;
+        bool                        prefixValue;
         public:
-            Prefix(OutputType characteristics, std::size_t size, std::pair<int, TraitType>& state)
+            Prefix(OutputType characteristics, std::size_t size, PrintState& state, bool prefixValue = false)
                 : characteristics(characteristics)
-                , size(size)
+                , size(size - 1)
                 , state(state)
+                , prefixValue(prefixValue)
             {}
             void printSeporator(std::ostream& stream, bool key) const
             {
-                char const*(&seporator)[] = (!key && state.second == TraitType::Map)
+                char const*(&seporator)[] = (!key && std::get<1>(state) == TraitType::Map)
                                             ? colon
-                                            : (state.first != 0) ? comma : space;
+                                            : (std::get<0>(state) != 0) ? comma : space;
                 stream << seporator[static_cast<int>(characteristics)];
             }
     };
@@ -38,8 +41,7 @@ namespace
         friend std::ostream& operator<<(std::ostream& stream, PrefixKey const& data)
         {
             data.printSeporator(stream, true);
-            if (data.characteristics == OutputType::Stream)
-            {
+            if (data.characteristics == OutputType::Stream) {
                 return stream;
             }
             return stream << "\n" << std::string(data.size, '\t');
@@ -51,13 +53,19 @@ namespace
         friend std::ostream& operator<<(std::ostream& stream, PrefixValue const& data)
         {
             data.printSeporator(stream, false);
-            ++data.state.first;
+            ++std::get<0>(data.state);
+            std::get<2>(data.state) = true;
 
-            //if (data.characteristics == OutputType::Stream || data.state.second == TraitType::Array)
-            {
+            if (data.characteristics == OutputType::Stream) {
                 return stream;
             }
-            //return stream << "\n" << std::string(data.size, '\t');
+            if (std::get<1>(data.state) == TraitType::Array && std::get<0>(data.state) != 1) {
+                stream << " ";
+            }
+            if (std::get<1>(data.state) == TraitType::Map) {
+                stream << " ";
+            }
+            return stream;
         }
     };
     struct PrefixMap: public Prefix
@@ -66,9 +74,7 @@ namespace
         friend std::ostream& operator<<(std::ostream& stream, PrefixMap const& data)
         {
             data.printSeporator(stream, false);
-
-            if (data.characteristics == OutputType::Stream)
-            {
+            if (data.characteristics == OutputType::Stream) {
                 return stream;
             }
             return stream << "\n" << std::string(data.size, '\t');
@@ -79,9 +85,8 @@ namespace
         using Prefix::Prefix;
         friend std::ostream& operator<<(std::ostream& stream, PrefixMapClose const& data)
         {
-            ++data.state.first;
-            if (data.characteristics == OutputType::Stream)
-            {
+            ++std::get<0>(data.state);
+            if (data.characteristics == OutputType::Stream) {
                 return stream;
             }
             return stream << "\n" << std::string(data.size, '\t');
@@ -93,7 +98,10 @@ namespace
         friend std::ostream& operator<<(std::ostream& stream, PrefixArray const& data)
         {
             data.printSeporator(stream, false);
-            return stream;
+            if (data.characteristics == OutputType::Stream) {
+                return stream;
+            }
+            return stream << "\n" << std::string(data.size, '\t');
         }
     };
     struct PrefixArrayClose: public Prefix
@@ -101,21 +109,28 @@ namespace
         using Prefix::Prefix;
         friend std::ostream& operator<<(std::ostream& stream, PrefixArrayClose const& data)
         {
-            ++data.state.first;
-            return stream;
+            ++std::get<0>(data.state);
+            if (data.characteristics == OutputType::Stream) {
+                return stream;
+            }
+            if (data.prefixValue) {
+                return stream;
+            }
+            return stream << "\n" << std::string(data.size, '\t');
         }
     };
 }
 
-char const*  Prefix::space[]   = {" ",  "",  " "};
-char const*  Prefix::comma[]   = {", ", ",", ", "};
-char const*  Prefix::colon[]   = {": ", ":", ": "};
+char const*  Prefix::space[]   = {"",  "",  ""};
+char const*  Prefix::comma[]   = {",", ",", ","};
+char const*  Prefix::colon[]   = {":", ":", ":"};
+
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 JsonPrinter::JsonPrinter(std::ostream& output, PrinterConfig config)
     : PrinterInterface(output, config)
 {
-    state.emplace_back(0, TraitType::Value);
+    state.emplace_back(0, TraitType::Value, false);
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
@@ -130,46 +145,48 @@ THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void JsonPrinter::openMap(std::size_t)
 {
     output << PrefixMap(config.characteristics, state.size(), state.back()) << "{";
-    state.emplace_back(0, TraitType::Map);
+    state.emplace_back(0, TraitType::Map, false);
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void JsonPrinter::closeMap()
 {
-    if (state.back().second != TraitType::Map)
+    if (std::get<1>(state.back()) != TraitType::Map)
     {
         ThorsLogAndThrow("ThorsAnvil::Serialize::JsonPrinter",
                          "closeMap",
                          "Invalid call to closeMap(): Currently not in a map");
     }
+    bool prefixValue = std::get<2>(state.back());
     state.pop_back();
-    output << PrefixMapClose(config.characteristics, state.size(), state.back()) << "}";
+    output << PrefixMapClose(config.characteristics, state.size(), state.back(), prefixValue) << "}";
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void JsonPrinter::openArray(std::size_t)
 {
     output << PrefixArray(config.characteristics, state.size(), state.back()) << "[";
-    state.emplace_back(0, TraitType::Array);
+    state.emplace_back(0, TraitType::Array, false);
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void JsonPrinter::closeArray()
 {
-    if (state.back().second != TraitType::Array)
+    if (std::get<1>(state.back()) != TraitType::Array)
     {
         ThorsLogAndThrow("ThorsAnvil::Serialize::JsonPrinter",
                          "closeArray",
                          "Invalid call to closeArray(): Currently not in an array");
     }
+    bool prefixValue = std::get<2>(state.back());
     state.pop_back();
-    output << PrefixArrayClose(config.characteristics, state.size(), state.back()) << "]";
+    output << PrefixArrayClose(config.characteristics, state.size(), state.back(), prefixValue) << "]";
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void JsonPrinter::addKey(std::string const& key)
 {
-    if (state.back().second != TraitType::Map)
+    if (std::get<1>(state.back()) != TraitType::Map)
     {
         ThorsLogAndThrow("ThorsAnvil::Serialize::JsonPrinter",
                          "addKey",

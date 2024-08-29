@@ -8,10 +8,8 @@
 #include "YamlParser.h"
 #include "BsonParser.h"
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 template<typename T>
 void DefaultCustomSerializer<T>::writeCustom(PrinterInterface& printer, T const& object) const
@@ -127,7 +125,6 @@ void DefaultCustomSerializer<T>::readBson(BsonParser& /*parser*/, char /*byteMar
                              "But have not implemented the readBson() method on the SerializationClass");
 }
 
-    }
 }
 
 #endif

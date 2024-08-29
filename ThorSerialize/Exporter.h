@@ -9,10 +9,8 @@
 #include "Serialize.h"
 #include "ThorsLogging/ThorsLogging.h"
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 template<typename Format, typename T, typename Config = PrinterConfig>
 class Exporter
@@ -75,7 +73,6 @@ Exporter<Format, T> Export(T const& value, PrinterConfig config = PrinterConfig{
 }
 
 
-    }
 }
 
 #endif

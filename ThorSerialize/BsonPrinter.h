@@ -19,17 +19,16 @@ static_assert(
     "Don't want to support big endian unless I can do some good testing. Don't have a system for that so currently not suppoorted, but should be a relatively easy change"
 );
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
-        class BsonPrinter;
-        namespace MongoUtility
-        {
-            class ObjectID;
-            class UTCDateTime;
-            BsonPrinter& operator<<(BsonPrinter& printer, MongoUtility::UTCDateTime const& data);
-        }
+
+class BsonPrinter;
+namespace MongoUtility
+{
+    class ObjectID;
+    class UTCDateTime;
+    BsonPrinter& operator<<(BsonPrinter& printer, MongoUtility::UTCDateTime const& data);
+}
 
 using IntTypes  = std::tuple<std::int32_t, std::int64_t>;
 using IdStore   = std::optional<std::reference_wrapper<std::vector<MongoUtility::ObjectID>>>;
@@ -205,7 +204,6 @@ inline void BsonPrinter::writeFloat(Float value)
     output.write(reinterpret_cast<char*>(&outputValue), BsonPrintFloatTraits<Float>::size);
 }
 
-    }
 }
 
 #if defined(THORS_SERIALIZER_HEADER_ONLY) && THORS_SERIALIZER_HEADER_ONLY == 1

@@ -19,10 +19,8 @@
 #include "Importer.h"
 #include "SerUtil.h"
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 struct Yaml
 {
@@ -66,7 +64,6 @@ Importer<Yaml, T> yamlImport(T& value, ParserConfig config = ParserConfig{}, boo
     config.catchExceptions = catchExceptions;
     return yamlImporter(value, config);
 }
-    }
 }
 
 #endif

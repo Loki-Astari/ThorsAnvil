@@ -5,10 +5,8 @@
 #include "Serialize.h"
 #include <string>
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 enum YYTokenType
     {
@@ -18,7 +16,7 @@ enum YYTokenType
         JSON_NULL       = 263,
         JSON_NUMBER     = 264
     };
-    }
+
 }
 
 #endif

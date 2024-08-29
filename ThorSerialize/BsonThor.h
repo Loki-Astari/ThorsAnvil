@@ -20,10 +20,8 @@
 #include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 template<typename T, TraitType trait = Traits<std::remove_cv_t<T>>::type>
 struct BsonBaseTypeGetter
@@ -163,7 +161,6 @@ class Traits<Projection<T>>
         }
 };
 
-    }
 }
 
 #endif

@@ -24,10 +24,8 @@
 #include <string>
 #include <vector>
 
-namespace ThorsAnvil
+namespace ThorsAnvil::Serialize
 {
-    namespace Serialize
-    {
 
 class JsonParser: public ParserInterface
 {
@@ -74,7 +72,7 @@ class JsonParser: public ParserInterface
 
         virtual std::string getRawValue()                       override;
 };
-    }
+
 }
 
 #if defined(THORS_SERIALIZER_HEADER_ONLY) && THORS_SERIALIZER_HEADER_ONLY == 1

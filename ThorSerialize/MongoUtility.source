@@ -7,9 +7,8 @@
 #include <arpa/inet.h>
 #endif
 
-namespace ThorsAnvil::Serialize
+namespace ThorsAnvil::Serialize::MongoUtility
 {
-using namespace ThorsAnvil::Serialize::MongoUtility;
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 int& ObjectID::classCounter()
