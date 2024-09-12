@@ -23,9 +23,17 @@ class YamlPrinter: public PrinterInterface
     template<typename T>
     void emit(T const& data);
     void emitNull();
+
+    void init();
+    void complete();
+
     public:
         YamlPrinter(std::ostream& output, PrinterConfig config = PrinterConfig{});
+        YamlPrinter(std::string& output, PrinterConfig config = PrinterConfig{});
         ~YamlPrinter();
+
+        virtual void reset()                                override;
+
         virtual FormatType formatType()                     override {return FormatType::Json;}
         virtual void openDoc()                              override;
         virtual void closeDoc()                             override;

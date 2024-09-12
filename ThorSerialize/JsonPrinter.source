@@ -3,6 +3,7 @@
 #include "ThorsLogging/ThorsLogging.h"
 #include <iomanip>
 #include <algorithm>
+#include <charconv>
 
 namespace ThorsAnvil::Serialize
 {
@@ -27,96 +28,101 @@ namespace
                 , state(state)
                 , prefixValue(prefixValue)
             {}
-            void printSeporator(std::ostream& stream, bool key) const
+            void printSeporator(PrinterInterface& printer, bool key) const
             {
                 char const*(&seporator)[] = (!key && std::get<1>(state) == TraitType::Map)
                                             ? colon
                                             : (std::get<0>(state) != 0) ? comma : space;
-                stream << seporator[static_cast<int>(characteristics)];
+                printer.write(seporator[static_cast<int>(characteristics)]);
             }
+            void printIndent(PrinterInterface& printer)
+            {
+                printer.write("\n", 1);
+                printer.write(std::string(size, '\t'));
+            }
+            virtual void write(PrinterInterface& printer) = 0;
     };
     struct PrefixKey: public Prefix
     {
         using Prefix::Prefix;
-        friend std::ostream& operator<<(std::ostream& stream, PrefixKey const& data)
+        virtual void write(PrinterInterface& printer) override
         {
-            data.printSeporator(stream, true);
-            if (data.characteristics == OutputType::Stream) {
-                return stream;
+            printSeporator(printer, true);
+            if (characteristics == OutputType::Stream) {
+                return;
             }
-            return stream << "\n" << std::string(data.size, '\t');
+            printIndent(printer);
         }
     };
     struct PrefixValue: public Prefix
     {
         using Prefix::Prefix;
-        friend std::ostream& operator<<(std::ostream& stream, PrefixValue const& data)
+        virtual void write(PrinterInterface& printer) override
         {
-            data.printSeporator(stream, false);
-            ++std::get<0>(data.state);
-            std::get<2>(data.state) = true;
+            printSeporator(printer, false);
+            ++std::get<0>(state);
+            std::get<2>(state) = true;
 
-            if (data.characteristics == OutputType::Stream) {
-                return stream;
+            if (characteristics == OutputType::Stream) {
+                return;
             }
-            if (std::get<1>(data.state) == TraitType::Array && std::get<0>(data.state) != 1) {
-                stream << " ";
+            if (std::get<1>(state) == TraitType::Array && std::get<0>(state) != 1) {
+                printer.write(" ", 1);
             }
-            if (std::get<1>(data.state) == TraitType::Map) {
-                stream << " ";
+            if (std::get<1>(state) == TraitType::Map) {
+                printer.write(" ", 1);
             }
-            return stream;
         }
     };
     struct PrefixMap: public Prefix
     {
         using Prefix::Prefix;
-        friend std::ostream& operator<<(std::ostream& stream, PrefixMap const& data)
+        virtual void write(PrinterInterface& printer) override
         {
-            data.printSeporator(stream, false);
-            if (data.characteristics == OutputType::Stream) {
-                return stream;
+            printSeporator(printer, false);
+            if (characteristics == OutputType::Stream) {
+                return;
             }
-            return stream << "\n" << std::string(data.size, '\t');
+            printIndent(printer);
         }
     };
     struct PrefixMapClose: public Prefix
     {
         using Prefix::Prefix;
-        friend std::ostream& operator<<(std::ostream& stream, PrefixMapClose const& data)
+        virtual void write(PrinterInterface& printer) override
         {
-            ++std::get<0>(data.state);
-            if (data.characteristics == OutputType::Stream) {
-                return stream;
+            ++std::get<0>(state);
+            if (characteristics == OutputType::Stream) {
+                return;
             }
-            return stream << "\n" << std::string(data.size, '\t');
+            printIndent(printer);
         }
     };
     struct PrefixArray: public Prefix
     {
         using Prefix::Prefix;
-        friend std::ostream& operator<<(std::ostream& stream, PrefixArray const& data)
+        virtual void write(PrinterInterface& printer) override
         {
-            data.printSeporator(stream, false);
-            if (data.characteristics == OutputType::Stream) {
-                return stream;
+            printSeporator(printer, false);
+            if (characteristics == OutputType::Stream) {
+                return;
             }
-            return stream << "\n" << std::string(data.size, '\t');
+            printIndent(printer);
         }
     };
     struct PrefixArrayClose: public Prefix
     {
         using Prefix::Prefix;
-        friend std::ostream& operator<<(std::ostream& stream, PrefixArrayClose const& data)
+        virtual void write(PrinterInterface& printer) override
         {
-            ++std::get<0>(data.state);
-            if (data.characteristics == OutputType::Stream) {
-                return stream;
+            ++std::get<0>(state);
+            if (characteristics == OutputType::Stream) {
+                return;
             }
-            if (data.prefixValue) {
-                return stream;
+            if (prefixValue) {
+                return;
             }
-            return stream << "\n" << std::string(data.size, '\t');
+            printIndent(printer);
         }
     };
 }
@@ -134,6 +140,20 @@ JsonPrinter::JsonPrinter(std::ostream& output, PrinterConfig config)
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+JsonPrinter::JsonPrinter(std::string& output, PrinterConfig config)
+    : PrinterInterface(output, config)
+{
+    state.emplace_back(0, TraitType::Value, false);
+}
+
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+void JsonPrinter::reset()
+{
+    state.clear();
+    state.emplace_back(0, TraitType::Value, false);
+}
+
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void JsonPrinter::openDoc()
 {}
 
@@ -144,7 +164,9 @@ void JsonPrinter::closeDoc()
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void JsonPrinter::openMap(std::size_t)
 {
-    output << PrefixMap(config.characteristics, state.size(), state.back()) << "{";
+    PrefixMap       prefix(config.characteristics, state.size(), state.back());
+    prefix.write(*this);
+    write("{", 1);
     state.emplace_back(0, TraitType::Map, false);
 }
 
@@ -159,13 +181,17 @@ void JsonPrinter::closeMap()
     }
     bool prefixValue = std::get<2>(state.back());
     state.pop_back();
-    output << PrefixMapClose(config.characteristics, state.size(), state.back(), prefixValue) << "}";
+    PrefixMapClose  prefix(config.characteristics, state.size(), state.back(), prefixValue);
+    prefix.write(*this);
+    write("}", 1);
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void JsonPrinter::openArray(std::size_t)
 {
-    output << PrefixArray(config.characteristics, state.size(), state.back()) << "[";
+    PrefixArray prefix(config.characteristics, state.size(), state.back());
+    prefix.write(*this);
+    write("[", 1);
     state.emplace_back(0, TraitType::Array, false);
 }
 
@@ -180,7 +206,9 @@ void JsonPrinter::closeArray()
     }
     bool prefixValue = std::get<2>(state.back());
     state.pop_back();
-    output << PrefixArrayClose(config.characteristics, state.size(), state.back(), prefixValue) << "]";
+    PrefixArrayClose    prefix(config.characteristics, state.size(), state.back(), prefixValue);
+    prefix.write(*this);
+    write("]", 1);
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
@@ -192,13 +220,25 @@ void JsonPrinter::addKey(std::string const& key)
                          "addKey",
                          "Invalid call to addKey(): Currently not in a map");
     }
-    output << PrefixKey(config.characteristics, state.size(), state.back()) << '"' << key << '"';
+    PrefixKey   prefix(config.characteristics, state.size(), state.back());
+    prefix.write(*this);
+    write("\"", 1);
+    write(key);
+    write("\"", 1);
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void JsonPrinter::addPrefix()
 {
-    output << PrefixValue(config.characteristics, state.size(), state.back());
+    PrefixValue prefix(config.characteristics, state.size(), state.back());
+    prefix.write(*this);
+}
+
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+void JsonPrinter::addIndent()
+{
+    PrefixValue     prefix(config.characteristics, state.size(), state.back());
+    prefix.write(*this);
 }
 
 template<typename T>
@@ -219,26 +259,57 @@ struct FormatDouble
     }
 };
 
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(short int value)             {output << PrefixValue(config.characteristics, state.size(), state.back()) << value;}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(int value)                   {output << PrefixValue(config.characteristics, state.size(), state.back()) << value;}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(long int value)              {output << PrefixValue(config.characteristics, state.size(), state.back()) << value;}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(long long int value)         {output << PrefixValue(config.characteristics, state.size(), state.back()) << value;}
+struct BoolFormatter
+{
+    bool  value;
+    BoolFormatter(bool value)
+        : value(value)
+    {}
+    friend std::ostream& operator<<(std::ostream& str, BoolFormatter const& formatter)
+    {
+        return str << std::boolalpha << formatter.value;
+    }
+};
 
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(unsigned short int value)    {output << PrefixValue(config.characteristics, state.size(), state.back()) << value;}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(unsigned int value)          {output << PrefixValue(config.characteristics, state.size(), state.back()) << value;}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(unsigned long int value)     {output << PrefixValue(config.characteristics, state.size(), state.back()) << value;}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(unsigned long long int value){output << PrefixValue(config.characteristics, state.size(), state.back()) << value;}
+template<typename T>
+inline std::to_chars_result to_chars(char* first, char* last, FormatDouble<T> const& value)
+{
+    static char   doubleZero[] = "0.0";
+    if (value.value == 0)
+    {
+        std::copy(std::begin(doubleZero), std::end(doubleZero), first);
+        return std::to_chars_result{first + 3, static_cast<std::errc>(0)};
+    }
+    return std::to_chars(first, last, value.value, std::chars_format::fixed, 6);
+}
+inline std::to_chars_result to_chars(char* first, char*, BoolFormatter const& value)
+{
+    static char const*  boolStr[2]   = {"false", "true"};
+    static int          boolSize[2]  = {5, 4};
+    std::copy(boolStr[value.value], boolStr[value.value] + boolSize[value.value], first);
+    return std::to_chars_result{first + boolSize[value.value], static_cast<std::errc>(0)};
+}
 
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(float value)                 {output << PrefixValue(config.characteristics, state.size(), state.back()) << FormatDouble<float>(value);}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(double value)                {output << PrefixValue(config.characteristics, state.size(), state.back()) << FormatDouble<double>(value);}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(long double value)           {output << PrefixValue(config.characteristics, state.size(), state.back()) << FormatDouble<long double>(value);}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(short int value)             {addIndent(); writeValue(value);}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(int value)                   {addIndent(); writeValue(value);}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(long int value)              {addIndent(); writeValue(value);}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(long long int value)         {addIndent(); writeValue(value);}
 
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(bool value)                  {output << PrefixValue(config.characteristics, state.size(), state.back()) << std::boolalpha << value;}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(unsigned short int value)    {addIndent(); writeValue(value);}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(unsigned int value)          {addIndent(); writeValue(value);}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(unsigned long int value)     {addIndent(); writeValue(value);}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(unsigned long long int value){addIndent(); writeValue(value);}
 
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(std::string const& value)    {output << PrefixValue(config.characteristics, state.size(), state.back()) << '"' << EscapeString(value) << '"';}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(std::string_view const&value){output << PrefixValue(config.characteristics, state.size(), state.back()) << '"' << EscapeString(value) << '"';}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addRawValue(std::string const& value) {output << PrefixValue(config.characteristics, state.size(), state.back()) << value;}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(float value)                 {addIndent(); writeValue(FormatDouble<float>{value});}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(double value)                {addIndent(); writeValue(FormatDouble<double>{value});}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(long double value)           {addIndent(); writeValue(FormatDouble<long double>{value});}
 
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addNull()                             {output << PrefixValue(config.characteristics, state.size(), state.back()) << "null";}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(bool value)                  {addIndent(); writeValue(BoolFormatter{value});}
+
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(std::string const& value)    {addIndent(); write("\"", 1); escapeString(*this, value); write("\"", 1);}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(std::string_view const&value){addIndent(); write("\"", 1); escapeString(*this, std::string(value)); write("\"", 1);}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addRawValue(std::string const& value) {addIndent(); escapeString(*this, value);}
+
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addNull()                             {addIndent(); write("null", 4);}
 }
 

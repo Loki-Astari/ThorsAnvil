@@ -79,23 +79,16 @@ template<typename T, typename M>
 class DeSerializeMemberContainer
 {
     public:
-        DeSerializeMemberContainer(DeSerializer&, ParserInterface& parser, std::string const& key, T& object, std::pair<char const*, M T::*> const& memberInfo);
-        DeSerializeMemberContainer(DeSerializer&, ParserInterface& parser, std::string const& key, T& object, std::pair<char const*, M*> const& memberInfo);
-        explicit operator bool() const {return used;}
-    private:
-        bool used = false;
+        DeSerializeMemberContainer(DeSerializer&, ParserInterface& parser, T& object, M T::* memberInfo);
+        DeSerializeMemberContainer(DeSerializer&, ParserInterface& parser, T& object, M* memberInfo);
 };
 
-template<typename T, typename M, TraitType Type>
+template<typename T, typename M, TraitType type>
 class DeSerializeMemberValue
 {
     public:
-        DeSerializeMemberValue(DeSerializer& parent, ParserInterface& parser, std::string const& key, T& object, std::pair<char const*, M T::*> const& memberInfo);
-        DeSerializeMemberValue(DeSerializer& parent, ParserInterface& parser, std::string const& key, T&, std::pair<char const*, M*> const& memberInfo);
-        explicit operator bool() const {return used;}
-    private:
-        bool used = false;
-        void init(DeSerializer& parent, ParserInterface& parser, std::string const& key, char const* name, M& object);
+        DeSerializeMemberValue(DeSerializer& parent, ParserInterface& parser, T& object, M T::* memberInfo);
+        DeSerializeMemberValue(DeSerializer& parent, ParserInterface& parser, T&, M* memberInfo);
 };
 
 class DeSerializer

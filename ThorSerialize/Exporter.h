@@ -22,14 +22,15 @@ class Exporter
             : value(value)
             , config(config)
         {}
-        friend std::ostream& operator<<(std::ostream& stream, Exporter const& data)
+        template<typename F>
+        bool inserter(F& stream) const
         {
+            typename Format::Printer    printer(stream, config);
             try
             {
-                typename Format::Printer    printer(stream, data.config);
                 Serializer                  serializer(printer);
 
-                serializer.print(data.value);
+                serializer.print(value);
             }
             catch (ThorsAnvil::Logging::CriticalException const& e)
             {
@@ -44,8 +45,8 @@ class Exporter
             catch (std::exception const& e)
             {
                 ThorsCatchMessage("ThorsAnvil::Serialize::Exporter", "operator<<", e.what());
-                stream.setstate(std::ios::failbit);
-                if (!data.config.catchExceptions)
+                printer.setFail();
+                if (!config.catchExceptions)
                 {
                     ThorsRethrowMessage("ThorsAnvil::Serialize::Exporter", "operator<<", e.what());
                     throw;
@@ -54,15 +55,24 @@ class Exporter
             catch (...)
             {
                 ThorsCatchMessage("ThorsAnvil::Serialize::Exporter", "operator<<", "UNKNOWN");
-                stream.setstate(std::ios::failbit);
-                if (!data.config.catchExceptions)
+                printer.setFail();
+                if (!config.catchExceptions)
                 {
                     ThorsRethrowMessage("ThorsAnvil::Serialize::Exporter", "operator>>", "UNKNOWN");
                     throw;
                 }
             }
 
+            return printer.ok();
+        }
+        friend std::ostream& operator<<(std::ostream& stream, Exporter const& data)
+        {
+            data.inserter(stream);
             return stream;
+        }
+        friend bool operator<<(std::string& stream, Exporter const& data)
+        {
+            return data.inserter(stream);
         }
 };
 

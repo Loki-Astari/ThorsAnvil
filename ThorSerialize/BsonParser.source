@@ -23,6 +23,16 @@ BsonParser::BsonParser(std::istream& stream, ParserConfig config)
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+BsonParser::BsonParser(std::string_view const& stream, ParserConfig config)
+    : ParserInterface(stream, config)
+    , nextToken(ParserToken::DocStart)
+    , nextType('\x00')
+    , skipOverValue(false)
+{
+    currentContainer.emplace_back(static_cast<BsonContainer>(config.parserInfo));
+}
+
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 ParserToken BsonParser::getNextToken()
 {
     if (skipOverValue)
@@ -200,15 +210,15 @@ void BsonParser::ignoreDataValue()
     {
         return;
     }
-    using AppendFunc = typename IgnoreCallBack::AppendFunc;
-    using ReadFunc   = typename IgnoreCallBack::ReadFunc;
-    using IgnoreFunc = typename IgnoreCallBack::IgnoreFunc;
-    AppendFunc& append  = config.ignoreCallBack.append;
-    ReadFunc&   read    = config.ignoreCallBack.read;
-    IgnoreFunc& ignore  = config.ignoreCallBack.ignore;
+    //using AppendFunc = typename IgnoreCallBack::AppendFunc;
+    //using ReadFunc   = typename IgnoreCallBack::ReadFunc;
+    //using IgnoreFunc = typename IgnoreCallBack::IgnoreFunc;
+    //AppendFunc& append  = config.ignoreCallBack.append;
+    //ReadFunc&   read    = config.ignoreCallBack.read;
+    //IgnoreFunc& ignore  = config.ignoreCallBack.ignore;
 
-    append(&nextType, 1);
-    append(nextKey.c_str(), nextKey.size() + 1);
+    //append(&nextType, 1);
+    //append(nextKey.c_str(), nextKey.size() + 1);
 
     switch (nextType)
     {
@@ -224,20 +234,20 @@ void BsonParser::ignoreDataValue()
                     -1:   => Min Key        Not supported (don't understand use case)
                     127:  => Max Key        Not supported (don't understand use case)
         */
-        case '\x01':    ignore(input, 8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Double-64");   break;
-        case '\x13':    ignore(input, 16);  dataLeft.back() -= 16;  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Double-128");  break;
-        case '\x10':    ignore(input, 4);   dataLeft.back() -= 4;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Int-32");      break;
-        case '\x12':    ignore(input, 8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Int-64");      break;
-        case '\x07':    ignore(input, 12);  dataLeft.back() -= 12;  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Obj-ID");      break;
-        case '\x08':    ignore(input, 1);   dataLeft.back() -= 1;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Bool");        break;
-        case '\x09':    ignore(input, 8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "UTC DateTime");break;
-        case '\x11':    ignore(input, 8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "TimeStamp");   break;
+        case '\x01':    ignore(8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Double-64");   break;
+        case '\x13':    ignore(16);  dataLeft.back() -= 16;  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Double-128");  break;
+        case '\x10':    ignore(4);   dataLeft.back() -= 4;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Int-32");      break;
+        case '\x12':    ignore(8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Int-64");      break;
+        case '\x07':    ignore(12);  dataLeft.back() -= 12;  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Obj-ID");      break;
+        case '\x08':    ignore(1);   dataLeft.back() -= 1;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Bool");        break;
+        case '\x09':    ignore(8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "UTC DateTime");break;
+        case '\x11':    ignore(8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "TimeStamp");   break;
         case '\x0A':                                                ThorsMessage(5, "BsonParser", "ignoreDataValue", "NULL");        break;
         case '\x02':
         {
             std::int32_t size;
-            read(input, reinterpret_cast<char*>(&size), sizeof(size));
-            ignore(input, size);
+            read(reinterpret_cast<char*>(&size), sizeof(size));
+            ignore(size);
             dataLeft.back() -= (size + 4);
             ThorsMessage(5, "BsonParser", "ignoreDataValue", "String");
             break;
@@ -245,8 +255,8 @@ void BsonParser::ignoreDataValue()
         case '\x05':
         {
             std::int32_t size;
-            read(input, reinterpret_cast<char*>(&size), sizeof(size));
-            ignore(input, size + 1);
+            read(reinterpret_cast<char*>(&size), sizeof(size));
+            ignore(size + 1);
             dataLeft.back() -= (size + 5);
             ThorsMessage(5, "BsonParser", "ignoreDataValue", "Binary");
             break;
@@ -282,7 +292,7 @@ THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonParser::readEndOfContainer()
 {
     char    mark = '\xFF';
-    if (input.read(&mark, 1))
+    if (read(&mark, 1))
     {
         dataLeft.back() -= 1;
         if (mark != '\x00')
@@ -303,7 +313,7 @@ void BsonParser::readEndOfContainer()
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonParser::readKey()
 {
-    if (input.read(&nextType, 1) && std::getline(input, nextKey, '\0'))
+    if (read(&nextType, 1) && readTo(nextKey, '\0'))
     {
         ThorsMessage(5, "BsonParser", "readKey", "Key: ", nextKey);
         dataLeft.back() -= (1 + nextKey.size() + 1);
@@ -318,7 +328,7 @@ THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 bool BsonParser::readBool()
 {
     bool result;
-    if (input.read(reinterpret_cast<char*>(&result) ,1))
+    if (read(reinterpret_cast<char*>(&result) ,1))
     {
         dataLeft.back() -= 1;
         return result;
@@ -328,13 +338,14 @@ bool BsonParser::readBool()
                      "Failed to read Bool");
 }
 
+#if 0
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 std::size_t BsonParser::peekSize()
 {
     std::int32_t size;
 
     std::streampos pos = input.tellg();
-    if (input.read(reinterpret_cast<char*>(&size), 4))
+    if (read(reinterpret_cast<char*>(&size), 4))
     {
         input.seekg(pos);
         return size;
@@ -343,6 +354,7 @@ std::size_t BsonParser::peekSize()
                      "peekSize",
                      "Failed to peek at the size of the next object");
 }
+#endif
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 std::string BsonParser::readString()
@@ -350,7 +362,7 @@ std::string BsonParser::readString()
     std::int32_t size = readSize<4, std::int32_t>();
     dataLeft.back() -= 4;
     std::string     result(size, '\0');
-    if (input.read(&result[0], size))
+    if (read(&result[0], size))
     {
         dataLeft.back() -= size;
         result.resize(size - 1);
@@ -372,11 +384,11 @@ std::string BsonParser::readBinary()
     std::int32_t    size        = readSize<4, std::int32_t>();
     dataLeft.back() -= 4;
 
-    if (input.read(reinterpret_cast<char*>(&subType), 1))
+    if (read(reinterpret_cast<char*>(&subType), 1))
     {
         dataLeft.back() -= 1;
         std::string result(size, '\0');
-        if (input.read(&result[0], size))
+        if (read(&result[0], size))
         {
             dataLeft.back() -= size;
             return result;

@@ -2,6 +2,8 @@
 #define THORSANVIL_SERIALIZER_THORSSERIALIZERUTIL_H
 
 #include "SerializeConfig.h"
+#include "StringOutput.h"
+#include "StringInput.h"
 #include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"
 #include <type_traits>
@@ -15,12 +17,14 @@
 #include <functional>
 #include <optional>
 #include <memory>
+#include <variant>
 
 namespace ThorsAnvil::Serialize
 {
 
         namespace Private
         {
+
 
 inline
 std::string const& getDefaultPolymorphicMarker()
@@ -36,98 +40,6 @@ struct SharedInfo
 {
     std::intmax_t       sharedPtrName;
     std::optional<T*>   data;
-};
-
-struct EscapeString
-{
-    std::string_view    value;
-    EscapeString(std::string const& value)
-        : value(value)
-    {}
-    EscapeString(std::string_view const& value)
-        : value(value)
-    {}
-    friend std::ostream& operator<<(std::ostream& stream, EscapeString const& data)
-    {
-        std::string_view const& value = data.value;
-
-        static auto isEscape = [](char c)
-        {
-            return (c >= 0x00 && c <= 0x1f) || c == '"' || c == '\\';
-        };
-
-        auto begin  = std::begin(value);
-        auto end    = std::end(value);
-        auto next = std::find_if(begin, end, isEscape);
-        if (next == end)
-        {
-            stream << value;
-        }
-        else
-        {
-            while (next != end)
-            {
-                stream << std::string(begin, next);
-                if (*next == '"')
-                {
-                    stream << R"(\")";
-                    ++next;
-                }
-                else if (*next == '\\')
-                {
-                    stream << R"(\\)";
-                    ++next;
-                }
-                else if (*next == 0x08)
-                {
-                    stream << R"(\b)";
-                    ++next;
-                }
-                else if (*next == 0x0C)
-                {
-                    stream << R"(\f)";
-                    ++next;
-                }
-                else if (*next == 0x0A)
-                {
-                    stream << R"(\n)";
-                    ++next;
-                }
-                else if (*next == 0x0D)
-                {
-                    stream << R"(\r)";
-                    ++next;
-                }
-                else if (*next == 0x09)
-                {
-                    stream << R"(\t)";
-                    ++next;
-                }
-                else
-                {
-                    stream << R"(\u)"
-                           << std::setw(4)
-                           << std::setfill('0')
-                           << std::hex
-                           << static_cast<unsigned int>(static_cast<unsigned char>(*next))
-                           << std::dec;
-                    ++next;
-                }
-                /*
-                else
-                {
-                    110xxxxx
-
-                    stream << R("\u") << std::setw(4) << std::setfill('0') << std::hex << codepoint;
-                }
-                */
-                begin = next;
-                next = std::find_if(begin, end, isEscape);
-            }
-            stream << std::string(begin, end);
-        }
-        return stream;
-    }
 };
 
 /*
@@ -197,9 +109,7 @@ struct ParserConfig
         : parseStrictness(parseStrictness)
         , polymorphicMarker(polymorphicMarker)
         , catchExceptions(catchExceptions)
-        , parserInfo(0)
         , ignoreCallBack(std::move(cb))
-        , useOldSharedPtr(false)
     {}
     ParserConfig(ParseType parseStrictness,
                  std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
@@ -207,61 +117,49 @@ struct ParserConfig
         : parseStrictness(parseStrictness)
         , polymorphicMarker(polymorphicMarker)
         , catchExceptions(catchExceptions)
-        , parserInfo(0)
-        , useOldSharedPtr(false)
     {}
     ParserConfig(std::string const& polymorphicMarker, bool catchExceptions = true)
-        : parseStrictness(ParseType::Weak)
-        , polymorphicMarker(polymorphicMarker)
+        : polymorphicMarker(polymorphicMarker)
         , catchExceptions(catchExceptions)
-        , parserInfo(0)
-        , useOldSharedPtr(false)
     {}
     ParserConfig(bool catchExceptions)
-        : parseStrictness(ParseType::Weak)
-        , polymorphicMarker(Private::getDefaultPolymorphicMarker())
-        , catchExceptions(catchExceptions)
-        , parserInfo(0)
-        , useOldSharedPtr(false)
+        : catchExceptions(catchExceptions)
     {}
     ParserConfig(ParseType parseStrictness, bool catchExceptions)
         : parseStrictness(parseStrictness)
-        , polymorphicMarker(Private::getDefaultPolymorphicMarker())
         , catchExceptions(catchExceptions)
-        , parserInfo(0)
-        , useOldSharedPtr(false)
     {}
     // Use this constructor.
     ParserConfig()
-        : parseStrictness(ParseType::Weak)
-        , polymorphicMarker(Private::getDefaultPolymorphicMarker())
-        , catchExceptions(true)
-        , parserInfo(0)
-        , useOldSharedPtr(false)
     {}
     ParserConfig& setParseStrictness(ParseType p_parseStrictness)               {parseStrictness = p_parseStrictness;       return *this;}
     ParserConfig& setPolymorphicMarker(std::string const& p_polymorphicMarker)  {polymorphicMarker = p_polymorphicMarker;   return *this;}
     ParserConfig& setCatchExceptions(bool p_catchExceptions)                    {catchExceptions = p_catchExceptions;       return *this;}
     ParserConfig& setUseOldSharedPtr()                                          {useOldSharedPtr = true;                    return *this;}
-    ParseType       parseStrictness;
-    std::string     polymorphicMarker;
-    bool            catchExceptions;
-    long            parserInfo;
+    ParserConfig& setValidateNoTrailingData()                                   {validateNoTrailingData = true;             return *this;}
+    ParseType       parseStrictness         = ParseType::Weak;
+    std::string     polymorphicMarker       = Private::getDefaultPolymorphicMarker();
+    bool            catchExceptions         = true;
+    long            parserInfo              = 0;
     IgnoreCallBack  ignoreCallBack;
-    bool            useOldSharedPtr;
+    bool            useOldSharedPtr         = false;
+    bool            validateNoTrailingData  = false;
 };
 
 class ParserInterface
 {
     public:
-        std::istream&   input;
-        ParserToken     pushBack;
-        ParserConfig    config;
+        ParserConfig const config;
 
-        ParserInterface(std::istream& input, ParserConfig  config = ParserConfig{})
-            : input(input)
+        ParserInterface(std::string_view const& str, ParserConfig  config = ParserConfig{})
+            : config(config)
+            , input(str)
             , pushBack(ParserToken::Error)
-            , config(config)
+        {}
+        ParserInterface(std::istream& stream, ParserConfig  config = ParserConfig{})
+            : config(config)
+            , input(&stream)
+            , pushBack(ParserToken::Error)
         {}
         virtual ~ParserInterface() {}
         virtual FormatType formatType()                 = 0;
@@ -298,7 +196,116 @@ class ParserInterface
 
         void    ignoreValue();
 
-        std::istream& stream() {return input;}
+        bool            read(char* dst, std::size_t size)
+        {
+            struct Read
+            {
+                char*       dst;
+                std::size_t size;
+                Read(char* dst, std::size_t size):dst(dst),size(size){}
+                bool operator()(std::istream* input)    {return static_cast<bool>(input->read(dst, size));}
+                bool operator()(StringInput& input)     {return input.read(dst, size);}
+            };
+            return std::visit(Read{dst, size}, input);
+        }
+        bool            readTo(std::string& dst, char delim)
+        {
+            struct ReadTo
+            {
+                std::string&    dst;
+                char            delim;
+                ReadTo(std::string& dst, char delim):dst(dst),delim(delim){}
+                bool operator()(std::istream* input)    {return static_cast<bool>(std::getline((*input), dst, delim));}
+                bool operator()(StringInput& input)     {return input.readTo(dst, delim);}
+            };
+            return std::visit(ReadTo(dst, delim), input);
+        }
+        std::size_t     lastReadCount() const
+        {
+            struct LastReadCount
+            {
+                std::size_t operator()(std::istream const* input)    {return input->gcount();}
+                std::size_t operator()(StringInput const& input)     {return input.getLastReadCount();}
+            };
+            return std::visit(LastReadCount{}, input);
+        }
+        std::streampos  getPos()
+        {
+            struct GetPos
+            {
+                std::streampos operator()(std::istream* input)    {return input->tellg();}
+                std::streampos operator()(StringInput& input)     {return input.getPos();}
+            };
+            return std::visit(GetPos{}, input);
+        }
+        int             get()
+        {
+            struct Get
+            {
+                int operator()(std::istream* input)    {return input->get();}
+                int operator()(StringInput& input)     {return input.get();}
+            };
+            return std::visit(Get{}, input);
+        }
+        void            ignore(std::size_t size)
+        {
+            struct Ignore
+            {
+                std::size_t size;
+                Ignore(std::size_t size): size(size) {}
+                void operator()(std::istream* input)    {input->ignore(size);}
+                void operator()(StringInput& input)     {input.ignore(size);}
+            };
+            std::visit(Ignore{size}, input);
+        }
+        void            clear()
+        {
+            struct Clear
+            {
+                void operator()(std::istream* input)    {input->clear();}
+                void operator()(StringInput& input)     {input.clear();}
+            };
+            std::visit(Clear{}, input);
+        }
+        void            unget()
+        {
+            struct Unget
+            {
+                void operator()(std::istream* input)    {input->unget();}
+                void operator()(StringInput& input)     {input.unget();}
+            };
+            std::visit(Unget{}, input);
+        }
+        bool            ok() const
+        {
+            struct OK
+            {
+                bool operator()(std::istream const* input)    {return !input->fail();}
+                bool operator()(StringInput const& input)     {return input.isOk();}
+            };
+            return std::visit(OK{}, input);
+        }
+        void setFail()
+        {
+            struct SetFail
+            {
+                void operator()(std::istream* input)    {input->setstate(std::ios::failbit);}
+                void operator()(StringInput& input)     {input.setFail();}
+            };
+            std::visit(SetFail{}, input);
+        }
+        template<typename T>
+        void readValue(T& value)
+        {
+            struct ReadValue
+            {
+                T& value;
+                ReadValue(T& value) :value(value) {}
+                void operator()(std::istream* input)    {(*input) >> value;}
+                void operator()(StringInput& input)     {input.readValue(value);}
+            };
+            std::visit(ReadValue{value}, input);
+        }
 
         template<typename T>
         void getShared(SharedInfo<T> const& info, std::shared_ptr<T>& object)
@@ -315,6 +322,10 @@ class ParserInterface
         }
 
     private:
+        using DataInputStream = std::variant<std::istream*, StringInput>;
+
+        DataInputStream input;
+        ParserToken     pushBack;
         std::map<std::intmax_t, std::any>     savedSharedPtr;
         void    ignoreTheValue();
         void    ignoreTheMap();
@@ -392,21 +403,29 @@ struct PrinterConfig
 class PrinterInterface
 {
     public:
-        std::ostream&   output;
-        PrinterConfig   config;
+        PrinterConfig const  config;
 
         PrinterInterface(std::ostream& output, PrinterConfig config = PrinterConfig{})
-            : output(output)
-            , config(config)
+            : config(config)
+            , output(&output)
         {}
+        PrinterInterface(std::string& output, PrinterConfig config = PrinterConfig{})
+            : config(config)
+            , output(output)
+        {}
+
+                bool    preflightSize();
+                void    reserveSize();
+        virtual void    reset()     {}
+
         virtual ~PrinterInterface() {}
         virtual FormatType formatType()                 = 0;
-        virtual void openDoc()                          = 0;
-        virtual void closeDoc()                         = 0;
-        virtual void openMap(std::size_t size)          = 0;
-        virtual void closeMap()                         = 0;
-        virtual void openArray(std::size_t size)        = 0;
-        virtual void closeArray()                       = 0;
+        virtual void    openDoc()                       = 0;
+        virtual void    closeDoc()                      = 0;
+        virtual void    openMap(std::size_t size)       = 0;
+        virtual void    closeMap()                      = 0;
+        virtual void    openArray(std::size_t size)     = 0;
+        virtual void    closeArray()                    = 0;
 
         virtual void    addKey(std::string const& key)  = 0;
 
@@ -458,7 +477,53 @@ class PrinterInterface
         virtual std::size_t getSizeValue(std::string_view const&)   {return 0;}
         virtual std::size_t getSizeRaw(std::size_t)                 {return 0;}
 
-        std::ostream& stream() {return output;}
+        bool write(char const* src, std::size_t size)
+        {
+            struct Write
+            {
+                char const* src;
+                std::size_t size;
+                Write(char const* src, std::size_t size): src(src), size(size) {}
+
+                bool operator()(std::ostream* output)       {return static_cast<bool>(output->write(src, size));}
+                bool operator()(StringOutput& output)       {return output.write(src, size);}
+            };
+            return std::visit(Write{src, size}, output);
+        }
+        bool write(std::string const& src)
+        {
+            return write(src.c_str(), src.size());
+        }
+        bool ok() const
+        {
+            struct OK
+            {
+                bool operator()(std::ostream* output)       {return !output->fail();}
+                bool operator()(StringOutput const& output) {return output.isOk();}
+            };
+            return std::visit(OK{}, output);
+        }
+        void setFail()
+        {
+            struct SetFail
+            {
+                void operator()(std::ostream* output)       {output->setstate(std::ios::failbit);}
+                void operator()(StringOutput& output)       {output.setFail();}
+            };
+            std::visit(SetFail{}, output);
+        }
+        template<typename T>
+        void writeValue(T const& src)
+        {
+            struct WriteValue
+            {
+                T const& src;
+                WriteValue(T const& src): src(src) {}
+                void operator()(std::ostream* output)       {(*output) << src;}
+                void operator()(StringOutput& output)       {output.writeValue(src);}
+            };
+            std::visit(WriteValue{src}, output);
+        }
 
         template<typename T>
         SharedInfo<T> addShared(std::shared_ptr<T> const& shared)
@@ -477,6 +542,9 @@ class PrinterInterface
             return result;
         }
     private:
+        using DataOutputStream = std::variant<std::ostream*, StringOutput>;
+
+        DataOutputStream   output;
         std::map<std::intmax_t, void const*>     savedSharedPtr;
 };
 
@@ -737,6 +805,89 @@ auto tryGetSizeFromSerializeType(PrinterInterface&, T const&, long) -> std::size
     // Which will make the code more stable.
     //
     // Please look at test/ExceptionTest.h for a simple example.
+}
+
+inline void escapeString(PrinterInterface& printer, std::string const& value)
+{
+    using namespace std::string_literals;
+
+    static auto isEscape = [](char c)
+    {
+        return (c >= 0x00 && c <= 0x1f) || c == '"' || c == '\\';
+    };
+
+    auto begin  = std::begin(value);
+    auto end    = std::end(value);
+    auto next = std::find_if(begin, end, isEscape);
+    if (next == end)
+    {
+        printer.write(value);
+    }
+    else
+    {
+        while (next != end)
+        {
+            printer.write(&*begin, (next - begin));
+            if (*next == '"')
+            {
+                printer.write(R"(\")"s);
+                ++next;
+            }
+            else if (*next == '\\')
+            {
+                printer.write(R"(\\)"s);
+                ++next;
+            }
+            else if (*next == 0x08)
+            {
+                printer.write(R"(\b)"s);
+                ++next;
+            }
+            else if (*next == 0x0C)
+            {
+                printer.write(R"(\f)"s);
+                ++next;
+            }
+            else if (*next == 0x0A)
+            {
+                printer.write(R"(\n)"s);
+                ++next;
+            }
+            else if (*next == 0x0D)
+            {
+                printer.write(R"(\r)"s);
+                ++next;
+            }
+            else if (*next == 0x09)
+            {
+                printer.write(R"(\t)"s);
+                ++next;
+            }
+            else
+            {
+                std::stringstream ss;
+                ss     << R"(\u)"
+                       << std::setw(4)
+                       << std::setfill('0')
+                       << std::hex
+                       << static_cast<unsigned int>(static_cast<unsigned char>(*next))
+                       << std::dec;
+                printer.write(ss.str());
+                ++next;
+            }
+            /*
+            else
+            {
+                110xxxxx
+
+                stream << R("\u") << std::setw(4) << std::setfill('0') << std::hex << codepoint;
+            }
+            */
+            begin = next;
+            next = std::find_if(begin, end, isEscape);
+        }
+        printer.write(&*begin, (end - begin));
+    }
 }
 
 

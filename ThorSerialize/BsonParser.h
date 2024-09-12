@@ -59,6 +59,7 @@ class BsonParser: public ParserInterface
 
     public:
         BsonParser(std::istream& stream, ParserConfig config = ParserConfig{});
+        BsonParser(std::string_view const& stream, ParserConfig config = ParserConfig{});
         virtual FormatType formatType()                         override {return FormatType::Bson;}
         virtual ParserToken getNextToken()                      override;
         virtual std::string getKey()                            override;
@@ -96,7 +97,7 @@ class BsonParser: public ParserInterface
         template<std::size_t size, typename Int> Int readLE()
         {
             Int docSize;
-            input.read(reinterpret_cast<char*>(&docSize), size);
+            read(reinterpret_cast<char*>(&docSize), size);
             return docSize;
         }
 
@@ -104,7 +105,7 @@ class BsonParser: public ParserInterface
         {
             Int     docSize = 0;
             char*   docData = reinterpret_cast<char*>(&docSize);
-            input.read(docData + sizeof(docSize) - size, size);
+            read(docData + sizeof(docSize) - size, size);
             for (std::size_t loop = 0; loop < sizeof(docSize)/2; ++loop) {
                 std::swap(docData[loop], docData[sizeof(docSize) - loop - 1]);
             }
@@ -116,7 +117,7 @@ class BsonParser: public ParserInterface
         template<std::size_t size, typename Int>
         Int readSize();
         bool isEndOfContainer(std::size_t unread);
-        std::size_t peekSize();
+        //std::size_t peekSize();
 
         void readEndOfContainer();
 
@@ -192,7 +193,7 @@ template<typename F>
 inline F BsonParser::readFloat()
 {
     F result;
-    if (input.read(reinterpret_cast<char*>(&result), sizeof(F)))
+    if (read(reinterpret_cast<char*>(&result), sizeof(F)))
     {
         dataLeft.back() -= sizeof(F);
         return result;

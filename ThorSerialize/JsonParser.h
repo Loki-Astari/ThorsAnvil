@@ -44,6 +44,7 @@ class JsonParser: public ParserInterface
     T scan();
     public:
         JsonParser(std::istream& stream, ParserConfig config = ParserConfig{});
+        JsonParser(std::string_view const& stream, ParserConfig config = ParserConfig{});
         virtual FormatType formatType()                         override {return FormatType::Json;}
         virtual ParserToken getNextToken()                      override;
         virtual std::string getKey()                            override;

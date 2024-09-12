@@ -10,20 +10,22 @@
 namespace ThorsAnvil::Serialize
 {
 
+class ParserInterface;
 class JsonManualLexer
 {
-    std::istream&       str;
+    ParserInterface&    parser;
     std::string         buffer;
     int                 lastToken;
     bool                lastBool;
     bool                lastNull;
     public:
-        JsonManualLexer(std::istream& str);
+        JsonManualLexer(ParserInterface& parser);
         int yylex();
 
         void        ignoreRawValue();
         std::string getRawString();
         std::string getString();
+        void        getStringInto(std::string&);
         bool        getLastBool();
         bool        isLastNull();
         template<typename T>
@@ -37,6 +39,16 @@ class JsonManualLexer
         void checkFixed(char const* check, std::size_t size);
         char readDigits(char next);
         void error();
+};
+
+class Unicode
+{
+    public:
+        static void checkBuffer(ParserInterface& i, std::string& reply);
+    private:
+        static void decodeUnicode(ParserInterface& i, std::string& reply);
+        static void decodeSurrogatePairs(long unicodeValue, ParserInterface& i, std::string& reply);
+        static long getUnicodeHex(ParserInterface& i);
 };
 
 template<typename T>

@@ -821,8 +821,7 @@ class ContainerTuppleExtractor
         template<std::size_t... index>
         void printTupleValues(PrinterInterface& printer, C const& object, std::index_sequence<index...> const&) const
         {
-            auto discard = {(printTupleValue<index, std::tuple_element_t<index, C>>(printer, object),1)...};
-            (void)discard;
+            (printTupleValue<index, std::tuple_element_t<index, C>>(printer, object),...);
         }
         template<std::size_t index, typename V>
         void parseTupleValue(ParserInterface& parser, C& object) const
@@ -875,10 +874,8 @@ class Traits<std::tuple<Args...>>
         template<std::size_t... Seq>
         static std::size_t getPrintSizeAllElement(PrinterInterface& printer, std::tuple<Args...> const& object, std::index_sequence<Seq...> const&)
         {
-           auto parts = {std::size_t(0), getPrintSizeElement(printer, std::get<Seq>(object))...};
-           std::size_t result = 0;
-           for (auto value: parts) {result += value;}
-           return result;
+            std::size_t result = (getPrintSizeElement(printer, std::get<Seq>(object)) + ...);
+            return result;
         }
         static std::size_t getPrintSize(PrinterInterface& printer, std::tuple<Args...> const& object, bool)
         {

@@ -131,16 +131,16 @@ class BinarySerializer: public DefaultCustomSerializer<T>
             std::int32_t    size    = object.getSize();
             char            type    = encodeType;
             printer.writeLE<4, std::int32_t>(size);
-            printer.stream().write(&type, 1);
-            printer.stream().write(object.getBuffer(), object.getSize());
+            printer.write(&type, 1);
+            printer.write(object.getBuffer(), object.getSize());
         }
         virtual void readBson(BsonParser& parser, char /*byteMarker*/, T& object) const override
         {
             std::int32_t    size    = parser.readLE<4, std::int32_t>();
             char            type;
             object.resize(size);
-            parser.stream().read(&type, 1);
-            parser.stream().read(object.getBuffer(), size);
+            parser.read(&type, 1);
+            parser.read(object.getBuffer(), size);
         }
 };
 
@@ -155,14 +155,14 @@ class JavascriptSerializer: public DefaultCustomSerializer<T>
         {
             std::int32_t    size = object.getSize();
             printer.writeLE<4, std::int32_t>(size + 1);
-            printer.stream().write(object.getBuffer(), size);
-            printer.stream().write("", 1);
+            printer.write(object.getBuffer(), size);
+            printer.write("", 1);
         }
         virtual void readBson(BsonParser& parser, char /*byteMarker*/, T& object) const override
         {
             std::int32_t    size = parser.readLE<4, std::int32_t>();
             object.resize(size);
-            parser.stream().read(object.getBuffer(), size);
+            parser.read(object.getBuffer(), size);
             object.resize(size - 1);
         }
 };
@@ -176,15 +176,15 @@ class RegExSerializer: public DefaultCustomSerializer<T>
         virtual std::size_t getPrintSizeBson(BsonPrinter& /*printer*/, T const& object) const override  {return object.pattern().size() + 1 + object.options().size() + 1;}
         virtual void writeBson(BsonPrinter& printer, T const& object) const override
         {
-            printer.stream().write(object.pattern().data(), object.pattern().size());
-            printer.stream().write("", 1);
-            printer.stream().write(object.options().data(), object.options().size());
-            printer.stream().write("", 1);
+            printer.write(object.pattern().data(), object.pattern().size());
+            printer.write("", 1);
+            printer.write(object.options().data(), object.options().size());
+            printer.write("", 1);
         }
         virtual void readBson(BsonParser& parser, char /*byteMarker*/, T& object) const override
         {
-            std::getline(parser.stream(), object.pattern(), '\0');
-            std::getline(parser.stream(), object.options(), '\0');
+            parser.readTo(object.pattern(), '\0');
+            parser.readTo(object.options(), '\0');
         }
 };
 
@@ -248,7 +248,10 @@ BsonPrinter& operator<<(BsonPrinter& printer, ObjectID const& data)
 inline
 JsonPrinter& operator<<(JsonPrinter& printer, ObjectID const& data)
 {
-    printer.stream() << data;
+    std::stringstream ss;
+    ss << data;
+
+    printer.addValue(ss.str());
     return printer;
 }
 
@@ -277,7 +280,11 @@ BsonParser& operator>>(BsonParser& parser, ObjectID& data)
 inline
 JsonParser& operator>>(JsonParser& parser, ObjectID& data)
 {
-    parser.stream() >> data;
+    std::string value;
+    parser.getValue(value);
+
+    std::stringstream ss(std::move(value));
+    ss >> data;
     return parser;
 }
 
@@ -298,7 +305,7 @@ BsonPrinter& operator<<(BsonPrinter& printer, UTCDateTime const& data)
 inline
 JsonPrinter& operator<<(JsonPrinter& printer, UTCDateTime const& data)
 {
-    printer.stream() << ThorsAnvil::Utility::StreamFormatterNoChange{} << std::hex << std::setw(16) << std::setfill('0') << data.datetime;
+    printer.addValue(data.datetime);
     return printer;
 }
 
@@ -321,7 +328,7 @@ BsonParser& operator>>(BsonParser& parser, UTCDateTime& data)
 inline
 JsonParser& operator>>(JsonParser& parser, UTCDateTime& data)
 {
-    parser.stream() >> data;
+    parser.getValue(data.datetime);
     return parser;
 }
 
@@ -342,7 +349,9 @@ BsonPrinter& operator<<(BsonPrinter& printer, BsonTimeStamp const& data)
 inline
 JsonPrinter& operator<<(JsonPrinter& printer, BsonTimeStamp const& data)
 {
-    printer.stream() << data;
+    std::stringstream   ss;
+    ss << data;
+    printer.addValue(ss.str());
     return printer;
 }
 
@@ -369,7 +378,11 @@ BsonParser& operator>>(BsonParser& parser, BsonTimeStamp& data)
 inline
 JsonParser& operator>>(JsonParser& parser, BsonTimeStamp& data)
 {
-    parser.stream() >> data;
+    std::string value;
+    parser.getValue(value);
+
+    std::stringstream   ss(std::move(value));
+    ss >> data;
     return parser;
 }
 

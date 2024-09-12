@@ -321,7 +321,7 @@ class SerializeProjection: public ThorsAnvil::Serialize::DefaultCustomSerializer
         virtual char getBsonByteMark()                                               const override {return '\x03';} // You should also override this see Bson specifications
         virtual void writeBson(ThorsAnvil::Serialize::BsonPrinter& printer, Projection const& object)       const override
         {
-            printer.stream().write(object.rawData.c_str(), object.rawData.size());
+            printer.write(object.rawData.c_str(), object.rawData.size());
         }
 };
 

@@ -58,6 +58,7 @@ class BsonPrinter: public PrinterInterface
         bool        writeProjection()                               {if (projection){writeInt<sizeof(int)>(1);}return projection;}
     public:
         BsonPrinter(std::ostream& output, BsonPrinterConfig config = BsonPrinterConfig{});
+        BsonPrinter(std::string& output, BsonPrinterConfig config = BsonPrinterConfig{});
         virtual FormatType formatType()                             override {return FormatType::Bson;}
         virtual void openDoc()                                      override;
         virtual void closeDoc()                                     override;
@@ -124,7 +125,7 @@ class BsonPrinter: public PrinterInterface
         template<std::size_t size, typename Int> void writeLE(Int value)
         {
             Int docValue = value;
-            output.write(reinterpret_cast<char*>(&docValue), size);
+            write(reinterpret_cast<char*>(&docValue), size);
         }
 
         template<std::size_t size, typename Int> void writeBE(Int value)
@@ -134,7 +135,7 @@ class BsonPrinter: public PrinterInterface
             for (std::size_t loop = 0; loop < sizeof(docValue)/2; ++loop) {
                 std::swap(docData[loop], docData[sizeof(docValue) - loop - 1]);
             }
-            output.write(docData + sizeof(docValue) - size, size);
+            write(docData + sizeof(docValue) - size, size);
         }
 
 
@@ -201,7 +202,7 @@ inline void BsonPrinter::writeFloat(Float value)
 {
     typename BsonPrintFloatTraits<Float>::ConversionType outputValue = value;
     writeKey(BsonPrintFloatTraits<Float>::keyValue, BsonPrintFloatTraits<Float>::size);
-    output.write(reinterpret_cast<char*>(&outputValue), BsonPrintFloatTraits<Float>::size);
+    write(reinterpret_cast<char*>(&outputValue), BsonPrintFloatTraits<Float>::size);
 }
 
 }
