@@ -2,6 +2,8 @@
 #define THORSANVIL_SERIALIZER_THORSSERIALIZERUTIL_H
 
 #include "SerializeConfig.h"
+#include "PolymorphicMarker.h"
+#include "PrinterConfig.h"
 #include "StringOutput.h"
 #include "StringInput.h"
 #include "ThorsIOUtil/Utility.h"
@@ -21,19 +23,6 @@
 
 namespace ThorsAnvil::Serialize
 {
-
-        namespace Private
-        {
-
-
-inline
-std::string const& getDefaultPolymorphicMarker()
-{
-    using std::string_literals::operator""s;
-    static std::string const defaultPolymorphicMarker = "__type"s;
-    return defaultPolymorphicMarker;
-}
-        }
 
 template<typename T>
 struct SharedInfo
@@ -331,73 +320,6 @@ class ParserInterface
         void    ignoreTheMap();
         void    ignoreTheArray();
 
-};
-
-// Default:     What ever the implementation likes.
-// Stream:      Compressed for over the wire protocol.
-// Config:      Human readable (potentially config file like)
-enum class OutputType {Default, Stream, Config};
-
-
-struct PrinterConfig
-{
-    /*
-     * These constructors are maintained for backward compatibility.
-     * But should not be used in new code.
-     * Please use the set<Attribute>() methods.
-     */
-    PrinterConfig(OutputType characteristics,
-                  std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
-                  bool catchExceptions = true)
-        : characteristics(characteristics)
-        , polymorphicMarker(polymorphicMarker)
-        , catchExceptions(catchExceptions)
-        , parserInfo(0)
-        , useOldSharedPtr(false)
-    {}
-    PrinterConfig(std::string const& polymorphicMarker,
-                  bool catchExceptions = true)
-        : characteristics(OutputType::Default)
-        , polymorphicMarker(polymorphicMarker)
-        , catchExceptions(catchExceptions)
-        , parserInfo(0)
-        , useOldSharedPtr(false)
-    {}
-    PrinterConfig(bool catchExceptions)
-        : characteristics(OutputType::Default)
-        , polymorphicMarker(Private::getDefaultPolymorphicMarker())
-        , catchExceptions(catchExceptions)
-        , parserInfo(0)
-        , useOldSharedPtr(false)
-    {}
-    PrinterConfig(OutputType characteristic, bool catchExceptions)
-        : characteristics(characteristic)
-        , polymorphicMarker(Private::getDefaultPolymorphicMarker())
-        , catchExceptions(catchExceptions)
-        , parserInfo(0)
-        , useOldSharedPtr(false)
-    {}
-
-    /* Please use the default constructor
-     * Then call the appropriate set<Attributes>() to define the characteristics you need.
-     */
-    PrinterConfig()
-        : characteristics(OutputType::Default)
-        , polymorphicMarker(Private::getDefaultPolymorphicMarker())
-        , catchExceptions(true)
-        , parserInfo(0)
-        , useOldSharedPtr(false)
-    {}
-    PrinterConfig& setOutputType(OutputType p_characteristics)                  {characteristics = p_characteristics;      return *this;}
-    PrinterConfig& setPolymorphicMarker(std::string const& p_polymorphicMarker) {polymorphicMarker = p_polymorphicMarker;  return *this;}
-    PrinterConfig& setCatchExceptions(bool p_catchExceptions)                   {catchExceptions = p_catchExceptions;      return *this;}
-    PrinterConfig& setUseOldSharedPtr()                                         {useOldSharedPtr = true;                   return *this;}
-
-    OutputType      characteristics;
-    std::string     polymorphicMarker;
-    bool            catchExceptions;
-    long            parserInfo;
-    bool            useOldSharedPtr;
 };
 
 class PrinterInterface

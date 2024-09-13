@@ -2,8 +2,10 @@
 #define THORSANVIL_SERIALIZER_STRING_OUTPUT_H
 
 #include "SerializeConfig.h"
+#include "PrinterConfig.h"
 #include <string>
 #include <charconv>
+#include <iostream>
 
 namespace ThorsAnvil::Serialize
 {
@@ -11,6 +13,8 @@ namespace ThorsAnvil::Serialize
 struct StringOutput
 {
     std::string&    data;
+    char*           current;
+    char*           end;
     std::size_t     calcSize;
     bool            ok;
     bool            preFlight;
@@ -18,6 +22,8 @@ struct StringOutput
     public:
         StringOutput(std::string& output)
             : data(output)
+            , current(nullptr)
+            , end(nullptr)
             , calcSize(0)
             , ok(true)
             , preFlight(false)
@@ -29,7 +35,7 @@ struct StringOutput
                 calcSize += size;
                 return true;
             }
-            data += std::string_view(src, size);
+            current = std::copy(src, src + size, current);
             return true;
         }
         bool isOk() const
@@ -44,15 +50,16 @@ struct StringOutput
         void writeValue(T const& src)
         {
             using std::to_chars;
-            static char buffer[100];
-            std::to_chars_result    result = to_chars(buffer, buffer + 100, src);
             if (preFlight)
             {
+                static char buffer[100];
+                auto result = to_chars(buffer, buffer + 100, src);
                 calcSize += (result.ptr - buffer);
             }
             else
             {
-                data += std::string_view(buffer, (result.ptr - buffer));
+                auto result = to_chars(current, end, src);
+                current = result.ptr;
             }
         }
         bool preflightSize()
@@ -62,7 +69,9 @@ struct StringOutput
         }
         void reserveSize()
         {
-            data.reserve(calcSize + 10);
+            data.resize(calcSize);
+            current = &data[0];
+            end = current + calcSize;
             preFlight = false;
         }
 };
