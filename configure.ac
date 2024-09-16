@@ -32,14 +32,29 @@ int main() {
     auto result = std::to_chars(buffer, buffer+100, value, std::chars_format::fixed, 6);
 }]],
     [
-        AC_MSG_NOTICE([Supports std::to_chars(beigin, end, 12.4])
+        AC_MSG_NOTICE([[Supports std::to_chars(begin, end, double)]])
     ],
     [
-        AC_MSG_NOTICE([Setting HOMEBREW_OLD_VERSION_OF_MAC])
-        AC_DEFINE([HOMEBREW_OLD_VERSION_OF_MAC], [1], [Check for older build tools and use simpler code with old tools])
-        subconfigure="${subconfigure} --with-homebrewCLT=${with_homebrewCLT}"
+        AC_MSG_NOTICE([Setting NO_STD_SUPPORT_TO_CHAR_DOUBLE])
+        AC_DEFINE([NO_STD_SUPPORT_TO_CHAR_DOUBLE], [1], [Check for older build tools and use simpler code with old tools])
     ]
 )
+AX_THOR_FUNC_TEST_COMP_ACTION([[
+#include <charconv>
+int main() {
+    char    buffer[] = "12.345";
+    double  value;
+    auto result = std::from_chars(buffer, buffer+100, value);
+}]],
+    [
+        AC_MSG_NOTICE([[Supports std::from_chars(begin, end, double)]])
+    ],
+    [
+        AC_MSG_NOTICE([Setting NO_STD_SUPPORT_FROM_CHAR_DOUBLE])
+        AC_DEFINE([NO_STD_SUPPORT_FROM_CHAR_DOUBLE], [1], [Check for older build tools and use simpler code with old tools])
+    ]
+)
+
 
 LT_INIT
 

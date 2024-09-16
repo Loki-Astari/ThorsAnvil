@@ -5792,19 +5792,18 @@ if ac_fn_cxx_try_compile "$LINENO"
 then :
 
 
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Supports std::to_chars(beigin, end, 12.4" >&5
-printf "%s\n" "$as_me: Supports std::to_chars(beigin, end, 12.4" >&6;}
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Supports std::to_chars(begin, end, double)" >&5
+printf "%s\n" "$as_me: Supports std::to_chars(begin, end, double)" >&6;}
 
 
 else case e in #(
   e)
 
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Setting HOMEBREW_OLD_VERSION_OF_MAC" >&5
-printf "%s\n" "$as_me: Setting HOMEBREW_OLD_VERSION_OF_MAC" >&6;}
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Setting NO_STD_SUPPORT_TO_CHAR_DOUBLE" >&5
+printf "%s\n" "$as_me: Setting NO_STD_SUPPORT_TO_CHAR_DOUBLE" >&6;}
 
-printf "%s\n" "#define HOMEBREW_OLD_VERSION_OF_MAC 1" >>confdefs.h
+printf "%s\n" "#define NO_STD_SUPPORT_TO_CHAR_DOUBLE 1" >>confdefs.h
 
-        subconfigure="${subconfigure} --with-homebrewCLT=${with_homebrewCLT}"
 
 
 
@@ -5817,6 +5816,67 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
 
 
 fi
+
+
+    if test "
+#include <charconv>
+int main() {
+    char    buffer[] = "12.345";
+    double  value;
+    auto result = std::from_chars(buffer, buffer+100, value);
+}" != ""
+then :
+
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}" >&5
+printf %s "checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}... " >&6; }
+            ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+            CXXFLAGS_SAVE="${CXXFLAGS}"
+            CXXFLAGS=${CXX_STD_FLAG}
+
+            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <charconv>
+int main() {
+    char    buffer[] = "12.345";
+    double  value;
+    auto result = std::from_chars(buffer, buffer+100, value);
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"
+then :
+
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Supports std::from_chars(begin, end, double)" >&5
+printf "%s\n" "$as_me: Supports std::from_chars(begin, end, double)" >&6;}
+
+
+else case e in #(
+  e)
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Setting NO_STD_SUPPORT_FROM_CHAR_DOUBLE" >&5
+printf "%s\n" "$as_me: Setting NO_STD_SUPPORT_FROM_CHAR_DOUBLE" >&6;}
+
+printf "%s\n" "#define NO_STD_SUPPORT_FROM_CHAR_DOUBLE 1" >>confdefs.h
+
+
+
+
+             ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+            CXXFLAGS=${CXXFLAGS_SAVE}
+
+
+
+fi
+
 
 
 
