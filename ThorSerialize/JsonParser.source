@@ -174,25 +174,19 @@ std::string JsonParser::getKey()
     return getString();
 }
 
-template<typename T>
-inline T JsonParser::scan()
-{
-    return lexer.scan<T>();
-}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(short int& value)                     {value = lexer.scan<short int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(int& value)                           {value = lexer.scan<int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(long int& value)                      {value = lexer.scan<long int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(long long int& value)                 {value = lexer.scan<long long int>();}
 
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(short int& value)                     {value = scan<short int>();}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(int& value)                           {value = scan<int>();}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(long int& value)                      {value = scan<long int>();}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(long long int& value)                 {value = scan<long long int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(unsigned short int& value)            {value = lexer.scan<unsigned short int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(unsigned int& value)                  {value = lexer.scan<unsigned int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(unsigned long int& value)             {value = lexer.scan<unsigned long int>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(unsigned long long int& value)        {value = lexer.scan<unsigned long long int>();}
 
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(unsigned short int& value)            {value = scan<unsigned short int>();}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(unsigned int& value)                  {value = scan<unsigned int>();}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(unsigned long int& value)             {value = scan<unsigned long int>();}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(unsigned long long int& value)        {value = scan<unsigned long long int>();}
-
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(float& value)                         {value = scan<float>();}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(double& value)                        {value = scan<double>();}
-THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(long double& value)                   {value = scan<long double>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(float& value)                         {value = lexer.scan<float>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(double& value)                        {value = lexer.scan<double>();}
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonParser::getValue(long double& value)                   {value = lexer.scan<long double>();}
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void JsonParser::getValue(bool& value)

@@ -62,17 +62,36 @@ class ApplyActionToParent<TraitType::Parent, T, I>
         }
 };
 /* ------------------- HeedAllValues ---------------------------- */
+struct StringVsStringView
+{
+    using is_transparent = void;
+
+    bool operator()(std::string const& lhs, std::string const& rhs) const
+    {
+        return lhs < rhs;
+    }
+    bool operator()(std::string const& lhs, std::string_view const& rhs) const
+    {
+        return lhs < rhs;
+    }
+    bool operator()(std::string_view const& lhs, std::string const& rhs) const
+    {
+        return lhs < rhs;
+    }
+};
+using KeyStore = std::set<std::string, StringVsStringView>;
+
 template<typename T>
 struct HeedAllValues;
 
 template<typename T>
 typename std::enable_if_t<! HasParent<T>::value>
-heedAllParentMembers(std::set<std::string> const& /*membersound*/)
+heedAllParentMembers(KeyStore const& /*membersound*/)
 {}
 
 template<typename T>
 std::enable_if_t<HasParent<T>::value>
-heedAllParentMembers(std::set<std::string> const& membersFound)
+heedAllParentMembers(KeyStore const& membersFound)
 {
     HeedAllValues<typename Traits<std::remove_cv_t<T>>::Parent>   heedParent;
     heedParent(membersFound);
@@ -82,7 +101,7 @@ template<typename T>
 struct HeedAllValues
 {
     template<typename X>
-    int checkAMember(std::set<std::string> const& membersFound, std::pair<char const*, X> const& member)
+    int checkAMember(KeyStore const& membersFound, std::pair<std::string_view, X> const& member)
     {
         if (membersFound.find(member.first) == std::end(membersFound))
         {
@@ -94,19 +113,19 @@ struct HeedAllValues
     }
 
     template<typename Tuple, std::size_t... Index>
-    void checkEachMember(std::set<std::string> const& membersFound, Tuple const& tuple, std::index_sequence<Index...> const&)
+    void checkEachMember(KeyStore const& membersFound, Tuple const& tuple, std::index_sequence<Index...> const&)
     {
         (checkAMember(membersFound, std::get<Index>(tuple)), ...);
         heedAllParentMembers<T>(membersFound);
     }
 
     template<typename... Args>
-    void checkMemberFound(std::set<std::string> const& membersFound, std::tuple<Args...> const& args)
+    void checkMemberFound(KeyStore const& membersFound, std::tuple<Args...> const& args)
     {
         checkEachMember(membersFound, args, std::index_sequence_for<Args...>{});
     }
 
-    void operator()(std::set<std::string> const& membersFound)
+    void operator()(KeyStore const& membersFound)
     {
         checkMemberFound(membersFound, Traits<std::remove_cv_t<T>>::getMembers());
     }
@@ -115,11 +134,11 @@ template<typename... P>
 struct HeedAllValues<Parents<P...>>
 {
     template<typename ParentTupple, std::size_t... Index>
-    void checkEachParent(ParentTupple& parentsToHeed, std::set<std::string> const& membersFound, std::index_sequence<Index...> const&)
+    void checkEachParent(ParentTupple& parentsToHeed, KeyStore const& membersFound, std::index_sequence<Index...> const&)
     {
         (std::get<Index>(parentsToHeed)(membersFound), ...);
     }
-    void operator()(std::set<std::string> const& membersFound)
+    void operator()(KeyStore const& membersFound)
     {
         std::tuple<HeedAllValues<P>...>     parentsToHeed;
         checkEachParent(parentsToHeed, membersFound, std::index_sequence_for<P...>{});
@@ -129,22 +148,22 @@ struct HeedAllValues<Parents<P...>>
 template<typename K, typename V>
 struct HeedAllValues<std::map<K, V>>
 {
-    void operator()(std::set<std::string> const& /*members*/) {}
+    void operator()(KeyStore const& /*members*/) {}
 };
 template<typename K, typename V>
 struct HeedAllValues<std::multimap<K, V>>
 {
-    void operator()(std::set<std::string> const& /*members*/) {}
+    void operator()(KeyStore const& /*members*/) {}
 };
 template<typename K, typename V>
 struct HeedAllValues<std::unordered_map<K, V>>
 {
-    void operator()(std::set<std::string> const& /*members*/) {}
+    void operator()(KeyStore const& /*members*/) {}
 };
 template<typename K, typename V>
 struct HeedAllValues<std::unordered_multimap<K, V>>
 {
-    void operator()(std::set<std::string> const& /*members*/) {}
+    void operator()(KeyStore const& /*members*/) {}
 };
 
 /* ------------ DeSerializationForBlock ------------------------- */
@@ -180,7 +199,7 @@ class DeSerializationForBlock
 
         void scanObject(T& object)
         {
-            std::set<std::string>     memberFound;
+            KeyStore    memberFound;
             while (hasMoreValue())
             {
                 if (!parent.scanObjectMembers(key, object))
@@ -344,7 +363,6 @@ auto tryParsePolyMorphicObject(DeSerializer& parent, ParserInterface& parser, T&
     }
 
 
-    std::string keyValue;
     if (parser.getKey() != parser.config.polymorphicMarker)
     {
         ThorsLogAndThrow("ThorsAnvil::Serialize",
@@ -595,7 +613,7 @@ class DeSerializeMember: public TraitsInfo<T, M, Type>::DeSerializeMember
 };
 
 template<typename T, typename M>
-bool make_DeSerializeMember(DeSerializer& parent, ParserInterface& parser, std::string const& key, T& object, std::pair<char const*, M*> const& memberInfo)
+bool make_DeSerializeMember(DeSerializer& parent, ParserInterface& parser, std::string const& key, T& object, std::pair<std::string_view, M*> const& memberInfo)
 {
     if (key.compare(ThorsAnvil::Serialize::Override<T>::nameOverride(memberInfo.first)) != 0) {
         return false;
@@ -605,7 +623,7 @@ bool make_DeSerializeMember(DeSerializer& parent, ParserInterface& parser, std::
 }
 
 template<typename T, typename M>
-bool make_DeSerializeMember(DeSerializer& parent, ParserInterface& parser, std::string const& key, T& object, std::pair<char const*, M T::*> const& memberInfo)
+bool make_DeSerializeMember(DeSerializer& parent, ParserInterface& parser, std::string const& key, T& object, std::pair<std::string_view, M T::*> const& memberInfo)
 {
     if (key.compare(ThorsAnvil::Serialize::Override<T>::nameOverride(memberInfo.first)) != 0) {
         return false;
@@ -949,7 +967,7 @@ class SerializerForBlock<TraitType::Array, T>
 /* ------------ SerializeMember ------------------------- */
 
 template<typename T, typename M>
-SerializeMemberContainer<T, M>::SerializeMemberContainer(Serializer&, PrinterInterface& printer, T const& object, std::pair<char const*, M T::*> const& memberInfo)
+SerializeMemberContainer<T, M>::SerializeMemberContainer(Serializer&, PrinterInterface& printer, T const& object, std::pair<std::string_view, M T::*> const& memberInfo)
 {
     if (ThorsAnvil::Serialize::Filter<T>::filter(object, memberInfo.first, object.*(memberInfo.second)))
     {
@@ -961,7 +979,7 @@ SerializeMemberContainer<T, M>::SerializeMemberContainer(Serializer&, PrinterInt
 }
 
 template<typename T, typename M>
-SerializeMemberContainer<T, M>::SerializeMemberContainer(Serializer&, PrinterInterface& printer, T const& object, std::pair<char const*, M*> const& memberInfo)
+SerializeMemberContainer<T, M>::SerializeMemberContainer(Serializer&, PrinterInterface& printer, T const& object, std::pair<std::string_view, M*> const& memberInfo)
 {
     if (ThorsAnvil::Serialize::Filter<T>::filter(object, memberInfo.first, *(memberInfo.second)))
     {
@@ -973,19 +991,19 @@ SerializeMemberContainer<T, M>::SerializeMemberContainer(Serializer&, PrinterInt
 }
 
 template<typename T, typename M, TraitType Type>
-SerializeMemberValue<T, M, Type>::SerializeMemberValue(Serializer& parent, PrinterInterface& printer, T const& object, std::pair<char const*, M T::*> const& memberInfo)
+SerializeMemberValue<T, M, Type>::SerializeMemberValue(Serializer& parent, PrinterInterface& printer, T const& object, std::pair<std::string_view, M T::*> const& memberInfo)
 {
     init(parent, printer, memberInfo.first, object, object.*(memberInfo.second));
 }
 
 template<typename T, typename M, TraitType Type>
-SerializeMemberValue<T, M, Type>::SerializeMemberValue(Serializer& parent, PrinterInterface& printer, T const& object, std::pair<char const*, M*> const& memberInfo)
+SerializeMemberValue<T, M, Type>::SerializeMemberValue(Serializer& parent, PrinterInterface& printer, T const& object, std::pair<std::string_view, M*> const& memberInfo)
 {
     init(parent, printer, memberInfo.first, object, *(memberInfo.second));
 }
 
 template<typename T, typename M, TraitType Type>
-void SerializeMemberValue<T, M, Type>::init(Serializer& parent, PrinterInterface& printer, char const* member, T const& object, M const& value)
+void SerializeMemberValue<T, M, Type>::init(Serializer& parent, PrinterInterface& printer, std::string_view const& member, T const& object, M const& value)
 {
     if (ThorsAnvil::Serialize::Filter<T>::filter(object, member, value))
     {
@@ -1004,12 +1022,12 @@ class SerializeMember: public TraitsInfo<T, M, Type>::SerializeMember
 };
 
 template<typename T, typename M>
-SerializeMember<T, M> make_SerializeMember(Serializer& ser, PrinterInterface& printer, T const& object, std::pair<char const*, M*> const& memberInfo)
+SerializeMember<T, M> make_SerializeMember(Serializer& ser, PrinterInterface& printer, T const& object, std::pair<std::string_view, M*> const& memberInfo)
 {
     return SerializeMember<T,M>(ser, printer, object, memberInfo);
 }
 template<typename T, typename M>
-SerializeMember<T, M> make_SerializeMember(Serializer& ser, PrinterInterface& printer, T const& object, std::pair<char const*, M T::*> const& memberInfo)
+SerializeMember<T, M> make_SerializeMember(Serializer& ser, PrinterInterface& printer, T const& object, std::pair<std::string_view, M T::*> const& memberInfo)
 {
     return SerializeMember<T,M>(ser, printer, object, memberInfo);
 }
@@ -1047,9 +1065,14 @@ inline void Serializer::print(T const& object)
         printer.reserveSize();
         printer.reset();
         printer.openDoc();
+        SerializerForBlock<Traits<std::remove_cv_t<T>>::type, T>     block(*this, printer, object);
+        block.printMembers();
     }
-    SerializerForBlock<Traits<std::remove_cv_t<T>>::type, T>     block(*this, printer, object);
-    block.printMembers();
+    else
+    {
+        SerializerForBlock<Traits<std::remove_cv_t<T>>::type, T>     block(*this, printer, object);
+        block.printMembers();
+    }
 }
 
 template<TraitType type>

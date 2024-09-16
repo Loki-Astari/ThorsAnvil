@@ -57,6 +57,10 @@ struct StringInput
         {
             return data[position++];
         }
+        int peek()
+        {
+            return data[position];
+        }
         void ignore(std::size_t size)
         {
             position += size;

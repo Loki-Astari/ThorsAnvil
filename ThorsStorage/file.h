@@ -72,7 +72,7 @@ namespace ThorsAnvil
         struct GetPointerMember;
 
         template<typename R, typename T>
-        struct GetPointerMember<std::pair<char const*, R T::*>>
+        struct GetPointerMember<std::pair<std::string_view, R T::*>>
         {
             using ReturnType = R;
         };

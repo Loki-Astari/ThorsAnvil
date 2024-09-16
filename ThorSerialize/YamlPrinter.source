@@ -219,7 +219,7 @@ void YamlPrinter::emitNull()
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-void YamlPrinter::addKey(std::string const& key)
+void YamlPrinter::addKey(std::string_view const& key)
 {
     if (state.back().second != TraitType::Map && state.back().first % 2 != 1)
     {

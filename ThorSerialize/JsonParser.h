@@ -40,8 +40,6 @@ class JsonParser: public ParserInterface
     std::string getString();
     std::string getRawString();
 
-    template<typename T>
-    T scan();
     public:
         JsonParser(std::istream& stream, ParserConfig config = ParserConfig{});
         JsonParser(std::string_view const& stream, ParserConfig config = ParserConfig{});

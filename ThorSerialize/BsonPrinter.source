@@ -106,7 +106,7 @@ std::size_t BsonPrinter::getSizeArray(std::size_t count)
 
 // Add a new Key
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-void BsonPrinter::addKey(std::string const& key)
+void BsonPrinter::addKey(std::string_view const& key)
 {
     if (currentContainer.back() != BsonContainer::Map)
     {
@@ -230,7 +230,7 @@ void BsonPrinter::writeBool(bool value)
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-void BsonPrinter::writeString(std::string const& value)
+void BsonPrinter::writeString(std::string_view const& value)
 {
     writeKey('\x02', 4 + value.size() + 1);
     writeSize<4, std::int32_t>(static_cast<std::int32_t>(value.size() + 1));
@@ -245,12 +245,12 @@ void BsonPrinter::writeNull()
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-void BsonPrinter::writeBinary(std::string const& value)
+void BsonPrinter::writeBinary(std::string_view const& value)
 {
     writeKey('\x05', 4 + 1 + value.size());    // binary
     writeSize<4, std::int32_t>(static_cast<std::int32_t>(value.size()));
     write("\x80", 1);
-    write(value.c_str(), value.size());
+    write(std::begin(value), value.size());
 }
 }
 

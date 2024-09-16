@@ -119,18 +119,18 @@ template<typename T, typename M>
 class SerializeMemberContainer
 {
     public:
-        SerializeMemberContainer(Serializer&, PrinterInterface& printer, T const& object, std::pair<char const*, M T::*> const& memberInfo);
-        SerializeMemberContainer(Serializer&, PrinterInterface& printer, T const& object, std::pair<char const*, M*> const& memberInfo);
+        SerializeMemberContainer(Serializer&, PrinterInterface& printer, T const& object, std::pair<std::string_view, M T::*> const& memberInfo);
+        SerializeMemberContainer(Serializer&, PrinterInterface& printer, T const& object, std::pair<std::string_view, M*> const& memberInfo);
 };
 
 template<typename T, typename M, TraitType Type>
 class SerializeMemberValue
 {
     public:
-        SerializeMemberValue(Serializer& parent, PrinterInterface& printer, T const& object, std::pair<char const*, M T::*> const& memberInfo);
-        SerializeMemberValue(Serializer& parent, PrinterInterface& printer, T const&, std::pair<char const*, M*> const& memberInfo);
+        SerializeMemberValue(Serializer& parent, PrinterInterface& printer, T const& object, std::pair<std::string_view, M T::*> const& memberInfo);
+        SerializeMemberValue(Serializer& parent, PrinterInterface& printer, T const&, std::pair<std::string_view, M*> const& memberInfo);
     private:
-        void init(Serializer& parent, PrinterInterface& printer, char const* member, T const& object, M const& value);
+        void init(Serializer& parent, PrinterInterface& printer, std::string_view const& member, T const& object, M const& value);
 };
 
 class Serializer
@@ -303,6 +303,7 @@ inline Serializer::~Serializer()
     if (root)
     {
         printer.closeDoc();
+        printer.finalizePrint();
     }
 }
 

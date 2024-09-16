@@ -31,7 +31,7 @@ class JsonPrinter: public PrinterInterface
         virtual void openArray(std::size_t size)            override;
         virtual void closeArray()                           override;
 
-        virtual void addKey(std::string const& key)         override;
+        virtual void addKey(std::string_view const& key)    override;
 
         virtual void addValue(short int value)              override;
         virtual void addValue(int value)                    override;
@@ -49,10 +49,9 @@ class JsonPrinter: public PrinterInterface
 
         virtual void addValue(bool value)                   override;
 
-        virtual void addValue(std::string const& value)     override;
         virtual void addValue(std::string_view const& value)override;
 
-        virtual void addRawValue(std::string const& value)  override;
+        virtual void addRawValue(std::string_view const& value)  override;
 
         virtual void addNull()                              override;
 

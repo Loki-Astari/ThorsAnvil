@@ -455,7 +455,7 @@
 #define BUILDTEMPLATETYPEVALUE(Act, M1, Count)  ALT_REP_OF_N(Act, M1, <, >, Count)
 
 
-#define THOR_TYPEACTION(TC, Type, Member)       std::pair<char const*, decltype(&Type BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , TC) ::Member)>
+#define THOR_TYPEACTION(TC, Type, Member)       std::pair<std::string_view, decltype(&Type BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , TC) ::Member)>
 #define THOR_VALUEACTION(TC, Type, Member)      { QUOTE(Member), &Type BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , TC) ::Member }
 #define THOR_NAMEACTION(TC, Type, Member)       { Type::Member, #Member ## s}
 #define LAST_THOR_TYPEACTION(TC, Type)
@@ -558,18 +558,18 @@ template<TT BUILDTEMPLATETYPEPARAM(THOR_TYPENAMEPARAMACTION, Count)>    \
 class Override<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , Count) > \
 {                                                                       \
     public:                                                             \
-        static char const* nameOverride(char const* name)               \
+        static std::string_view const& nameOverride(std::string_view const& name)   \
         {                                                               \
-            static auto hashCString = [](char const* str)               \
+            static auto hashCString = [](std::string_view const& str)   \
             {                                                           \
                 std::hash<std::string_view>  viewHash;                  \
-                return viewHash(std::string_view(str));                 \
+                return viewHash(str);                                   \
             };                                                          \
-            static auto cmpCString = [](char const* lhs, char const* rhs)\
+            static auto cmpCString = [](std::string_view const& lhs, std::string_view const& rhs)\
             {                                                           \
-                return std::strcmp(lhs, rhs) == 0;                      \
+                return lhs == rhs;                                      \
             };                                                          \
-            using OverrideMap = std::unordered_map<char const*, char const*, decltype(hashCString), decltype(cmpCString)>;   \
+            using OverrideMap = std::unordered_map<std::string_view, std::string_view, decltype(hashCString), decltype(cmpCString)>;   \
             static OverrideMap overrideMap =                            \
             {                                                           \
                 {__VA_ARGS__},                                          \
@@ -601,7 +601,7 @@ class Filter<DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , Count) 
 {                                                                       \
     public:                                                             \
         template<typename M>                                            \
-        static bool filter(DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , Count) const& object, char const* name, M const& /*v*/)    \
+        static bool filter(DataType BUILDTEMPLATETYPEVALUE(THOR_TYPENAMEVALUEACTION, , Count) const& object, std::string_view const& name, M const& /*v*/)    \
         {                                                               \
             auto find = object.member.find(name);                       \
             return find == object.member.end() ? true : find->second;   \
@@ -891,7 +891,7 @@ template<typename T>
 class Override
 {
     public:
-        static char const* nameOverride(char const* name) {return name;}
+        static std::string_view const& nameOverride(std::string_view const& name) {return name;}
 };
 
 template<typename T>
@@ -912,7 +912,7 @@ class Filter
 {
     public:
         template<typename M>
-        static constexpr bool filter(T const& /*object*/, char const* /*name*/, M const& value)
+        static constexpr bool filter(T const& /*object*/, std::string_view const& /*name*/, M const& value)
         {
             if constexpr (isOptional_v<M>) {
                 return value.has_value();
@@ -978,7 +978,7 @@ class TraitsSizeCalculator
                 return std::make_pair(0UL,0UL);
             }
             auto partSize   = addSizeOneMember(printer, object, item.second);
-            auto nameSize   = std::strlen(Override<MyType>::nameOverride(item.first));
+            auto nameSize   = std::size(Override<MyType>::nameOverride(item.first));
             return std::make_pair(partSize + nameSize, 1);
         }
         template<typename MyType, typename M, typename C>
@@ -988,7 +988,7 @@ class TraitsSizeCalculator
                 return std::make_pair(0UL,0UL);
             }
             auto partSize   = addSizeOneMember(printer, object, item.second);
-            auto nameSize   = std::strlen(Override<MyType>::nameOverride(item.first));
+            auto nameSize   = std::size(Override<MyType>::nameOverride(item.first));
             return std::make_pair(partSize + nameSize, 1);
         }
         template<typename MyType, typename Members, std::size_t... Seq>

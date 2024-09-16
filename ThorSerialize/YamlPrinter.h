@@ -42,7 +42,7 @@ class YamlPrinter: public PrinterInterface
         virtual void openArray(std::size_t size)            override;
         virtual void closeArray()                           override;
 
-        virtual void addKey(std::string const& key)         override;
+        virtual void addKey(std::string_view const& key)    override;
 
         virtual void addValue(short int value)              override    {emit(value);}
         virtual void addValue(int value)                    override    {emit(value);}
@@ -60,10 +60,9 @@ class YamlPrinter: public PrinterInterface
 
         virtual void addValue(bool value)                   override    {emit(value?"true":"false");}
 
-        virtual void addValue(std::string const& value)     override    {emit(value);}
         virtual void addValue(std::string_view const& value)override    {emit(std::string(value));}
 
-        virtual void addRawValue(std::string const& value)  override    {emit(value);}
+        virtual void addRawValue(std::string_view const& value)override {emit(value);}
 
         virtual void addNull()                              override    {emitNull();}
 };
