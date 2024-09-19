@@ -8,6 +8,7 @@
 #include <optional>
 #include <cstdint>
 #include <string>
+#include <charconv>
 
 namespace ThorsAnvil::DB::Mongo
 {
@@ -61,7 +62,7 @@ struct RequestAcknowledgmentSerializer
     }
     static void readCustom(ThorsAnvil::Serialize::ParserInterface& parser, RequestAcknowledgment& object)
     {
-        std::string rawValue = parser.getRawValue();
+        std::string_view rawValue = parser.getRawValue();
         if (rawValue.size() > 0 && rawValue[0] == '"')
         {
             using namespace std::string_literals;
@@ -75,9 +76,10 @@ struct RequestAcknowledgmentSerializer
         else
         {
             object.option = RequestAcknowledgment::WOpt::Specific;
-            std::size_t pos;
-            object.count = std::stoi(rawValue, &pos);
-            if (pos != rawValue.size()) {
+            char const* beg = &rawValue[0];
+            char const* end = beg + rawValue.size();
+            auto result = std::from_chars(beg, end, object.count);
+            if (result.ptr != end) {
                 throw std::invalid_argument("Invalid Number");
             }
         }

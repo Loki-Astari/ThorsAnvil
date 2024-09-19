@@ -62,7 +62,7 @@ class BsonParser: public ParserInterface
         BsonParser(std::string_view const& stream, ParserConfig config = ParserConfig{});
         virtual FormatType formatType()                         override {return FormatType::Bson;}
         virtual ParserToken getNextToken()                      override;
-        virtual std::string getKey()                            override;
+        virtual std::string_view getKey()                       override;
 
         virtual void    ignoreDataValue()                       override;
         virtual void    ignoreDataMap(bool)                     override;
@@ -84,11 +84,11 @@ class BsonParser: public ParserInterface
 
         virtual void    getValue(bool& value)                   override    {if (nextType != '\x08')    {badType("Bool", nextType);}value = readBool();}
 
-        virtual void    getValue(std::string& value)            override    {if (nextType != '\x02')    {badType("String", nextType);}value = readString();}
+        virtual void    getValue(std::string& value)            override    {if (nextType != '\x02')    {badType("String", nextType);}value.clear();readString(value);}
 
         virtual bool    isValueNull()                           override    {return (nextType == '\x0A');}
 
-        virtual std::string getRawValue()                       override;
+        virtual std::string_view getRawValue()                  override;
 
         void useStreamData(std::size_t amount) {dataLeft.back() -= amount;}
 
@@ -135,9 +135,9 @@ class BsonParser: public ParserInterface
         F readFloat();
 
         bool readBool();
-        std::string readString();
+        void readString(std::string& buffer);
         void readNull();
-        std::string readBinary();
+        void readBinary(std::string& buffer);
 
         [[noreturn]]
         void badType(std::string const& expected, unsigned char got)

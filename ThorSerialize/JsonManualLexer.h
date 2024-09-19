@@ -23,8 +23,8 @@ class JsonManualLexer
         int yylex();
 
         void        ignoreRawValue();
-        std::string getRawString();
-        std::string getString();
+        std::string_view getRawString();
+        std::string_view getString();
         void        getStringInto(std::string&);
         bool        getLastBool();
         bool        isLastNull();
@@ -54,15 +54,13 @@ class Unicode
 template<typename T>
 inline T JsonManualLexer::scan()
 {
-    std::streampos posBefore = parser.getPos();
     T           value;
     bool readOK = parser.readValue(value);
-    int peek = parser.peek();
-    if (!readOK || posBefore == parser.getPos() || peek == '.' || peek == 'e' || peek == 'E')
+    if (!readOK)
     {
-        ThorsLogAndThrow("ThorsAnvil::Serialize::JsonParser",
+        ThorsLogAndThrow("ThorsAnvil::Serialize::JsonManualLexer",
                          "scan",
-                         "No data left to scan");
+                         "Failed to Scan a number correctly");
     }
     return value;
 }

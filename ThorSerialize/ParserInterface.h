@@ -13,6 +13,7 @@
 #include <map>
 #include <any>
 #include <memory>
+#include <concepts>
 
 namespace ThorsAnvil::Serialize
 {
@@ -33,11 +34,11 @@ class ParserInterface
             , pushBack(ParserToken::Error)
         {}
         virtual ~ParserInterface() {}
-        virtual FormatType formatType()                 = 0;
-                ParserToken     getToken();
-                void            pushBackToken(ParserToken token);
-        virtual ParserToken     getNextToken()          = 0;
-        virtual std::string     getKey()                = 0;
+        virtual FormatType       formatType()            = 0;
+                ParserToken      getToken();
+                void             pushBackToken(ParserToken token);
+        virtual ParserToken      getNextToken()          = 0;
+        virtual std::string_view getKey()                = 0;
 
         virtual void    ignoreDataValue()               {}
         virtual void    ignoreDataMap(bool)             {}
@@ -63,7 +64,7 @@ class ParserInterface
 
         virtual bool    isValueNull()                    = 0;
 
-        virtual std::string getRawValue()                = 0;
+        virtual std::string_view getRawValue()           = 0;
 
         void    ignoreValue();
 
@@ -175,18 +176,108 @@ class ParserInterface
             std::visit(SetFail{}, input);
         }
         template<typename T>
+        requires std::integral<T>
         bool readValue(T& value)
         {
             struct ReadValue
             {
                 T& value;
                 ReadValue(T& value) :value(value) {}
-                bool operator()(std::istream* input)    {return static_cast<bool>((*input) >> value);}
-                bool operator()(StringInput& input)     {input.readValue(value);return true;}
+                bool operator()(std::istream* input)
+                {
+                    bool ok = static_cast<bool>((*input) >> value);
+                    char next = input->peek();
+                    return ok && next != '.' && next != 'e' && next != 'E';
+                }
+                bool operator()(StringInput& input)
+                {
+                    bool ok = input.readValue(value);
+                    char next = input.peek();
+                    return ok && next != '.' && next != 'e' && next != 'E';
+                }
+            };
+            return std::visit(ReadValue{value}, input);
+        }
+        template<typename T>
+        requires std::floating_point<T>
+        bool readValue(T& value)
+        {
+            struct ReadValue
+            {
+                T& value;
+                ReadValue(T& value) :value(value) {}
+                bool operator()(std::istream* input)
+                {
+                    return static_cast<bool>((*input) >> value);
+                }
+                bool operator()(StringInput& input)
+                {
+                    return input.readValue(value);
+                }
+            };
+            return std::visit(ReadValue{value}, input);
+        }
+        bool readValue(char& value)
+        {
+            struct ReadValue
+            {
+                char& value;
+                ReadValue(char& value) :value(value) {}
+                bool operator()(std::istream* input)
+                {
+                    return static_cast<bool>((*input) >> value);
+                }
+                bool operator()(StringInput& input)
+                {
+                    return input.readValue(value);
+                }
             };
             return std::visit(ReadValue{value}, input);
         }
 
+        int peekNextNonSpaceValue()
+        {
+            struct PeekNextNonSpaceValue
+            {
+                int operator()(std::istream* input)
+                {
+                    char value;
+                    bool ok = static_cast<bool>((*input) >> value);
+                    switch (value)
+                    {
+                        case '{':
+                        case '}':
+                        case '[':
+                        case ']':
+                        case ',':
+                        case ':':
+                            break;
+                        default:
+                            input->unget();
+                    }
+                    return ok ? value : -1;
+                }
+                int operator()(StringInput& input)
+                {
+                    char value = -1;
+                    input.readValue(value);
+                    switch (value)
+                    {
+                        case '{':
+                        case '}':
+                        case '[':
+                        case ']':
+                        case ',':
+                        case ':':
+                            break;
+                        default:
+                            input.unget();
+                    }
+                    return value;
+                }
+            };
+            return std::visit(PeekNextNonSpaceValue{}, input);
+        }
         template<typename T>
         void getShared(SharedInfo<T> const& info, std::shared_ptr<T>& object)
         {

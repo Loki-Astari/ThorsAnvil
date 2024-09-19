@@ -167,7 +167,7 @@ void YamlParser::generateParsingException(std::function<bool ()> test, std::stri
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-std::string YamlParser::getString()
+std::string_view YamlParser::getString()
 {
 //int   plain_implicit
 //int   quoted_implicit
@@ -187,7 +187,7 @@ std::string YamlParser::getString()
 */
 
 
-    return std::string(buffer, buffer + length);
+    return std::string_view(buffer, length);
 }
 
 template<typename T>
@@ -261,7 +261,7 @@ bool YamlParser::isValueNull()
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-std::string YamlParser::getRawValue()
+std::string_view YamlParser::getRawValue()
 {
     return getString();
 }

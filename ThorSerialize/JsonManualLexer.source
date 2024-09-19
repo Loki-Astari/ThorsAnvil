@@ -18,48 +18,44 @@ JsonManualLexer::JsonManualLexer(ParserInterface& parser)
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 int JsonManualLexer::yylex()
 {
-    char    next;
-    parser.readValue(next);
-    buffer.clear();
+    char    next    = parser.peekNextNonSpaceValue();
+    //buffer.clear();
     lastNull = false;
     switch (next)
     {
-        case '{':
-        case '}':
-        case '[':
-        case ']':
-        case ',':
-        case ':':
-        {
-            return lastToken = next;
-        }
+        case '{':   lastToken = '{';return 1;
+        case '}':   lastToken = '}';return 2;
+        case '[':   lastToken = '[';return 3;
+        case ']':   lastToken = ']';return 4;
+        case ',':   lastToken = ',';return 5;
+        case ':':   lastToken = ':';return 6;
         case 't':
         {
-            parser.unget();
             lastBool = true;
-            return lastToken = ThorsAnvil::Serialize::JSON_TRUE;
+            lastToken = ThorsAnvil::Serialize::JSON_TRUE;
+            return 7;
         }
         case 'f':
         {
-            parser.unget();
             lastBool = false;
-            return lastToken = ThorsAnvil::Serialize::JSON_FALSE;
+            lastToken = ThorsAnvil::Serialize::JSON_FALSE;
+            return 8;
         }
         case 'n':
         {
-            parser.unget();
             lastNull = true;
-            return lastToken = ThorsAnvil::Serialize::JSON_NULL;
+            lastToken = ThorsAnvil::Serialize::JSON_NULL;
+            return 9;
         }
         case '"':
         {
-            parser.unget();
-            return lastToken = ThorsAnvil::Serialize::JSON_STRING;
+            lastToken = ThorsAnvil::Serialize::JSON_STRING;
+            return 10;
         }
         default:
         {
-            parser.unget();
-            return lastToken = ThorsAnvil::Serialize::JSON_NUMBER;
+            lastToken = ThorsAnvil::Serialize::JSON_NUMBER;
+            return 13;
         }
     }
 }
@@ -111,7 +107,7 @@ void JsonManualLexer::ignoreRawValue()
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-std::string JsonManualLexer::getRawString()
+std::string_view JsonManualLexer::getRawString()
 {
     switch (lastToken)
     {
@@ -133,10 +129,9 @@ std::string JsonManualLexer::getRawString()
         }
         case ThorsAnvil::Serialize::JSON_STRING:
         {
-            std::string result;
-
+            buffer.clear();
             char last = parser.get();  // Read the first Quote off the stream
-            result.push_back(last);
+            buffer.push_back(last);
             int next = parser.get();
             while (next != EOF && !(next == '"' && last != '\\'))
             {
@@ -146,7 +141,7 @@ std::string JsonManualLexer::getRawString()
                                      "getRawString",
                                      "Strings should not contain control characters.");
                 }
-                result.push_back(next);
+                buffer.push_back(next);
                 last = next;
                 next = parser.get();
             }
@@ -154,8 +149,8 @@ std::string JsonManualLexer::getRawString()
             {
                 error();
             }
-            result.push_back('"');
-            return result;
+            buffer.push_back('"');
+            return buffer;
         }
         default:
         {
@@ -313,11 +308,10 @@ void JsonManualLexer::getStringInto(std::string& value)
     Unicode::checkBuffer(parser, value);
 }
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-std::string JsonManualLexer::getString()
+std::string_view JsonManualLexer::getString()
 {
-    std::string result;
-    getStringInto(result);
-    return result;
+    getStringInto(buffer);
+    return buffer;
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
