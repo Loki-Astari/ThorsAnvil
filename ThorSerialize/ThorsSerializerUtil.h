@@ -69,7 +69,6 @@ struct GetPrimaryParentType<Parents<Args...>>
     using type = std::tuple_element_t<0, std::tuple<Args...>>;
 };
 
-
 template<typename T, bool = HasParent<T>::value>
 struct CalcSizeHelper
 {

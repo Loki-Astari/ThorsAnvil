@@ -285,7 +285,7 @@ DeSerializationForBlock<TraitType::Custom_Depricated, T>
                                  "DeSerializationForBlock",
                                  "Invalid Object");
             }
-            std::stringstream valueStream(parser.getRawValue());
+            std::stringstream valueStream(std::string(parser.getRawValue()));
             valueStream >> object;
         }
 };

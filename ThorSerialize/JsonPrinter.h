@@ -12,7 +12,16 @@
 namespace ThorsAnvil::Serialize
 {
 
-using PrintState = std::tuple<int, TraitType, bool>;
+//using PrintState = std::tuple<int, TraitType, bool>;
+struct PrintState
+{
+    PrintState(int f0, TraitType f1, bool f2)
+        : f0(f0), f1(f1), f2(f2)
+    {}
+    int         f0;
+    TraitType   f1;
+    bool        f2;
+};
 class JsonPrinter: public PrinterInterface
 {
     std::vector<PrintState> state;

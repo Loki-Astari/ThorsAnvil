@@ -55,14 +55,17 @@
 /* We have found package ZLIB */
 /* #undef HAVE_ZLIB */
 
-/* Check for older build tools and use simpler code with old tools */
-/* #undef HOMEBREW_OLD_VERSION_OF_MAC */
-
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #define LT_OBJDIR ".libs/"
 
 /* "Get mongosh version into #define. That way we can turn off some tests" */
 #define MONGO_MAJOR_VERSION 7
+
+/* Check for older build tools and use simpler code with old tools */
+#define NO_STD_SUPPORT_FROM_CHAR_DOUBLE 1
+
+/* Check for older build tools and use simpler code with old tools */
+/* #undef NO_STD_SUPPORT_TO_CHAR_DOUBLE */
 
 /* Name of package */
 #define PACKAGE "thorsserialize"

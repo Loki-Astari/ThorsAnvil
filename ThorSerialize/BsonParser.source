@@ -357,16 +357,18 @@ std::size_t BsonParser::peekSize()
 #endif
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-std::string BsonParser::readString()
+void BsonParser::readString(std::string& dst)
 {
     std::int32_t size = readSize<4, std::int32_t>();
     dataLeft.back() -= 4;
-    std::string     result(size, '\0');
-    if (read(&result[0], size))
+
+    std::size_t dstCurrentSize = dst.size();
+    dst.resize(dstCurrentSize + size);
+    if (read(&dst[dstCurrentSize], size))
     {
         dataLeft.back() -= size;
-        result.resize(size - 1);
-        return result;
+        dst.resize(dstCurrentSize + size - 1);   // remove the trailing '\0'
+        return;
     }
     ThorsLogAndThrow("ThorsAnvil::Serialize::BsonParser",
                      "readString",
@@ -378,7 +380,7 @@ void BsonParser::readNull()
 {}
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-std::string BsonParser::readBinary()
+void BsonParser::readBinary(std::string& dst)
 {
     char            subType     = '\xFF';
     std::int32_t    size        = readSize<4, std::int32_t>();
@@ -387,11 +389,11 @@ std::string BsonParser::readBinary()
     if (read(reinterpret_cast<char*>(&subType), 1))
     {
         dataLeft.back() -= 1;
-        std::string result(size, '\0');
-        if (read(&result[0], size))
+        dst.resize(size);
+        if (read(&dst[0], size))
         {
             dataLeft.back() -= size;
-            return result;
+            return;
         }
     }
     ThorsLogAndThrow("ThorsAnvil::Serialize::BsonParser",
@@ -400,7 +402,7 @@ std::string BsonParser::readBinary()
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-std::string BsonParser::getKey()
+std::string_view BsonParser::getKey()
 {
     return nextKey;
 }
@@ -413,22 +415,27 @@ std::string BsonParser::getKey()
  *       Prefer to use: ThorsAnvil_SelfSerialize   for a better experience.
  */
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-std::string BsonParser::getRawValue()
+std::string_view BsonParser::getRawValue()
 {
+    static std::string buffer;
     switch (nextType)
     {
-        case '\x01':            ThorsMessage(5, "BsonParser", "getRawValue", "Double-64");return std::to_string(readFloat<double>());
-        case '\x10':            ThorsMessage(5, "BsonParser", "getRawValue", "Int-32");return std::to_string(readInt<4, std::int32_t>());
-        case '\x12':            ThorsMessage(5, "BsonParser", "getRawValue", "Int-64");return std::to_string(readInt<8, std::int64_t>());
-        case '\x08':            ThorsMessage(5, "BsonParser", "getRawValue", "Bool");return readBool() ? "true" : "false";
-        case '\x0A':            ThorsMessage(5, "BsonParser", "getRawValue", "Null");readNull(); return "null";
+        case '\x01':            ThorsMessage(5, "BsonParser", "getRawValue", "Double-64");  buffer = std::to_string(readFloat<double>());       return buffer;
+        case '\x10':            ThorsMessage(5, "BsonParser", "getRawValue", "Int-32");     buffer = std::to_string(readInt<4, std::int32_t>());return buffer;
+        case '\x12':            ThorsMessage(5, "BsonParser", "getRawValue", "Int-64");     buffer = std::to_string(readInt<8, std::int64_t>());return buffer;
+        case '\x08':            ThorsMessage(5, "BsonParser", "getRawValue", "Bool");       return readBool() ? "true" : "false";
+        case '\x0A':            ThorsMessage(5, "BsonParser", "getRawValue", "Null");       readNull(); return "null";
         case '\x02':
         {
             using std::string_literals::operator""s;
             ThorsMessage(5, "BsonParser", "getRawValue", "String");
-            return "\""s + readString() + "\"";
+            buffer.clear();
+            buffer.append("\"");
+            readString(buffer);
+            buffer.append("\"");
+            return buffer;
         }
-        case '\x05':         ThorsMessage(5, "BsonParser", "getRawValue", "Binary");return readBinary();
+        case '\x05':         ThorsMessage(5, "BsonParser", "getRawValue", "Binary");        readBinary(buffer);return buffer;
         default:
         {
             ThorsLogAndThrow("ThorsAnvil::Serialize::BsonParser",
