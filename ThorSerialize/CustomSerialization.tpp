@@ -48,9 +48,9 @@ void DefaultCustomSerializer<T>::readCustom(ParserInterface& parser, T& object) 
         case FormatType::Bson:
         {
             BsonParser& bsonParser = dynamic_cast<BsonParser&>(parser);
-            std::streampos pos = parser.getPos();
+            std::streampos pos = parser.tellg();
             readBson(bsonParser, bsonParser.getValueType(), object);
-            bsonParser.useStreamData(parser.getPos() - pos);
+            bsonParser.useStreamData(parser.tellg() - pos);
             break;
         }
         default:

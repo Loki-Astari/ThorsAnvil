@@ -47,26 +47,6 @@ ParserToken JsonParser::getNextToken()
         return ParserToken::Error;
     }
 
-    // Convert Lexer tokens into smaller range 0-12
-#if 0
-    static std::map<int, int>   tokenIndex  =
-    {
-        {0,                                     0},
-        {'{',                                   1},
-        {'}',                                   2},
-        {'[',                                   3},
-        {']',                                   4},
-        {',',                                   5},
-        {':',                                   6},
-        {ThorsAnvil::Serialize::JSON_TRUE,      7},
-        {ThorsAnvil::Serialize::JSON_FALSE,     8},
-        {ThorsAnvil::Serialize::JSON_NULL,      9},
-        {ThorsAnvil::Serialize::JSON_STRING,    10},
-        //{ThorsAnvil::Serialize::JSON_INTEGER,   11},
-        //{ThorsAnvil::Serialize::JSON_FLOAT,     12}
-        {ThorsAnvil::Serialize::JSON_NUMBER,    13}
-    };
-#endif
     // State transition table;
     static State   stateTable[][14]   =
     {
@@ -87,9 +67,6 @@ ParserToken JsonParser::getNextToken()
         /* Done  */ {   Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error   },
     };
 
-    // Read the next token and update the state.
-    //int token   = lexer.yylex();
-    //int index   = tokenIndex[token];
     int index = lexer.yylex();
 
     currentState    = stateTable[currentState][index];
@@ -200,7 +177,6 @@ void JsonParser::getValue(bool& value)
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void JsonParser::getValue(std::string& value)
 {
-    //value = getString();
     lexer.getStringInto(value);
 }
 

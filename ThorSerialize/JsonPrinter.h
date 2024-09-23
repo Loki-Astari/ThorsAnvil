@@ -12,7 +12,7 @@
 namespace ThorsAnvil::Serialize
 {
 
-//using PrintState = std::tuple<int, TraitType, bool>;
+// TODO This needs better field names
 struct PrintState
 {
     PrintState(int f0, TraitType f1, bool f2)

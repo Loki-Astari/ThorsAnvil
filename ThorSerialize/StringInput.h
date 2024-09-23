@@ -18,12 +18,14 @@ struct StringInput
     std::string_view    data;
     std::size_t         position;
     std::size_t         lastRead;
+    bool                good;
 
     public:
         StringInput(std::string_view const& view)
             : data(view)
             , position(0)
             , lastRead(0)
+            , good(true)
         {}
 
         bool read(char* dst, std::size_t size)
@@ -34,7 +36,7 @@ struct StringInput
             position += copySize;
             lastRead = copySize;
 
-            return position <= data.size();
+            return good = position <= data.size();
         }
         bool readTo(std::string& dst, char delim)
         {
@@ -44,23 +46,24 @@ struct StringInput
             }
             auto size = find - position;
 
-            dst.resize(size);
-            std::copy(&data[position], &data[position + size], &dst[0]);
+            std::size_t start = dst.size();
+            dst.resize(start + size);
+            std::copy(&data[position], &data[position + size], &dst[start]);
 
             position += (size + 1);
-            return position <= data.size();
+            return good = position <= data.size();
         }
         std::size_t getLastReadCount() const
         {
             return lastRead;
         }
-        std::streampos  getPos()
+        std::streampos  tellg()
         {
             return position;
         }
         int get()
         {
-            return data[position++];
+            return good ? data[position++] : EOF;
         }
         int peek()
         {
@@ -69,22 +72,24 @@ struct StringInput
         void ignore(std::size_t size)
         {
             position += size;
+            good = position <= data.size();
         }
-        void clear()
+        void clear(bool newState = true)
         {
-            position = 0;
+            good = newState;
         }
         void unget()
         {
             --position;
+            good = position <= data.size();
         }
         bool isOk() const
         {
-            return position <= data.size();
+            return good;
         }
         void setFail()
         {
-            position = data.size() + 1;
+            good = false;
         }
 
         template<typename T>
@@ -101,6 +106,7 @@ struct StringInput
             {
                 lastRead = (result.ptr - start);
                 position+= lastRead;
+                good = position <= data.size();
                 return true;
             }
             return false;
@@ -117,12 +123,35 @@ struct StringInput
 
         bool readValue(char& value)
         {
-            while (position < data.size() && std::isspace(data[position])) {
+            // ' ' \f \n \r \t \v
+            static char isspace[] =
+                "01234567" "8     EF"   // 00-15
+                "01234567" "89ABCDEF"   // 16-31
+                " 1234567" "89ABCDEF"   // 32-47
+                "01234567" "89ABCDEF"   // 48-63
+                "01234567" "89ABCDEF"   // 64-79
+                "01234567" "89ABCDEF"
+                "01234567" "89ABCDEF"
+                "01234567" "89ABCDEF"
+                "01234567" "89ABCDEF"
+                "01234567" "89ABCDEF"
+                "01234567" "89ABCDEF"
+                "01234567" "89ABCDEF"
+                "01234567" "89ABCDEF"
+                "01234567" "89ABCDEF"
+                "01234567" "89ABCDEF"
+                "01234567" "89ABCDEF";
+            while (position < data.size() && isspace[static_cast<unsigned char>(data[position])] == ' ') {
                 ++position;
             }
             value = (position < data.size()) ? data[position] : -1;
             ++position;
+            good = position <= data.size();
             return true;
+        }
+        bool rdstate()
+        {
+            return good;
         }
     private:
 };

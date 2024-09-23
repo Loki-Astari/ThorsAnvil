@@ -197,20 +197,12 @@ struct UnicodeWrapperIterator
         if (!end)
         {
             next = *iter;
-            ++iter;
-            if (next != '"')
-            {
-                ThorsLogAndThrow("ThorsAnvil::Serialize::UnicodeWrapperIterator",
-                                 "UnicodeWrapperIterator",
-                                 "String does not start with a \" character");
-            }
-            next = *iter;
-            ++iter;
         }
+        ++iter;
     }
-    bool operator==(UnicodeWrapperIterator const&) const
+    bool operator==(UnicodeWrapperIterator const& rhs) const
     {
-        return next == '"';
+        return iter == rhs.iter;
     }
     bool operator!=(UnicodeWrapperIterator const& rhs) const
     {

@@ -157,26 +157,6 @@ THORSANVIL_TRAITS_FOR_BASIC_TYPE_VALUE(bool);
 THORSANVIL_TRAITS_FOR_BASIC_TYPE_VALUE(std::string);
 THORSANVIL_TRAITS_FOR_BASIC_TYPE_VALUE(std::string_view);
 
-#if 0
-template<> class Traits<short int>              {public: THORSANVIL_TRAITS_FOR_VALUE(short int)};
-template<> class Traits<int>                    {public: THORSANVIL_TRAITS_FOR_VALUE(int)};
-template<> class Traits<long int>               {public: THORSANVIL_TRAITS_FOR_VALUE(long int)};
-template<> class Traits<long long int>          {public: THORSANVIL_TRAITS_FOR_VALUE(long long int)};
-
-template<> class Traits<unsigned short int>     {public: THORSANVIL_TRAITS_FOR_VALUE(unsigned short int)};
-template<> class Traits<unsigned int>           {public: THORSANVIL_TRAITS_FOR_VALUE(unsigned int)};
-template<> class Traits<unsigned long int>      {public: THORSANVIL_TRAITS_FOR_VALUE(unsigned long int)};
-template<> class Traits<unsigned long long int> {public: THORSANVIL_TRAITS_FOR_VALUE(unsigned long long int)};
-
-template<> class Traits<float>                  {public: THORSANVIL_TRAITS_FOR_VALUE(float)};
-template<> class Traits<double>                 {public: THORSANVIL_TRAITS_FOR_VALUE(double)};
-template<> class Traits<long double>            {public: THORSANVIL_TRAITS_FOR_VALUE(long double)};
-
-template<> class Traits<bool>                   {public: THORSANVIL_TRAITS_FOR_VALUE(bool)};
-
-template<> class Traits<std::string>            {public: THORSANVIL_TRAITS_FOR_VALUE(std::string const&)};
-#endif
-
 /*
  * A specialization for pointer objects.
  * They are a pointer type. When serialized a pointer will emit:

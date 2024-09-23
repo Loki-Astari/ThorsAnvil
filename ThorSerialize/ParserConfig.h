@@ -51,6 +51,7 @@ struct ParserConfig
     ParserConfig& setCatchExceptions(bool p_catchExceptions)                    {catchExceptions = p_catchExceptions;       return *this;}
     ParserConfig& setUseOldSharedPtr()                                          {useOldSharedPtr = true;                    return *this;}
     ParserConfig& setValidateNoTrailingData()                                   {validateNoTrailingData = true;             return *this;}
+    ParserConfig& setNoBackslashConversion()                                    {convertBackSlash = false;                  return *this;}
     ParseType       parseStrictness         = ParseType::Weak;
     std::string     polymorphicMarker       = Private::getDefaultPolymorphicMarker();
     bool            catchExceptions         = true;
@@ -58,6 +59,7 @@ struct ParserConfig
     IgnoreCallBack  ignoreCallBack;
     bool            useOldSharedPtr         = false;
     bool            validateNoTrailingData  = false;
+    bool            convertBackSlash        = true;
 };
 
 }

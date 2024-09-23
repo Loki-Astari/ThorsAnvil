@@ -18,6 +18,73 @@
 namespace ThorsAnvil::Serialize
 {
 
+template<typename T>
+struct ReadValue
+{
+    std::streampos  pos;
+    T&              value;
+
+    ReadValue(T& value)
+        :value(value)
+    {}
+
+    template<typename I>
+    void checkZero(I& stream)
+    {
+        int peek = stream.peek();
+        if (peek == '0')
+        {
+            stream.get();
+            peek = stream.peek();
+            if (peek >= '1' && peek <= '9') {
+                throw std::runtime_error("Nubers can't start with leading zero");
+            }
+            else {
+                stream.unget();
+            }
+        }
+        pos = stream.tellg();
+    }
+    template<typename I>
+    requires std::integral<T>
+    bool validateResult(bool ok, I& stream)
+    {
+        char next = stream.peek();
+        return ok && next != '.' && next != 'e' && next != 'E';
+    }
+    template<typename I>
+    requires std::floating_point<T>
+    bool validateResult(bool ok, I& stream)
+    {
+        if (!ok)
+        {
+            auto state = stream.rdstate();
+            stream.clear();
+            if (pos == stream.tellg())
+            {
+                stream.clear(state);
+            }
+            else
+            {
+                ok = true;
+            }
+        }
+        return ok;
+    }
+    bool operator()(std::istream* input)
+    {
+        checkZero(*input);
+        bool ok = static_cast<bool>((*input) >> value);
+        return validateResult(ok, *input);
+    }
+    bool operator()(StringInput& input)
+    {
+        checkZero(input);
+        bool ok = input.readValue(value);
+        return validateResult(ok, input);
+    }
+};
+
 class ParserInterface
 {
     public:
@@ -88,7 +155,7 @@ class ParserInterface
                 char            delim;
                 ReadTo(std::string& dst, char delim):dst(dst),delim(delim){}
                 bool operator()(std::istream* input)    {return static_cast<bool>(std::getline((*input), dst, delim));}
-                bool operator()(StringInput& input)     {return input.readTo(dst, delim);}
+                bool operator()(StringInput& input)     {dst.clear();return input.readTo(dst, delim);}
             };
             return std::visit(ReadTo(dst, delim), input);
         }
@@ -101,12 +168,12 @@ class ParserInterface
             };
             return std::visit(LastReadCount{}, input);
         }
-        std::streampos  getPos()
+        std::streampos  tellg()
         {
             struct GetPos
             {
                 std::streampos operator()(std::istream* input)    {return input->tellg();}
-                std::streampos operator()(StringInput& input)     {return input.getPos();}
+                std::streampos operator()(StringInput& input)     {return input.tellg();}
             };
             return std::visit(GetPos{}, input);
         }
@@ -179,42 +246,12 @@ class ParserInterface
         requires std::integral<T>
         bool readValue(T& value)
         {
-            struct ReadValue
-            {
-                T& value;
-                ReadValue(T& value) :value(value) {}
-                bool operator()(std::istream* input)
-                {
-                    bool ok = static_cast<bool>((*input) >> value);
-                    char next = input->peek();
-                    return ok && next != '.' && next != 'e' && next != 'E';
-                }
-                bool operator()(StringInput& input)
-                {
-                    bool ok = input.readValue(value);
-                    char next = input.peek();
-                    return ok && next != '.' && next != 'e' && next != 'E';
-                }
-            };
             return std::visit(ReadValue{value}, input);
         }
         template<typename T>
         requires std::floating_point<T>
         bool readValue(T& value)
         {
-            struct ReadValue
-            {
-                T& value;
-                ReadValue(T& value) :value(value) {}
-                bool operator()(std::istream* input)
-                {
-                    return static_cast<bool>((*input) >> value);
-                }
-                bool operator()(StringInput& input)
-                {
-                    return input.readValue(value);
-                }
-            };
             return std::visit(ReadValue{value}, input);
         }
         bool readValue(char& value)
