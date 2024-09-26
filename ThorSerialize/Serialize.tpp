@@ -225,12 +225,14 @@ class DeSerializationForBlock
             bool           result    = tokenType != ParserToken::MapEnd;
             if (result)
             {
+#if defined(FULL_VALIDATION_OF_PARSER)
                 if (tokenType != ParserToken::Key)
                 {
                     ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializationForBlock<Map>",
                                      "hasMoreValue",
                                      "Expecting key token");
                 }
+#endif
                 key = parser.getKey();
             }
 

@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <charconv>
+#include <cmath>
 
 namespace ThorsAnvil::Serialize
 {
@@ -248,7 +249,7 @@ struct FormatDouble
     {
         if (formater.value == 0)
         {
-            return str << "0.0";
+            return str << (std::signbit(formater.value) ? "-0.0" : "0.0");
         }
         else
         {
@@ -272,10 +273,11 @@ struct BoolFormatter
 template<typename T>
 inline std::to_chars_result to_chars(char* first, char* last, FormatDouble<T> const& value)
 {
-    static char   doubleZero[] = "0.0";
     if (value.value == 0)
     {
-        std::copy(std::begin(doubleZero), std::end(doubleZero), first);
+        static std::string_view   doubleZero[2] = {"0.0", "-0.0"};
+        std::string_view& doubleZeroRef = doubleZero[std::signbit(value.value) ? 1 : 0];
+        std::copy(std::begin(doubleZeroRef), std::end(doubleZeroRef), first);
         return std::to_chars_result{first + 3, static_cast<std::errc>(0)};
     }
 #if defined(NO_STD_SUPPORT_TO_CHAR_DOUBLE) && (NO_STD_SUPPORT_TO_CHAR_DOUBLE >= 1)
@@ -289,10 +291,9 @@ inline std::to_chars_result to_chars(char* first, char* last, FormatDouble<T> co
 }
 inline std::to_chars_result to_chars(char* first, char*, BoolFormatter const& value)
 {
-    static char const*  boolStr[2]   = {"false", "true"};
-    static int          boolSize[2]  = {5, 4};
-    std::copy(boolStr[value.value], boolStr[value.value] + boolSize[value.value], first);
-    return std::to_chars_result{first + boolSize[value.value], static_cast<std::errc>(0)};
+    static std::string_view boolStr[2]   = {"false", "true"};
+    std::copy(std::begin(boolStr[value.value]), std::end(boolStr[value.value]), first);
+    return std::to_chars_result{first + std::size(boolStr[value.value]), static_cast<std::errc>(0)};
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE void JsonPrinter::addValue(short int value)             {addIndent(); writeValue(value);}
