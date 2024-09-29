@@ -19,9 +19,9 @@
 [submodule "third/ThorsIOUtil"]
 	path = third/ThorsIOUtil
 	url = ../../Loki-Astari/ThorsIOUtil.git
-[submodule "third/ThorsMongoAPI"]
-	path = third/ThorsMongoAPI
-	url = ../../Loki-Astari/ThorsMongoAPI.git
 [submodule "third/ThorsSerializer"]
 	path = third/ThorsSerializer
 	url = ../../Loki-Astari/ThorsSerializer
+[submodule "third/ThorsMongoAPI"]
+	path = third/ThorsMongoAPI
+	url = ../../Loki-Astari/ThorsMongoAPI.git
