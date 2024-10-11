@@ -11,26 +11,34 @@ namespace ThorsAnvil::ThorsSocket
 
 
 template<typename Buffer = SocketStreamBuffer>
-class SocketStream: public std::iostream
+class BaseSocketStream: public std::iostream
 {
     Buffer  buffer;
 
     public:
-        SocketStream(PipeInfo const& info);
-        SocketStream(FileInfo const& info);
-        SocketStream(SocketInfo const& info);
-        SocketStream(SSocketInfo const& info);
-        SocketStream(SocketStream const&)                       = delete;
-        SocketStream(SocketStream&& move) noexcept;
-        ~SocketStream()                                         = default;
+        // Create from a socket.
+        BaseSocketStream();
+        BaseSocketStream(Socket&& socket);
+        BaseSocketStream(BaseSocketStream&& move) noexcept;
+        BaseSocketStream& operator=(BaseSocketStream&& move) noexcept;
 
-        SocketStream& operator=(SocketStream const&)            = delete;
-        SocketStream& operator=(SocketStream&& move) noexcept   = delete;
+        // Manual Creation.
+        BaseSocketStream(PipeInfo const& info);
+        BaseSocketStream(FileInfo const& info);
+        BaseSocketStream(SocketInfo const& info);
+        BaseSocketStream(SSocketInfo const& info);
+        ~BaseSocketStream()                                         = default;
+
+        // No copying allowed
+        BaseSocketStream(BaseSocketStream const&)                       = delete;
+        BaseSocketStream& operator=(BaseSocketStream const&)            = delete;
 
         // Usefult for testing
         Socket&         getSocket()         {return buffer.getSocket();}
         Socket const&   getSocket() const   {return buffer.getSocket();}
 };
+
+using SocketStream = BaseSocketStream<SocketStreamBuffer>;
 
 }
 

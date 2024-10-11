@@ -101,6 +101,18 @@ namespace ThorsAnvil
 
 #if defined(THORS_LOGGING_HEADER_ONLY) && THORS_LOGGING_HEADER_ONLY == 1
 
+class ConvertToVoid
+{
+    public:
+        void operator&(std::ostream&) {}
+};
+
+#define VLOG_IF_S(verbosity, cond)                                                                 \
+    ((verbosity) > THOR_LOGGING_DEFAULT_LOG_LEVEL || (cond) == false)                              \
+        ? (void)0                                                                                  \
+        : ConvertToVoid{} & std::cerr
+#define VLOG_S(verbosity)              VLOG_IF_S(verbosity, true)
+
 #define ThorsLogOutput(Level, message)                                  \
 do                                                                      \
 {                                                                       \
@@ -110,32 +122,26 @@ do                                                                      \
 }                                                                       \
 while (false)
 
-#define ThorsMessage(Level, ...)                                        \
-do                                                                      \
-{                                                                       \
-    if ((loguru::Verbosity_ ## Level) <= THOR_LOGGING_DEFAULT_LOG_LEVEL) {      \
-        std::cerr << ThorsAnvil::Utility::buildErrorMessage(__VA_ARGS__); \
-    }                                                                   \
-}                                                                       \
-while (false)
-
 #else
 
 #define ThorsLogOutput(Level, message)  LOG_F(Level, "%s", message_ThorsLogAndThrowAction.c_str())
-#define ThorsMessage(Level, ...)        VLOG_S(loguru::Verbosity_ ## Level) << ThorsAnvil::Utility::buildErrorMessage(__VA_ARGS__)
 
 #endif
+
+#define ThorsMessage(Level, ...)        VLOG_S(loguru::Verbosity_ ## Level) << ThorsAnvil::Utility::buildErrorMessage(__VA_ARGS__)
+
 
 #define ThorsLogActionWithPotetialThrow(hasExcept, Exception, Level, Scope, Function, ...)          \
 do                                                                      \
 {                                                                       \
-    std::string message_ThorsLogAndThrowAction =                        \
+    ThorsMessage(Level, Scope, Function, __VA_ARGS__);                  \
+    if constexpr (hasExcept)                                            \
+    {                                                                   \
+        std::string message_ThorsLogAndThrowAction =                    \
                           ThorsAnvil::Utility::buildErrorMessage(       \
                                             Scope,                      \
                                             Function,                   \
                                             __VA_ARGS__);               \
-    ThorsLogOutput(Level, message_ThorsLogAndThrowAction);              \
-    if constexpr (hasExcept) {                                          \
         throw Exception(message_ThorsLogAndThrowAction);                \
     }                                                                   \
 }                                                                       \

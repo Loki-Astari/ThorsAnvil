@@ -5,41 +5,66 @@ namespace ThorsAnvil::ThorsSocket
 {
 
 template<typename Buffer>
-SocketStream<Buffer>::SocketStream(PipeInfo const& info)
+BaseSocketStream<Buffer>::BaseSocketStream()
     : std::iostream(nullptr)
-    , buffer(info)
 {
     rdbuf(&buffer);
 }
 
 template<typename Buffer>
-SocketStream<Buffer>::SocketStream(FileInfo const& info)
+BaseSocketStream<Buffer>::BaseSocketStream(Socket&& socket)
     : std::iostream(nullptr)
-    , buffer(info)
+    , buffer(std::move(socket))
 {
     rdbuf(&buffer);
 }
 
 template<typename Buffer>
-SocketStream<Buffer>::SocketStream(SocketInfo const& info)
-    : std::iostream(nullptr)
-    , buffer(info)
-{
-    rdbuf(&buffer);
-}
-
-template<typename Buffer>
-SocketStream<Buffer>::SocketStream(SSocketInfo const& info)
-    : std::iostream(nullptr)
-    , buffer(info)
-{
-    rdbuf(&buffer);
-}
-
-template<typename Buffer>
-SocketStream<Buffer>::SocketStream(SocketStream&& move) noexcept
+BaseSocketStream<Buffer>::BaseSocketStream(BaseSocketStream&& move) noexcept
     : std::iostream(nullptr)
     , buffer(std::move(move.buffer))
+{
+    rdbuf(&buffer);
+}
+
+template<typename Buffer>
+BaseSocketStream<Buffer>& BaseSocketStream<Buffer>::operator=(BaseSocketStream&& move) noexcept
+{
+    std::iostream::operator=(std::move(move));
+    buffer = std::move(move.buffer);
+    rdbuf(&buffer);
+    return *this;
+}
+
+
+template<typename Buffer>
+BaseSocketStream<Buffer>::BaseSocketStream(PipeInfo const& info)
+    : std::iostream(nullptr)
+    , buffer(info)
+{
+    rdbuf(&buffer);
+}
+
+template<typename Buffer>
+BaseSocketStream<Buffer>::BaseSocketStream(FileInfo const& info)
+    : std::iostream(nullptr)
+    , buffer(info)
+{
+    rdbuf(&buffer);
+}
+
+template<typename Buffer>
+BaseSocketStream<Buffer>::BaseSocketStream(SocketInfo const& info)
+    : std::iostream(nullptr)
+    , buffer(info)
+{
+    rdbuf(&buffer);
+}
+
+template<typename Buffer>
+BaseSocketStream<Buffer>::BaseSocketStream(SSocketInfo const& info)
+    : std::iostream(nullptr)
+    , buffer(info)
 {
     rdbuf(&buffer);
 }

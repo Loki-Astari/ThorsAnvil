@@ -23,16 +23,22 @@ class SocketStreamBuffer: public std::streambuf
     std::size_t             inCount;
     std::size_t             outCount;
     public:
+        // Create directly from socket.
+        SocketStreamBuffer();
+        SocketStreamBuffer(Socket&& socket);
+        SocketStreamBuffer(SocketStreamBuffer&& move) noexcept;
+        SocketStreamBuffer& operator=(SocketStreamBuffer&&) noexcept;
+
+        // Create the socket internally.
         SocketStreamBuffer(PipeInfo const& info);
         SocketStreamBuffer(FileInfo const& info);
         SocketStreamBuffer(SocketInfo const& info);
         SocketStreamBuffer(SSocketInfo const& info);
-        SocketStreamBuffer(SocketStreamBuffer const&)                       = delete;
-        SocketStreamBuffer(SocketStreamBuffer&& move) noexcept;
         ~SocketStreamBuffer();
 
+        // Don't allow copy
+        SocketStreamBuffer(SocketStreamBuffer const&)                       = delete;
         SocketStreamBuffer& operator=(SocketStreamBuffer const&)            = delete;
-        SocketStreamBuffer& operator=(SocketStreamBuffer&&) noexcept        = delete;
 
         // Useful for testing
         Socket&         getSocket()         {return socket;}
@@ -45,6 +51,7 @@ class SocketStreamBuffer: public std::streambuf
         void reserveInputSize(std::size_t size);
         void reserveOutputSize(std::size_t size);
     protected:
+        void    swap(SocketStreamBuffer& rhs) noexcept;
         virtual int_type        underflow() override;
         virtual std::streamsize xsgetn(char_type* s, std::streamsize count) override;
 

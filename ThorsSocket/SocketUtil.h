@@ -20,6 +20,9 @@
 namespace ThorsAnvil::ThorsSocket
 {
 
+using YieldFunc     = std::function<bool()>;
+using AcceptFunc    = std::function<void()>;
+
 struct IOData
 {
     std::size_t     dataSize;
@@ -36,11 +39,18 @@ struct FileInfo
     std::string_view    fileName;
     Open                open;
 };
+
 struct PipeInfo
 {};
+
 struct SocketInfo
 {
     std::string_view    host;
+    int                 port;
+};
+
+struct ServerInfo
+{
     int                 port;
 };
 
@@ -52,13 +62,16 @@ struct OpenSocketInfo
 struct SSocketInfo: public SocketInfo
 {
     SSLctx const&       ctx;
-    CertificateInfo&&   certificate = CertificateInfo{};
+};
+
+struct SServerInfo: public ServerInfo
+{
+    SSLctx const&       ctx;
 };
 
 struct OpenSSocketInfo: public OpenSocketInfo
 {
     SSLctx const&       ctx;
-    CertificateInfo&&   certificate = CertificateInfo{};
 };
 
 }

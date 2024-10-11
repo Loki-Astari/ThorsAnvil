@@ -20,7 +20,7 @@
 #define HAVE_INTTYPES_H 1
 
 /* We have found MagicEnumHeaderOnly package */
-#define HAVE_MagicEnumHeaderOnly 1
+/* #undef HAVE_MagicEnumHeaderOnly */
 
 /* We have found package SNAPPY */
 /* #undef HAVE_SNAPPY */
@@ -59,7 +59,7 @@
 #define LT_OBJDIR ".libs/"
 
 /* "Get mongosh version into #define. That way we can turn off some tests" */
-/* #undef MONGO_MAJOR_VERSION */
+#define MONGO_MAJOR_VERSION 7
 
 /* Check for older build tools and use simpler code with old tools */
 #define NO_STD_SUPPORT_FROM_CHAR_DOUBLE 1
@@ -105,7 +105,7 @@
 
 /* Disable test that require the Mongo server to support the OP_QUERY command
    */
-#define THOR_DISABLE_TEST_WITH_MONGO_QUERY 1
+#define THOR_DISABLE_TEST_WITH_MONGO_QUERY 0
 
 /* Name of package for header files */
 #define THOR_PACKAGE_NAME ThorsSerializer

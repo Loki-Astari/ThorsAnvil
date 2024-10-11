@@ -16,7 +16,7 @@ struct MongoURL
     int             port        = 27017;
 };
 
-class ConnectionMongo: public ThorsSocket::SocketStream<ConnectionBufferMongo>
+class ConnectionMongo: public ThorsSocket::BaseSocketStream<ConnectionBufferMongo>
 {
     public:
         ConnectionMongo(MongoURL const& url);

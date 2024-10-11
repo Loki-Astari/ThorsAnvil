@@ -18,6 +18,7 @@ namespace ThorsAnvil::ThorsSocket
     namespace ConnectionType
     {
         class SSocketBase;
+        class SSocketStandard;
     }
 
 extern "C" int certificateInfo_PasswdCB(char* buf, int size, int /*rwflag*/, void* userdata);
@@ -78,6 +79,7 @@ class SSLctx
 {
     private:
         friend class ConnectionType::SSocketBase;
+        friend class ConnectionType::SSocketStandard;
         SSL_CTX*            ctx;
     public:
         template<typename... Args>
@@ -112,11 +114,12 @@ struct CertificateInfo
 
         std::string     certificateFileName;
         std::string     keyFileName;
+        bool            hasPasswordGetter;
         GetPasswordFunc getPassword;
 
     public:
-        CertificateInfo();
-        CertificateInfo(std::string const& certificateFileName, std::string const& keyFileName, GetPasswordFunc&& getPassword = [](int){return "";});
+        CertificateInfo(std::string const& certificateFileName, std::string const& keyFileName);
+        CertificateInfo(std::string const& certificateFileName, std::string const& keyFileName, GetPasswordFunc&& getPassword);
 
         void apply(SSL_CTX* ctx)   const;
         void apply(SSL* ssl)       const;

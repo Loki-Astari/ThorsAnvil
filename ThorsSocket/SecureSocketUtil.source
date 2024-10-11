@@ -142,13 +142,24 @@ void CipherInfo::apply(SSL* ssl) const
 }
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-CertificateInfo::CertificateInfo()
-{}
+CertificateInfo::CertificateInfo(std::string const& certificateFileName, std::string const& keyFileName)
+    : certificateFileName(certificateFileName)
+    , keyFileName(keyFileName)
+    , hasPasswordGetter{false}
+{
+    if (certificateFileName == "" || keyFileName == "")
+    {
+        ThorsLogAndThrow("ThorsAnvil::ThorsSocket::CertificateInfo",
+                         "CertificateInfo",
+                         "Either both certificate and key are set or neither are set");
+    }
+}
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 CertificateInfo::CertificateInfo(std::string const& certificateFileName, std::string const& keyFileName, GetPasswordFunc&& getPassword)
     : certificateFileName(certificateFileName)
     , keyFileName(keyFileName)
+    , hasPasswordGetter{true}
     , getPassword(std::move(getPassword))
 {
     if (certificateFileName == "" || keyFileName == "")
@@ -164,9 +175,12 @@ void CertificateInfo::apply(SSL_CTX* ctx) const
 {
     if (certificateFileName != "")
     {
-        /*Load the password for the Private Key*/
-        ::SSL_CTX_set_default_passwd_cb(ctx, certificateInfo_PasswdCB);
-        ::SSL_CTX_set_default_passwd_cb_userdata(ctx, static_cast<void*>(const_cast<CertificateInfo*>(this)));
+        if (hasPasswordGetter)
+        {
+            /*Load the password for the Private Key*/
+            ::SSL_CTX_set_default_passwd_cb(ctx, certificateInfo_PasswdCB);
+            ::SSL_CTX_set_default_passwd_cb_userdata(ctx, static_cast<void*>(const_cast<CertificateInfo*>(this)));
+        }
 
         /*Set the certificate to be used.*/
         if (::SSL_CTX_use_certificate_file(ctx, certificateFileName.c_str(), SSL_FILETYPE_PEM) <= 0)
@@ -199,9 +213,12 @@ void CertificateInfo::apply(SSL* ssl) const
 {
     if (certificateFileName != "")
     {
-        /*Load the password for the Private Key*/
-        ::SSL_set_default_passwd_cb(ssl, certificateInfo_PasswdCB);
-        ::SSL_set_default_passwd_cb_userdata(ssl, static_cast<void*>(const_cast<CertificateInfo*>(this)));
+        if (hasPasswordGetter)
+        {
+            /*Load the password for the Private Key*/
+            ::SSL_set_default_passwd_cb(ssl, certificateInfo_PasswdCB);
+            ::SSL_set_default_passwd_cb_userdata(ssl, static_cast<void*>(const_cast<CertificateInfo*>(this)));
+        }
 
         /*Set the certificate to be used.*/
         if (::SSL_use_certificate_file(ssl, certificateFileName.c_str(), SSL_FILETYPE_PEM) <= 0)

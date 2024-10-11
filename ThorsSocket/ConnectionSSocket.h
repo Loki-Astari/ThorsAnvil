@@ -11,36 +11,62 @@ namespace ThorsAnvil::ThorsSocket::ConnectionType
 
 class SSocket;
 
-class SSocketBase: public Socket
+class SSocketStandard
 {
-    protected:
-        SSL*        ssl;
-        SSocketBase(SSocketInfo const& socketInfo, Blocking blocking);
-        SSocketBase(OpenSSocketInfo const& socketInfo);
+    SSL*        ssl;
+    bool        connectionFailed;
     public:
-        virtual ~SSocketBase();
-        virtual void tryFlushBuffer()                               override;
+        SSocketStandard()                       = delete;
+        SSocketStandard(SSocketStandard const&) = delete;
+        SSocketStandard(SSocketStandard&&)      = delete;
 
-        virtual IOData readFromStream(char* buffer, std::size_t size)        override;
-        virtual IOData writeToStream(char const* buffer, std::size_t size)   override;
+        SSocketStandard(SSocketInfo const& socketInfo, int fd);
+        SSocketStandard(OpenSSocketInfo const& socketInfo, int fd);
+        ~SSocketStandard();
 
-        virtual void close()                                        override;
-        virtual bool isConnected()                          const   override;
+        bool isConnected() const;
+        void close();
+        void externalyClosed();
 
-        char const* getSSErrNoStr(int)  {return "";}
+        std::string buildSSErrorMessage(int);
+
+        SSL* getSSL() const;
+        void checkConnectionOK(int errorCode);
+
     private:
-        void initSSocket(SSLctx const& ctx, CertificateInfo&& info);
-};
-
-class SSocketClient: public SSocketBase
-{
-    public:
-        SSocketClient(SSocketInfo const& socketInfo, Blocking blocking);
-        SSocketClient(OpenSSocketInfo const& socketInfo);
-    private:
+        void initSSocket(SSLctx const& ctx, int fd);
         void initSSocketClient();
+        void initSSocketClientAccept();
 };
 
+class SSocketServer;
+class SSocketClient: public SocketClient
+{
+    SSocketStandard     secureSocketInfo;
+    public:
+        // Normal Client.
+        SSocketClient(SSocketInfo const& socketInfo, Blocking blocking);
+        // Server Side accept.
+        SSocketClient(SSocketServer&, OpenSSocketInfo const& socketInfo, Blocking blocking);
+        virtual ~SSocketClient();
+
+        virtual bool isConnected() const override;
+        virtual void close()             override;
+        virtual void externalyClosed()   override;
+
+        virtual IOData readFromStream(char* buffer, std::size_t size)       override;
+        virtual IOData writeToStream(char const* buffer, std::size_t size)  override;
+};
+
+class SSocketServer: public SocketServer
+{
+    SSLctx const&       ctx;
+
+    public:
+        SSocketServer(SServerInfo const& socketInfo, Blocking blocking);
+
+        virtual std::unique_ptr<ConnectionClient> accept(Blocking blocking, AcceptFunc&& accept = [](){})          override;
+};
 
 }
 

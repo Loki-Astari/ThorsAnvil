@@ -9,7 +9,7 @@
 namespace ThorsAnvil::ThorsSocket::ConnectionType
 {
 
-class FileDescriptor: public Connection
+class FileDescriptor: public ConnectionClient
 {
     public:
         virtual void tryFlushBuffer()                                       override;
