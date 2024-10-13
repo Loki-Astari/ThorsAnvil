@@ -36,7 +36,7 @@ class ConnectionClient: public ConnectionBase
 class ConnectionServer: public ConnectionBase
 {
     public:
-        virtual std::unique_ptr<ConnectionClient> accept(Blocking blocking = Blocking::Yes, AcceptFunc&& accept = [](){}) = 0;
+        virtual std::unique_ptr<ConnectionClient> accept(YieldFunc& yield, Blocking blocking = Blocking::Yes) = 0;
 };
 
 }

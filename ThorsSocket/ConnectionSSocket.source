@@ -489,9 +489,9 @@ SSocketServer::SSocketServer(SServerInfo const& ssocketInfo, Blocking blocking)
 {}
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-std::unique_ptr<ThorsAnvil::ThorsSocket::ConnectionClient> SSocketServer::accept(Blocking blocking, AcceptFunc&& accept)
+std::unique_ptr<ThorsAnvil::ThorsSocket::ConnectionClient> SSocketServer::accept(YieldFunc& yield, Blocking blocking)
 {
-    int     acceptedFd = SocketServer::acceptSocket(std::move(accept));
+    int     acceptedFd = SocketServer::acceptSocket(yield);
 
     return std::make_unique<SSocketClient>(*this, OpenSSocketInfo{static_cast<SOCKET_TYPE>(acceptedFd), ctx}, blocking);
 }

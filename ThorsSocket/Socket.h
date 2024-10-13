@@ -24,21 +24,21 @@ class Socket
     YieldFunc                           writeYield;
 
     friend class Server;
-    Socket(std::unique_ptr<ConnectionClient>&& connection, YieldFunc&& readYield, YieldFunc&& writeYield);
+    Socket(std::unique_ptr<ConnectionClient>&& connection);
     public:
         Socket();
-        Socket(FileInfo const& file, Blocking blocking = Blocking::Yes, YieldFunc&& readYield = [](){return false;}, YieldFunc&& writeYield = [](){return false;});
-        Socket(PipeInfo const& pipe, Blocking blocking = Blocking::Yes, YieldFunc&& readYield = [](){return false;}, YieldFunc&& writeYield = [](){return false;});
-        Socket(SocketInfo const& socket, Blocking blocking = Blocking::Yes, YieldFunc&& readYield = [](){return false;}, YieldFunc&& writeYield = [](){return false;});
-        Socket(SSocketInfo const& socket, Blocking blocking = Blocking::Yes, YieldFunc&& readYield = [](){return false;}, YieldFunc&& writeYield = [](){return false;});
+        Socket(FileInfo const& file, Blocking blocking = Blocking::Yes);
+        Socket(PipeInfo const& pipe, Blocking blocking = Blocking::Yes);
+        Socket(SocketInfo const& socket, Blocking blocking = Blocking::Yes);
+        Socket(SSocketInfo const& socket, Blocking blocking = Blocking::Yes);
         ~Socket();
 
         // Good for testing only.
         template<typename T>
-        Socket(TestMarker, T const& socket, YieldFunc&& readYield = [](){return false;}, YieldFunc&& writeYield = [](){return false;})
+        Socket(TestMarker, T const& socket)
             : connection(std::make_unique<typename T::Connection>(socket))
-            , readYield(std::move(readYield))
-            , writeYield(std::move(writeYield))
+            , readYield([](){return false;})
+            , writeYield([](){return false;})
         {}
 
         Socket(Socket&& move)               noexcept;

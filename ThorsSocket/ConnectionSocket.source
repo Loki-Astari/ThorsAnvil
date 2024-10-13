@@ -408,7 +408,36 @@ void SocketServer::release()
 }
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-int SocketServer::acceptSocket(AcceptFunc&& accept)
+void SocketServer::waitForFileDescriptor(int fd)
+{
+    int result;
+    using PollFD = THOR_POLL_TYPE;
+    PollFD  fds[1] = {{THOR_SOCKET_ID(fd), static_cast<short>(POLLIN | THOR_POLLPRI), 0}};
+
+    while ((result = THOR_POLL(fds, 1, -1)) <= 0)
+    {
+        if (result == THOR_POLL_ERROR) {
+            ThorsLogAndThrow("ThorsAnvil::ThorsSocket::SocketServer", "waitForInput", ": poll return an error");
+        }
+    }
+}
+
+THORS_SOCKET_HEADER_ONLY_INCLUDE
+bool SocketServer::wouldBlock(int errorCode)
+{
+#ifdef __WINNT__
+    return errorCode == WSAEWOULDBLOCK;
+#else
+#if defined(HAS_UNIQUE_EWOULDBLOCK) && (HAS_UNIQUE_EWOULDBLOCK == 1)
+    return (errorCode == EAGAIN || errorCode == EWOULDBLOCK);
+#else
+    return (errorCode == EAGAIN);
+#endif
+#endif
+}
+
+THORS_SOCKET_HEADER_ONLY_INCLUDE
+int SocketServer::acceptSocket(YieldFunc& yield)
 {
     using SocketStorage = sockaddr_storage;
     using SocketLen     = socklen_t;
@@ -416,29 +445,37 @@ int SocketServer::acceptSocket(AcceptFunc&& accept)
     SocketStorage   serverStorage;
     SocketLen       addr_size   = sizeof serverStorage;
 
-    SOCKET_TYPE acceptedFd = ::accept(socketInfo.getFD(), reinterpret_cast<SocketAddr*>(&serverStorage), &addr_size);
-    if (acceptedFd == static_cast<SOCKET_TYPE>(-1))
+    SOCKET_TYPE acceptedFd = -1;
+    while (acceptedFd == -1)
     {
+        acceptedFd = ::accept(socketInfo.getFD(), reinterpret_cast<SocketAddr*>(&serverStorage), &addr_size);
+        if (acceptedFd >= 0) {
+            break;
+        }
         int saveErrno = thorGetSocketError();
+        if (wouldBlock(saveErrno))
+        {
+            if (!yield()) {
+                waitForFileDescriptor(socketInfo.getFD());
+            }
+            continue;
+        }
+
         ThorsLogAndThrow(
-            "ThorsAnvil::ThorsSocket::ConnectionType::SocketServer",
-            "accept",
-            " :Failed on ::accept.",
-            " errno = ", saveErrno, " ", getErrNoStrSocket(saveErrno),
-            " msg >", getErrMsgSocket(saveErrno), "<"
+                "ThorsAnvil::ThorsSocket::ConnectionType::SocketServer",
+                "accept",
+                " :Failed on ::accept.",
+                " errno = ", saveErrno, " ", getErrNoStrSocket(saveErrno),
+                " msg >", getErrMsgSocket(saveErrno), "<"
         );
-    }
-    else
-    {
-        accept();
     }
     return acceptedFd;
 }
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-std::unique_ptr<ThorsAnvil::ThorsSocket::ConnectionClient> SocketServer::accept(Blocking blocking, AcceptFunc&& accept)
+std::unique_ptr<ThorsAnvil::ThorsSocket::ConnectionClient> SocketServer::accept(YieldFunc& yield, Blocking blocking)
 {
-    return std::make_unique<SocketClient>(*this, OpenSocketInfo{static_cast<SOCKET_TYPE>(acceptSocket(std::move(accept)))}, blocking);
+    return std::make_unique<SocketClient>(*this, OpenSocketInfo{static_cast<SOCKET_TYPE>(acceptSocket(yield))}, blocking);
 }
 }
 

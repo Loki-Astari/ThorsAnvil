@@ -12,12 +12,11 @@ namespace ThorsAnvil::ThorsSocket
 class Server
 {
     std::unique_ptr<ConnectionServer>   connection;
-    YieldFunc                           readYield;
-    YieldFunc                           writeYield;
+    YieldFunc                           yield;
 
     public:
-        Server(ServerInfo const& socket, Blocking blocking = Blocking::Yes, YieldFunc&& readYield = [](){return false;}, YieldFunc&& writeYield = [](){return false;});
-        Server(SServerInfo const& socket, Blocking blocking = Blocking::Yes, YieldFunc&& readYield = [](){return false;}, YieldFunc&& writeYield = [](){return false;});
+        Server(ServerInfo const& socket, Blocking blocking = Blocking::Yes);
+        Server(SServerInfo const& socket, Blocking blocking = Blocking::Yes);
         ~Server();
 
         Server(Server&& move)               noexcept;
@@ -37,7 +36,8 @@ class Server
         void close();
         void release();
 
-        Socket accept(Blocking blocking = Blocking::Yes, AcceptFunc&& acceptOK = [](){}, YieldFunc&& readYield = [](){return false;}, YieldFunc&& writeYield = [](){return false;});
+        Socket accept(Blocking blocking = Blocking::Yes);
+        void setYield(YieldFunc&& yieldFunc)    {yield = std::move(yieldFunc);}
     private:
 };
 inline

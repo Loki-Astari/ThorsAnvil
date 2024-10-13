@@ -78,9 +78,11 @@ class SocketServer: public ConnectionServer
         virtual void close()                                        override;
         virtual void release()                                      override;
 
-        virtual std::unique_ptr<ConnectionClient> accept(Blocking blocking, AcceptFunc&& accept = [](){})          override;
+        virtual std::unique_ptr<ConnectionClient> accept(YieldFunc& yield, Blocking blocking)          override;
     protected:
-        int acceptSocket(AcceptFunc&& accept);
+        int  acceptSocket(YieldFunc& yield);
+        void waitForFileDescriptor(int fd);
+        bool wouldBlock(int errorCode);
 };
 
 }

@@ -65,7 +65,7 @@ class SSocketServer: public SocketServer
     public:
         SSocketServer(SServerInfo const& socketInfo, Blocking blocking);
 
-        virtual std::unique_ptr<ConnectionClient> accept(Blocking blocking, AcceptFunc&& accept = [](){})          override;
+        virtual std::unique_ptr<ConnectionClient> accept(YieldFunc& yield, Blocking blocking)          override;
 };
 
 }

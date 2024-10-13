@@ -21,7 +21,6 @@ namespace ThorsAnvil::ThorsSocket
 {
 
 using YieldFunc     = std::function<bool()>;
-using AcceptFunc    = std::function<void()>;
 
 struct IOData
 {
