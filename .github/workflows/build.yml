@@ -30,7 +30,7 @@ jobs:
             - run: make
             - run: make install
     Build_on_Linux:
-        runs-on:    ubuntu-latest
+        runs-on:    ubuntu-22.04
         steps:
             - run: g++ --version
             - run: which g++
