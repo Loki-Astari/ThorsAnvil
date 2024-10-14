@@ -445,11 +445,11 @@ int SocketServer::acceptSocket(YieldFunc& yield)
     SocketStorage   serverStorage;
     SocketLen       addr_size   = sizeof serverStorage;
 
-    SOCKET_TYPE acceptedFd = -1;
-    while (acceptedFd == -1)
+    SOCKET_TYPE acceptedFd = thorInvalidFD();
+    while (acceptedFd == thorInvalidFD())
     {
         acceptedFd = ::accept(socketInfo.getFD(), reinterpret_cast<SocketAddr*>(&serverStorage), &addr_size);
-        if (acceptedFd >= 0) {
+        if (acceptedFd != thorInvalidFD()) {
             break;
         }
         int saveErrno = thorGetSocketError();
