@@ -68,6 +68,7 @@ class Socket
 
         void setReadYield(YieldFunc&& yield)    {readYield = std::move(yield);}
         void setWriteYield(YieldFunc&& yield)   {writeYield = std::move(yield);}
+        std::string_view protocol();
     private:
         IOData getMessageDataFromStream(void* b, std::size_t size, bool waitWhenBlocking);
         IOData putMessageDataToStream(void const* b, std::size_t size, bool waitWhenBlocking);

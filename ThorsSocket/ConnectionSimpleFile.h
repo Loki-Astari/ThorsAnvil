@@ -22,6 +22,7 @@ class SimpleFile: public FileDescriptor
         virtual int getReadFD()                             const   override;
         virtual int getWriteFD()                            const   override;
         virtual void release()                                      override;
+        virtual std::string_view protocol() const override {return "file";}
 };
 
 }

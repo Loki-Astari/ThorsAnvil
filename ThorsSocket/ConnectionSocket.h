@@ -57,6 +57,7 @@ class SocketClient: public ConnectionType::FileDescriptor
         virtual void release()                                      override;
 
         virtual void tryFlushBuffer()                               override;
+        virtual std::string_view protocol() const override {return "http";}
 #ifdef __WINNT__
         virtual IOData readFromStream(char* buffer, std::size_t size)       override;
         virtual IOData writeToStream(char const* buffer, std::size_t size)  override;

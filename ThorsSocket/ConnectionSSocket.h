@@ -53,6 +53,7 @@ class SSocketClient: public SocketClient
         virtual bool isConnected() const override;
         virtual void close()             override;
         virtual void externalyClosed()   override;
+        virtual std::string_view protocol() const override {return "https";}
 
         virtual IOData readFromStream(char* buffer, std::size_t size)       override;
         virtual IOData writeToStream(char const* buffer, std::size_t size)  override;

@@ -9,6 +9,11 @@
 #endif
 
 #if defined(THORS_LOGGING_HEADER_ONLY) && THORS_LOGGING_HEADER_ONLY == 1
+
+#ifndef THOR_LOGGING_DEFAULT_LOG_LEVEL
+#define THOR_LOGGING_DEFAULT_LOG_LEVEL   3
+#endif
+
 #include <iostream>
 namespace loguru
 {
@@ -45,11 +50,8 @@ namespace loguru
         // Do not use higher verbosity levels, as that will make grepping log files harder.
         Verbosity_MAX     = +9,
     };
-}
 
-#ifndef THOR_LOGGING_DEFAULT_LOG_LEVEL
-#define THOR_LOGGING_DEFAULT_LOG_LEVEL   3
-#endif
+}
 
 #else
 #include "loguru.hpp"
@@ -116,7 +118,7 @@ class ConvertToVoid
 #define ThorsLogOutput(Level, message)                                  \
 do                                                                      \
 {                                                                       \
-    if ((loguru::Verbosity_ ## Level) <= THOR_LOGGING_DEFAULT_LOG_LEVEL) {      \
+    if ((loguru::Verbosity_ ## Level) <= THOR_LOGGING_DEFAULT_LOG_LEVEL) {   \
         std::cerr << message;                                           \
     }                                                                   \
 }                                                                       \
@@ -153,11 +155,17 @@ while (false)
 #define ThorsLogAndThrowFatal(...)      ThorsLogAndThrowAction(ThorsAnvil::Logging::FatalException,    FATAL,   __VA_ARGS__)
 #define ThorsLogAndThrowCritical(...)   ThorsLogAndThrowAction(ThorsAnvil::Logging::CriticalException, ERROR,   __VA_ARGS__)
 #define ThorsLogAndThrowLogical(...)    ThorsLogAndThrowAction(ThorsAnvil::Logging::LogicalException,  WARNING, __VA_ARGS__)
+#define ThorsLogAndThrowWarning(...)    ThorsLogAndThrowAction(ThorsAnvil::Logging::LogicalException,  WARNING, __VA_ARGS__)
+#define ThorsLogAndThrowInfo(...)       ThorsLogAndThrowAction(ThorsAnvil::Logging::LogicalException,  INFO,    __VA_ARGS__)
+#define ThorsLogAndThrowCust(L, ...)    ThorsLogAndThrowAction(std::runtime_error,                     L,       __VA_ARGS__)
 #define ThorsLogAndThrow(...)           ThorsLogAndThrowAction(std::runtime_error,                     2,       __VA_ARGS__)
 #define ThorsLogFatal(...)              ThorsLogAction(FATAL,   __VA_ARGS__)
 #define ThorsLogCritical(...)           ThorsLogAction(ERROR,   __VA_ARGS__)
 #define ThorsLogLogical(...)            ThorsLogAction(WARNING, __VA_ARGS__)
+#define ThorsLogWarning(...)            ThorsLogAction(WARNING, __VA_ARGS__)
+#define ThorsLogInfo(...)               ThorsLogAction(INFO,    __VA_ARGS__)
 #define ThorsLog(...)                   ThorsLogAction(2,       __VA_ARGS__)
+#define ThorsLogCust(L, ...)            ThorsLogAction(L,       __VA_ARGS__)
 
 #define ThorsCatchMessage(S, F, e)      ThorsMessage(2, S, F, "Caught Exception: ", e)
 #define ThorsRethrowMessage(S, F, e)    ThorsMessage(2, S, F, "ReThrow Exception: ",e)

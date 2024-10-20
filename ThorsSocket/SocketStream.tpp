@@ -36,7 +36,6 @@ BaseSocketStream<Buffer>& BaseSocketStream<Buffer>::operator=(BaseSocketStream&&
     return *this;
 }
 
-
 template<typename Buffer>
 BaseSocketStream<Buffer>::BaseSocketStream(PipeInfo const& info)
     : std::iostream(nullptr)
