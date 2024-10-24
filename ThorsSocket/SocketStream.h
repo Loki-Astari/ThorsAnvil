@@ -36,6 +36,7 @@ class BaseSocketStream: public std::iostream
         // Usefult for testing
         Socket&         getSocket()         {return buffer.getSocket();}
         Socket const&   getSocket() const   {return buffer.getSocket();}
+        operator bool()             const   {return buffer.getSocket().isConnected();}
 };
 
 using SocketStream = BaseSocketStream<SocketStreamBuffer>;

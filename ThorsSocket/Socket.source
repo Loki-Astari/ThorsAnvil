@@ -7,6 +7,18 @@
 namespace ThorsAnvil::ThorsSocket
 {
 
+struct SocketConnectionBuilder
+{
+    Blocking blocking;
+    SocketConnectionBuilder(Blocking blocking)
+        : blocking(blocking)
+    {}
+    std::unique_ptr<ConnectionClient> operator()(FileInfo const& fileInfo)      {return std::make_unique<ConnectionType::SimpleFile>(fileInfo, blocking);}
+    std::unique_ptr<ConnectionClient> operator()(PipeInfo const& pipeInfo)      {return std::make_unique<ConnectionType::Pipe>(pipeInfo, blocking);}
+    std::unique_ptr<ConnectionClient> operator()(SocketInfo const& socketInfo)  {return std::make_unique<ConnectionType::SocketClient>(socketInfo, blocking);}
+    std::unique_ptr<ConnectionClient> operator()(SSocketInfo const& ssocketInfo){return std::make_unique<ConnectionType::SSocketClient>(ssocketInfo, blocking);}
+};
+
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 Socket::Socket()
     : connection(nullptr)
@@ -22,29 +34,8 @@ Socket::Socket(std::unique_ptr<ConnectionClient>&& connection)
 {}
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-Socket::Socket(FileInfo const& fileInfo, Blocking blocking)
-    : connection(std::make_unique<ConnectionType::SimpleFile>(fileInfo, blocking))
-    , readYield([](){return false;})
-    , writeYield([](){return false;})
-{}
-
-THORS_SOCKET_HEADER_ONLY_INCLUDE
-Socket::Socket(PipeInfo const& pipeInfo, Blocking blocking)
-    : connection(std::make_unique<ConnectionType::Pipe>(pipeInfo, blocking))
-    , readYield([](){return false;})
-    , writeYield([](){return false;})
-{}
-
-THORS_SOCKET_HEADER_ONLY_INCLUDE
-Socket::Socket(SocketInfo const& socketInfo, Blocking blocking)
-    : connection(std::make_unique<ConnectionType::SocketClient>(socketInfo, blocking))
-    , readYield([](){return false;})
-    , writeYield([](){return false;})
-{}
-
-THORS_SOCKET_HEADER_ONLY_INCLUDE
-Socket::Socket(SSocketInfo const& ssocketInfo, Blocking blocking)
-    : connection(std::make_unique<ConnectionType::SSocketClient>(ssocketInfo, blocking))
+Socket::Socket(SocketInit const& initInfo, Blocking blocking)
+    : connection(std::visit(SocketConnectionBuilder{blocking}, initInfo))
     , readYield([](){return false;})
     , writeYield([](){return false;})
 {}

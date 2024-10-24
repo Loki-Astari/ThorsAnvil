@@ -5,9 +5,12 @@
 #include "SocketUtil.h"
 #include "Connection.h"
 #include "Socket.h"
+#include <variant>
 
 namespace ThorsAnvil::ThorsSocket
 {
+
+using ServerInit = std::variant<ServerInfo, SServerInfo>;
 
 class Server
 {
@@ -15,8 +18,7 @@ class Server
     YieldFunc                           yield;
 
     public:
-        Server(ServerInfo const& socket, Blocking blocking = Blocking::Yes);
-        Server(SServerInfo const& socket, Blocking blocking = Blocking::Yes);
+        Server(ServerInit const& serverInit, Blocking blocking = Blocking::Yes);
         ~Server();
 
         Server(Server&& move)               noexcept;

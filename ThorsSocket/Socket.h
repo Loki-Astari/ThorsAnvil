@@ -7,6 +7,7 @@
 #include <memory>
 #include <functional>
 #include <cstddef>
+#include <variant>
 
 namespace ThorsAnvil::ThorsSocket
 {
@@ -15,6 +16,7 @@ class ConnectionClient;
 enum class TestMarker {True};
 
 using YieldFunc     = std::function<bool()>;
+using SocketInit    = std::variant<FileInfo, PipeInfo, SocketInfo, SSocketInfo>;
 
 class Server;
 class Socket
@@ -27,10 +29,7 @@ class Socket
     Socket(std::unique_ptr<ConnectionClient>&& connection);
     public:
         Socket();
-        Socket(FileInfo const& file, Blocking blocking = Blocking::Yes);
-        Socket(PipeInfo const& pipe, Blocking blocking = Blocking::Yes);
-        Socket(SocketInfo const& socket, Blocking blocking = Blocking::Yes);
-        Socket(SSocketInfo const& socket, Blocking blocking = Blocking::Yes);
+        Socket(SocketInit const& initInfo, Blocking blocking = Blocking::Yes);
         ~Socket();
 
         // Good for testing only.

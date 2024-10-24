@@ -3,20 +3,33 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <iostream>
 
 
 namespace ThorsAnvil::ThorsSocket::ConnectionType
 {
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
+int convertModeToOpenFlag(ThorsAnvil::ThorsSocket::FileMode mode, ThorsAnvil::ThorsSocket::Blocking blocking)
+{
+    int result = THOR_BINARY;
+    result |= (blocking == ThorsAnvil::ThorsSocket::Blocking::No ? NONBLOCKING_FLAG : 0);
+    switch (mode)
+    {
+        case ThorsAnvil::ThorsSocket::FileMode::Read:          return result | O_RDONLY;
+        case ThorsAnvil::ThorsSocket::FileMode::WriteTruncate: return result | O_WRONLY | O_CREAT | O_TRUNC;
+        case ThorsAnvil::ThorsSocket::FileMode::WriteAppend:   return result | O_WRONLY | O_CREAT | O_APPEND;
+    }
+    return 0;
+}
+
+THORS_SOCKET_HEADER_ONLY_INCLUDE
 SimpleFile::SimpleFile(FileInfo const& fileInfo, Blocking blocking)
-    : fd(::open(&fileInfo.fileName[0],
-                       (fileInfo.open == Open::Append ? O_APPEND : O_TRUNC) | O_CREAT | (blocking == Blocking::No ? NONBLOCKING_FLAG : 0) | O_RDWR | THOR_BINARY,
-                       0777))
+    : fd(::open(&fileInfo.fileName[0], convertModeToOpenFlag(fileInfo.mode, blocking), 0777))
 {
     if (fd == -1)
     {
-        ThorsLogAndThrow(
+        ThorsLog(
             "ThorsAnvil::ThorsSocket::ConnectionType::SimpleFile",
             "SimpleFile",
             " :Failed to open.",
