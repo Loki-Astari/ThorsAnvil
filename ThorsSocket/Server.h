@@ -18,7 +18,11 @@ class Server
     YieldFunc                           yield;
 
     public:
-        Server(ServerInit const& serverInit, Blocking blocking = Blocking::Yes);
+        Server(ServerInit&& serverInit, Blocking blocking = Blocking::Yes);
+        Server(ServerInfo&& socketInit, Blocking blocking = Blocking::Yes)  : Server{ServerInit{std::move(socketInit)}, blocking}{}
+        Server(SServerInfo&& secureInit, Blocking blocking = Blocking::Yes) : Server{ServerInit{std::move(secureInit)}, blocking}{}
+        Server(int port, Blocking blocking = Blocking::Yes)                 : Server{ServerInit{ServerInfo{port}}, blocking}{}
+        Server(int port, SSLctx && ctx, Blocking blocking = Blocking::Yes)  : Server{ServerInit{SServerInfo{port, std::move(ctx)}}, blocking}{}
         ~Server();
 
         Server(Server&& move)               noexcept;
@@ -38,7 +42,7 @@ class Server
         void close();
         void release();
 
-        Socket accept(Blocking blocking = Blocking::Yes);
+        Socket accept(Blocking blocking = Blocking::Yes, DeferAccept deferAccept = DeferAccept::No);
         void setYield(YieldFunc&& yieldFunc)    {yield = std::move(yieldFunc);}
     private:
 };

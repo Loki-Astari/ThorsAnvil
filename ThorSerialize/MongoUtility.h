@@ -259,12 +259,10 @@ inline
 std::ostream& operator<<(std::ostream& stream, ObjectID const& data)
 {
     stream << ThorsAnvil::Utility::StreamFormatterNoChange{}
-                     << "\""
                      << std::hex << std::setfill('0')
                      << std::setw( 8) << data.timestamp << "-"
                      << std::setw(10) << data.random    << "-"
-                     << std::setw( 6) << data.counter
-                     << "\"";
+                     << std::setw( 6) << data.counter;
     return stream;
 }
 
@@ -291,8 +289,8 @@ JsonParser& operator>>(JsonParser& parser, ObjectID& data)
 inline
 std::istream& operator>>(std::istream& stream, ObjectID& data)
 {
-    char x1, x2, x3, x4;
-    return stream >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> x1 >> data.timestamp >> x2 >> data.random >> x3 >> data.counter >> x4;
+    char x2, x3;
+    return stream >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> data.timestamp >> x2 >> data.random >> x3 >> data.counter >> std::dec;
 }
 
 inline

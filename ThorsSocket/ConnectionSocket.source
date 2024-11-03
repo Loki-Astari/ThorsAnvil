@@ -375,7 +375,7 @@ int SocketClient::getWriteFD() const
 #endif
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-SocketServer::SocketServer(ServerInfo const& socketInfo, Blocking blocking)
+SocketServer::SocketServer(ServerInfo&& socketInfo, Blocking blocking)
     : socketInfo(socketInfo, blocking)
 {}
 
@@ -473,7 +473,7 @@ int SocketServer::acceptSocket(YieldFunc& yield)
 }
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-std::unique_ptr<ThorsAnvil::ThorsSocket::ConnectionClient> SocketServer::accept(YieldFunc& yield, Blocking blocking)
+std::unique_ptr<ThorsAnvil::ThorsSocket::ConnectionClient> SocketServer::accept(YieldFunc& yield, Blocking blocking, DeferAccept)
 {
     return std::make_unique<SocketClient>(*this, OpenSocketInfo{static_cast<SOCKET_TYPE>(acceptSocket(yield))}, blocking);
 }

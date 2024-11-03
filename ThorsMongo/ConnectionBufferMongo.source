@@ -15,6 +15,17 @@ ConnectionBufferMongo::ConnectionBufferMongo(ConnectionBufferMongo&& move) noexc
 {}
 
 THORS_MONGO_HEADER_ONLY_INCLUDE
+ConnectionBufferMongo& ConnectionBufferMongo::operator=(ConnectionBufferMongo&& move) noexcept
+{
+    SocketStreamBuffer::operator=(std::move(move));
+    inMessageSize   = std::exchange(move.inMessageSize, 0);
+    outMessageSize  = std::exchange(move.outMessageSize, 0);
+    underflowNeeds  = std::exchange(move.underflowNeeds, 0);
+    outMessagePlaced= std::exchange(move.outMessagePlaced, 0);
+    return *this;
+}
+
+THORS_MONGO_HEADER_ONLY_INCLUDE
 ConnectionBufferMongo::int_type ConnectionBufferMongo::underflow()
 {
     /*

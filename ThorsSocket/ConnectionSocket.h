@@ -71,7 +71,7 @@ class SocketServer: public ConnectionServer
 {
     SocketStandard  socketInfo;
     public:
-        SocketServer(ServerInfo const& socketInfo, Blocking blocking);
+        SocketServer(ServerInfo&& socketInfo, Blocking blocking);
         virtual ~SocketServer();
 
         virtual bool isConnected()                          const   override;
@@ -79,7 +79,7 @@ class SocketServer: public ConnectionServer
         virtual void close()                                        override;
         virtual void release()                                      override;
 
-        virtual std::unique_ptr<ConnectionClient> accept(YieldFunc& yield, Blocking blocking)          override;
+        virtual std::unique_ptr<ConnectionClient> accept(YieldFunc& yield, Blocking blocking, DeferAccept deferAccept)          override;
     protected:
         int  acceptSocket(YieldFunc& yield);
         void waitForFileDescriptor(int fd);

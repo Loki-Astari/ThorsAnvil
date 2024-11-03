@@ -127,9 +127,20 @@ struct Range
         return ((!rangeData->ok) || (rangeData->size() == 0)) ? false : true;
     }
     public:
+        Range()
+            : rangeData(nullptr)
+        {}
         Range(std::unique_ptr<R> rangeData)
             : rangeData(std::move(rangeData))
         {}
+        Range(Range&& move)
+            : rangeData(std::move(move.rangeData))
+        {}
+        Range& operator=(Range&& move)
+        {
+            rangeData = std::exchange(move.rangeData, nullptr);
+            return *this;
+        }
         CursorIterator<R> begin()   {return CursorIterator<R>{*rangeData, cursorhasData()};}
         CursorIterator<R> end()     {return CursorIterator<R>{*rangeData, false};}
 

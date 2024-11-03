@@ -98,7 +98,11 @@ class SSLctx
         SSLctx(SSLctx&& move)
             : ctx(std::exchange(move.ctx, nullptr))
         {}
-        //SSLctx& operator=(SSLctx const&)        = delete;
+        SSLctx& operator=(SSLctx&& move)
+        {
+            ctx = std::exchange(move.ctx, nullptr);
+            return *this;
+        }
     private:
         SSL_METHOD const*       createClient();
         SSL_METHOD const*       createServer();

@@ -19,7 +19,6 @@ void DefaultCustomSerializer<T>::writeCustom(PrinterInterface& printer, T const&
         case FormatType::Json:
         {
             JsonPrinter&    jsonPrinter = dynamic_cast<JsonPrinter&>(printer);
-            jsonPrinter.addPrefix();
             return writeJson(jsonPrinter, object);
         }
         case FormatType::Yaml:  return writeYaml(dynamic_cast<YamlPrinter&>(printer), object);

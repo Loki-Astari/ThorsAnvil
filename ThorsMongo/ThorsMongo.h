@@ -38,13 +38,23 @@ namespace ThorsAnvil::DB::Mongo
 
 class MongoMessageHandler: public MessageHandler
 {
-    ConnectionMongo& mongoStream;
+    ConnectionMongo mongoStream;
 
     public:
-        MongoMessageHandler(ConnectionMongo& mongoStream)
-            : mongoStream(mongoStream)
+        MongoMessageHandler(MongoURL const& url)
+            : mongoStream(url)
         {}
+        MongoMessageHandler(MongoMessageHandler&& move)
+            : mongoStream(std::move(move.mongoStream))
+        {}
+        MongoMessageHandler& operator=(MongoMessageHandler&& move)
+        {
+            mongoStream = std::move(move.mongoStream);
+            //MessageHandler::operator=(std::move(move));
+            return *this;
+        }
         virtual std::iostream& getStream() override {return mongoStream;}
+        ConnectionMongo&       getConnection()      {return mongoStream;}
 };
 
 class DB;
@@ -72,7 +82,6 @@ class ThorsMongo
         OptReadConcern                      readConcern;
         OptWriteConcern                     writeConcern;
     };
-    ConnectionMongo                         mongoStream;
     MongoMessageHandler                     messageHandler;
     OptReadConcern                          readConcern;
     OptWriteConcern                         writeConcern;
@@ -116,7 +125,8 @@ class ThorsMongo
 
 
     private:
-        ConnectionMongo&        getStream() {return mongoStream;}
+    public:
+        ConnectionMongo&        getStream() {return messageHandler.getConnection();}//{return mongoStream;}
 
     private:
         template<typename T>

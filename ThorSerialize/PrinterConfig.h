@@ -50,12 +50,14 @@ struct PrinterConfig
     PrinterConfig& setOutputType(OutputType p_characteristics)                  {characteristics = p_characteristics;      return *this;}
     PrinterConfig& setPolymorphicMarker(std::string const& p_polymorphicMarker) {polymorphicMarker = p_polymorphicMarker;  return *this;}
     PrinterConfig& setCatchExceptions(bool p_catchExceptions)                   {catchExceptions = p_catchExceptions;      return *this;}
+    PrinterConfig& setCatchUnknownExceptions(bool p_catchExceptions)            {catchUnknownExceptions =p_catchExceptions;return *this;}
     PrinterConfig& setUseOldSharedPtr()                                         {useOldSharedPtr = true;                   return *this;}
     PrinterConfig& setExactPreFlightCalc()                                      {exactPreFlight = true;                    return *this;}
 
     OutputType      characteristics         = OutputType::Default;
     std::string     polymorphicMarker       = Private::getDefaultPolymorphicMarker();
     bool            catchExceptions         = true;
+    bool            catchUnknownExceptions  = false;
     long            parserInfo              = 0;
     bool            useOldSharedPtr         = false;
     bool            exactPreFlight          = false;

@@ -56,8 +56,10 @@ class Exporter
             {
                 ThorsCatchMessage("ThorsAnvil::Serialize::Exporter", "operator<<", "UNKNOWN");
                 printer.setFail();
-                if (!config.catchExceptions)
+                if (!config.catchUnknownExceptions)
                 {
+                    // Don't set this to true if you are using boost-coroutines.
+                    // As this may prevent the force_unwind exception propagating.
                     ThorsRethrowMessage("ThorsAnvil::Serialize::Exporter", "operator>>", "UNKNOWN");
                     throw;
                 }

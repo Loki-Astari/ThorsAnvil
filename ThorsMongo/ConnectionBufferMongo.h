@@ -73,6 +73,7 @@ class ConnectionBufferMongo: public ThorsSocket::SocketStreamBuffer
     public:
         using SocketStreamBuffer::SocketStreamBuffer;
         ConnectionBufferMongo(ConnectionBufferMongo&& move) noexcept;
+        ConnectionBufferMongo& operator=(ConnectionBufferMongo&& move) noexcept;
 
         void setCompressionOnWrite(Compression comp) {useCompressionOnWrite = comp;}
 

@@ -16,8 +16,10 @@ class BaseSocketStream: public std::iostream
     Buffer  buffer;
 
     public:
-        // Create from a socket.
+        // Default: (no connection attached) constructor.
         BaseSocketStream();
+
+        // Create from an existing socket.
         BaseSocketStream(Socket&& socket);
         BaseSocketStream(BaseSocketStream&& move) noexcept;
         BaseSocketStream& operator=(BaseSocketStream&& move) noexcept;
@@ -27,7 +29,9 @@ class BaseSocketStream: public std::iostream
         BaseSocketStream(FileInfo const& info);
         BaseSocketStream(SocketInfo const& info);
         BaseSocketStream(SSocketInfo const& info);
-        ~BaseSocketStream()                                         = default;
+
+        // Destructor
+        ~BaseSocketStream()                                             = default;
 
         // No copying allowed
         BaseSocketStream(BaseSocketStream const&)                       = delete;

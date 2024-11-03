@@ -165,6 +165,7 @@ while (false)
 #define ThorsLogWarning(...)            ThorsLogAction(WARNING, __VA_ARGS__)
 #define ThorsLogInfo(...)               ThorsLogAction(INFO,    __VA_ARGS__)
 #define ThorsLog(...)                   ThorsLogAction(2,       __VA_ARGS__)
+#define ThorsLogDebug(...)              ThorsLogAction(7,       __VA_ARGS__)
 #define ThorsLogCust(L, ...)            ThorsLogAction(L,       __VA_ARGS__)
 
 #define ThorsCatchMessage(S, F, e)      ThorsMessage(2, S, F, "Caught Exception: ", e)

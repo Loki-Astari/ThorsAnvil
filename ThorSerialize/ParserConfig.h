@@ -49,12 +49,14 @@ struct ParserConfig
     ParserConfig& setParseStrictness(ParseType p_parseStrictness)               {parseStrictness = p_parseStrictness;       return *this;}
     ParserConfig& setPolymorphicMarker(std::string const& p_polymorphicMarker)  {polymorphicMarker = p_polymorphicMarker;   return *this;}
     ParserConfig& setCatchExceptions(bool p_catchExceptions)                    {catchExceptions = p_catchExceptions;       return *this;}
+    ParserConfig& setCatchUnknownExceptions(bool p_catchExceptions)             {catchUnknownExceptions = p_catchExceptions;return *this;}
     ParserConfig& setUseOldSharedPtr()                                          {useOldSharedPtr = true;                    return *this;}
     ParserConfig& setValidateNoTrailingData()                                   {validateNoTrailingData = true;             return *this;}
     ParserConfig& setNoBackslashConversion()                                    {convertBackSlash = false;                  return *this;}
     ParseType       parseStrictness         = ParseType::Weak;
     std::string     polymorphicMarker       = Private::getDefaultPolymorphicMarker();
     bool            catchExceptions         = true;
+    bool            catchUnknownExceptions  = false;
     long            parserInfo              = 0;
     IgnoreCallBack  ignoreCallBack;
     bool            useOldSharedPtr         = false;

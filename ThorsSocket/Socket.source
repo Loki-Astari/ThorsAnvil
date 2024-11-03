@@ -234,6 +234,14 @@ void Socket::externalyClosed()
 }
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
+void Socket::deferInit()
+{
+    if (connection.get() != nullptr) {
+        connection->deferInit(readYield, writeYield);
+    }
+}
+
+THORS_SOCKET_HEADER_ONLY_INCLUDE
 std::string_view Socket::protocol()
 {
     return connection->protocol();

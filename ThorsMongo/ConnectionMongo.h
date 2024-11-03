@@ -20,6 +20,14 @@ class ConnectionMongo: public ThorsSocket::BaseSocketStream<ConnectionBufferMong
 {
     public:
         ConnectionMongo(MongoURL const& url);
+        ConnectionMongo(ConnectionMongo&& moveV) noexcept
+            : ThorsSocket::BaseSocketStream<ConnectionBufferMongo>{std::move(moveV)}
+        {}
+        ConnectionMongo& operator=(ConnectionMongo&& moveV) noexcept
+        {
+            ThorsSocket::BaseSocketStream<ConnectionBufferMongo>::operator=(std::move(moveV));
+            return *this;
+        }
 };
 
 }
