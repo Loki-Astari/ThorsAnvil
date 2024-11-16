@@ -19,11 +19,14 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
-/* We have found MagicEnumHeaderOnlyV1 package */
-/* #undef HAVE_MagicEnumHeaderOnlyV1 */
+/* We have found MagicEnumHeaderOnly package */
+#define HAVE_MagicEnumHeaderOnly 1
 
-/* We have found MagicEnumHeaderOnlyV2 package */
-#define HAVE_MagicEnumHeaderOnlyV2 1
+/* Magic Enum V1 being used */
+#define HAVE_MagicEnumHeaderOnlyV1 1
+
+/* Magic Enum V2 being used */
+/* #undef HAVE_MagicEnumHeaderOnlyV2 */
 
 /* We have found package SNAPPY */
 /* #undef HAVE_SNAPPY */

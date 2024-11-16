@@ -19,6 +19,12 @@
 /* Define to 1 if you have the 'dl' library (-ldl). */
 #define HAVE_LIBDL 1
 
+/* Magic Enum V1 being used */
+/* #undef HAVE_MagicEnumHeaderOnlyV1 */
+
+/* Magic Enum V2 being used */
+/* #undef HAVE_MagicEnumHeaderOnlyV2 */
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
 
