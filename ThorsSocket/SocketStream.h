@@ -37,6 +37,9 @@ class BaseSocketStream: public std::iostream
         BaseSocketStream(BaseSocketStream const&)                       = delete;
         BaseSocketStream& operator=(BaseSocketStream const&)            = delete;
 
+        // Simply utility functions.
+        void close()    {getSocket().close();}
+
         // Usefult for testing
         Socket&         getSocket()         {return buffer.getSocket();}
         Socket const&   getSocket() const   {return buffer.getSocket();}

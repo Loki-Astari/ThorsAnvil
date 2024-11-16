@@ -265,7 +265,12 @@
 #include <cstddef>
 #include <cstring>
 #include <numeric>
+#ifdef  HAVE_MagicEnumHeaderOnlyV1
 #include <magic_enum.hpp>
+#endif
+#ifdef  HAVE_MagicEnumHeaderOnlyV2
+#include <magic_enum/magic_enum.hpp>
+#endif
 #include <map>
 #include <string>
 

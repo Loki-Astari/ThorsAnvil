@@ -16,8 +16,11 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
-/* We have found MagicEnumHeaderOnly package */
-/* #undef HAVE_MagicEnumHeaderOnly */
+/* We have found MagicEnumHeaderOnlyV1 package */
+/* #undef HAVE_MagicEnumHeaderOnlyV1 */
+
+/* We have found MagicEnumHeaderOnlyV2 package */
+#define HAVE_MagicEnumHeaderOnlyV2 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -44,7 +47,7 @@
 #define HAVE_THORSSERIALIZER 1
 
 /* We have found ThorSerializeHeaderOnly package */
-/* #undef HAVE_ThorSerializeHeaderOnly */
+#define HAVE_ThorSerializeHeaderOnly 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
