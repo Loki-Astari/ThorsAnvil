@@ -714,8 +714,7 @@ snappy_ROOT_LIB
 snappy_ROOT_DIR
 yaml_ROOT_LIB
 yaml_ROOT_DIR
-MagicEnumHeaderOnlyV2_ROOT_DIR
-MagicEnumHeaderOnlyV1_ROOT_DIR
+MagicEnumHeaderOnly_ROOT_DIR
 THOR_CONAN_ENABLE
 UNZIP
 CXX_STD_FLAG
@@ -1523,12 +1522,8 @@ Optional Packages:
                           standard. Default 20
 
   --with-magicenum-header-only-root=<location>
-                          Directory of MagicEnumHeaderOnlyV1 include folder:
-                          the folder that has the include file
-
-  --with-magicenum-header-only-root=<location>
-                          Directory of MagicEnumHeaderOnlyV2 include folder:
-                          the folder that has the include file
+                          Directory of MagicEnumHeaderOnly include folder: the
+                          folder that has the include file
 
   --with-yaml-root=<location>
                           Define the root directory of package YAML
@@ -4906,14 +4901,14 @@ if test "x$ac_cv_header_magic_enum_hpp" = xyes
 then :
 
 
-printf "%s\n" "#define HAVE_MagicEnumHeaderOnlyV1 1" >>confdefs.h
+printf "%s\n" "#define HAVE_MagicEnumHeaderOnly 1" >>confdefs.h
 
             magicenum_header_only_found=1
             if test "x${with_magicenum_header_only_root}" != "x"
 then :
 
                     magicenum_header_only_defined=1
-                    MagicEnumHeaderOnlyV1_ROOT_DIR=${with_magicenum_header_only_root}
+                    MagicEnumHeaderOnly_ROOT_DIR=${with_magicenum_header_only_root}
 
                     subconfigure="${subconfigure} --with-magicenum-header-only-root=${with_magicenum_header_only_root}"
 
@@ -4973,14 +4968,14 @@ if test "x$ac_cv_header_magic_enum_magic_enum_hpp" = xyes
 then :
 
 
-printf "%s\n" "#define HAVE_MagicEnumHeaderOnlyV2 1" >>confdefs.h
+printf "%s\n" "#define HAVE_MagicEnumHeaderOnly 1" >>confdefs.h
 
             magicenum_header_only_found=1
             if test "x${with_magicenum_header_only_root}" != "x"
 then :
 
                     magicenum_header_only_defined=1
-                    MagicEnumHeaderOnlyV2_ROOT_DIR=${with_magicenum_header_only_root}
+                    MagicEnumHeaderOnly_ROOT_DIR=${with_magicenum_header_only_root}
 
                     subconfigure="${subconfigure} --with-magicenum-header-only-root=${with_magicenum_header_only_root}"
 
