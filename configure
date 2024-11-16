@@ -4898,10 +4898,6 @@ then :
 
 fi
 
-    echo "DefaultLinkDir: ${DefaultLinkDir}/include"
-    echo "INCLUDE_DIR:    ${INCLUDE_DIR}"
-    echo "File:           magic_enum.hpp"
-
     ORIG_CXXFLAGS="${CXXFLAGS}"
     CXXFLAGS="${CXXFLAGS} ${CXX_STD_FLAG} ${INCLUDE_DIR}"
 
@@ -4912,6 +4908,7 @@ then :
 
 printf "%s\n" "#define HAVE_MagicEnumHeaderOnlyV1 1" >>confdefs.h
 
+            magicenum_header_only_found=1
             if test "x${with_magicenum_header_only_root}" != "x"
 then :
 
@@ -4940,7 +4937,7 @@ fi
     CXXFLAGS="${ORIG_CXXFLAGS}"
 
 
-    if test "x${MagicEnumHeaderOnlyV1}" != "x"
+    if test "x${magicenum_header_only_found}" != "x"
 then :
 
             HAVE_MagicEnumHeaderOnly=1
@@ -4968,10 +4965,6 @@ then :
 
 fi
 
-    echo "DefaultLinkDir: ${DefaultLinkDir}/include"
-    echo "INCLUDE_DIR:    ${INCLUDE_DIR}"
-    echo "File:           magic_enum/magic_enum.hpp"
-
     ORIG_CXXFLAGS="${CXXFLAGS}"
     CXXFLAGS="${CXXFLAGS} ${CXX_STD_FLAG} ${INCLUDE_DIR}"
 
@@ -4982,6 +4975,7 @@ then :
 
 printf "%s\n" "#define HAVE_MagicEnumHeaderOnlyV2 1" >>confdefs.h
 
+            magicenum_header_only_found=1
             if test "x${with_magicenum_header_only_root}" != "x"
 then :
 
@@ -5019,7 +5013,7 @@ fi
 
 
 
-            if test "x${MagicEnumHeaderOnlyV1}" != "x"
+            if test "x${magicenum_header_only_found}" != "x"
 then :
 
                     HAVE_MagicEnumHeaderOnly=1
