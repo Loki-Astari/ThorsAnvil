@@ -21,6 +21,12 @@
 /* We have found MagicEnumHeaderOnly package */
 #undef HAVE_MagicEnumHeaderOnly
 
+/* Magic Enum V1 being used */
+#undef HAVE_MagicEnumHeaderOnlyV1
+
+/* Magic Enum V2 being used */
+#undef HAVE_MagicEnumHeaderOnlyV2
+
 /* We have found package SNAPPY */
 #undef HAVE_SNAPPY
 
