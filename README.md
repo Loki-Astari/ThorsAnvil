@@ -1,5 +1,19 @@
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G216KZR3)
 
+xcode-select --install
+brew tap mongodb/brew
+brew update
+brew install mongodb-community@8.0
+
+
+
+openssl@3
+snappy
+libyaml
+magic_enum
+vera++
+
+
 # ThorsMongo
 
 [![Brew package](https://img.shields.io/badge/Brew-package-blueviolet)](https://formulae.brew.sh/formula/thors-mongo)
