@@ -5035,7 +5035,8 @@ esac
 fi
 
 
-    if [ "x1" == "x0" ]; then
+    if [ "x13" == "x12" ] || [ "x13" == "x10" ]; then
+
         grep -q 'MagicEnum_ROOT_DIR=@MagicEnum_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -5050,6 +5051,9 @@ then :
 
 
 fi
+    fi
+
+    if [ "x13" == "x12" ] || [ "x13" == "x11" ]; then
 
         grep -q 'MagicEnum_ROOT_LIB=@MagicEnum_ROOT_LIB@' Makefile.config.in
         result=$?
@@ -5065,7 +5069,9 @@ then :
 
 
 fi
-    else
+    fi
+
+    if [ "x13" == "x13" ]; then
         grep -q 'MagicEnumHeaderOnly_ROOT_DIR=@MagicEnumHeaderOnly_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -5097,7 +5103,8 @@ fi
 then :
 
 
-    if [ "x0" == "x0" ]; then
+    if [ "x12" == "x12" ] || [ "x12" == "x10" ]; then
+
         grep -q 'yaml_ROOT_DIR=@yaml_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -5112,6 +5119,9 @@ then :
 
 
 fi
+    fi
+
+    if [ "x12" == "x12" ] || [ "x12" == "x11" ]; then
 
         grep -q 'yaml_ROOT_LIB=@yaml_ROOT_LIB@' Makefile.config.in
         result=$?
@@ -5127,7 +5137,9 @@ then :
 
 
 fi
-    else
+    fi
+
+    if [ "x12" == "x13" ]; then
         grep -q 'yamlHeaderOnly_ROOT_DIR=@yamlHeaderOnly_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -5289,7 +5301,8 @@ fi
 then :
 
 
-    if [ "x0" == "x0" ]; then
+    if [ "x12" == "x12" ] || [ "x12" == "x10" ]; then
+
         grep -q 'snappy_ROOT_DIR=@snappy_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -5304,6 +5317,9 @@ then :
 
 
 fi
+    fi
+
+    if [ "x12" == "x12" ] || [ "x12" == "x11" ]; then
 
         grep -q 'snappy_ROOT_LIB=@snappy_ROOT_LIB@' Makefile.config.in
         result=$?
@@ -5319,7 +5335,9 @@ then :
 
 
 fi
-    else
+    fi
+
+    if [ "x12" == "x13" ]; then
         grep -q 'snappyHeaderOnly_ROOT_DIR=@snappyHeaderOnly_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -5481,7 +5499,8 @@ fi
 then :
 
 
-    if [ "x0" == "x0" ]; then
+    if [ "x12" == "x12" ] || [ "x12" == "x10" ]; then
+
         grep -q 'crypto_ROOT_DIR=@crypto_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -5496,6 +5515,9 @@ then :
 
 
 fi
+    fi
+
+    if [ "x12" == "x12" ] || [ "x12" == "x11" ]; then
 
         grep -q 'crypto_ROOT_LIB=@crypto_ROOT_LIB@' Makefile.config.in
         result=$?
@@ -5511,7 +5533,9 @@ then :
 
 
 fi
-    else
+    fi
+
+    if [ "x12" == "x13" ]; then
         grep -q 'cryptoHeaderOnly_ROOT_DIR=@cryptoHeaderOnly_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -5680,7 +5704,8 @@ fi
 then :
 
 
-    if [ "x0" == "x0" ]; then
+    if [ "x12" == "x12" ] || [ "x12" == "x10" ]; then
+
         grep -q 'ZLIB_ROOT_DIR=@ZLIB_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -5695,6 +5720,9 @@ then :
 
 
 fi
+    fi
+
+    if [ "x12" == "x12" ] || [ "x12" == "x11" ]; then
 
         grep -q 'ZLIB_ROOT_LIB=@ZLIB_ROOT_LIB@' Makefile.config.in
         result=$?
@@ -5710,7 +5738,9 @@ then :
 
 
 fi
-    else
+    fi
+
+    if [ "x12" == "x13" ]; then
         grep -q 'ZLIBHeaderOnly_ROOT_DIR=@ZLIBHeaderOnly_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
