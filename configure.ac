@@ -8,7 +8,7 @@ AX_THOR_FUNC_INIT_BUILD([ThorsSerializer], [], [20])
 
 AX_THOR_ENABLE_CONAN
 
-AX_THOR_CHECK_USE_THORS_SERIALIZE([ThorSerialize ThorsSocket ThorsStorage ThorsLogging])
+AX_THOR_CHECK_USE_THORS_SERIALIZE([ThorSerialize ThorsSocket ThorsStorage ThorsLogging ThorsMongo])
 AX_THOR_CHECK_USE_MAGIC_ENUM
 AX_THOR_CHECK_USE_YAML
 AX_THOR_CHECK_USE_SNAPPY
