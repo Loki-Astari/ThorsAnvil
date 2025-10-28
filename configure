@@ -722,6 +722,8 @@ yaml_ROOT_DIR
 MAGIC_ENUM_FILE
 HAVE_MagicEnumHeaderOnly
 MagicEnumHeaderOnly_ROOT_DIR
+ThorSerialize_ROOT_LIB
+ThorSerialize_ROOT_DIR
 THOR_CONAN_ENABLE
 UNZIP
 CXX_STD_FLAG
@@ -809,6 +811,7 @@ enable_colour
 enable_dark_mode
 with_standard_version
 enable_test_with_conan
+with_thorserialize_root
 with_magicenum_header_only_root
 with_yaml_root
 with_snappy_root
@@ -1526,6 +1529,10 @@ Optional Packages:
                           Use the specified version <version> of the C++
                           standard. Default 20
 
+  --with-thorserialize-root=<location>
+                          Define the root directory of package Thors
+                          Serializer
+
   --with-magicenum-header-only-root=<location>
                           Directory of MagicEnumHeaderOnly include folder: the
                           folder that has the include file
@@ -1697,41 +1704,6 @@ fi
 
 } # ac_fn_cxx_try_compile
 
-# ac_fn_cxx_check_header_compile LINENO HEADER VAR INCLUDES
-# ---------------------------------------------------------
-# Tests whether HEADER exists and can be compiled using the include files in
-# INCLUDES, setting the cache variable VAR accordingly.
-ac_fn_cxx_check_header_compile ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
-printf %s "checking for $2... " >&6; }
-if eval test \${$3+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-#include <$2>
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"
-then :
-  eval "$3=yes"
-else case e in #(
-  e) eval "$3=no" ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext ;;
-esac
-fi
-eval ac_res=\$$3
-	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-printf "%s\n" "$ac_res" >&6; }
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-
-} # ac_fn_cxx_check_header_compile
-
 # ac_fn_cxx_try_link LINENO
 # -------------------------
 # Try to link conftest.$ac_ext, and return whether this succeeded.
@@ -1779,6 +1751,41 @@ fi
   as_fn_set_status $ac_retval
 
 } # ac_fn_cxx_try_link
+
+# ac_fn_cxx_check_header_compile LINENO HEADER VAR INCLUDES
+# ---------------------------------------------------------
+# Tests whether HEADER exists and can be compiled using the include files in
+# INCLUDES, setting the cache variable VAR accordingly.
+ac_fn_cxx_check_header_compile ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+printf %s "checking for $2... " >&6; }
+if eval test \${$3+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+#include <$2>
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"
+then :
+  eval "$3=yes"
+else case e in #(
+  e) eval "$3=no" ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext ;;
+esac
+fi
+eval ac_res=\$$3
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_cxx_check_header_compile
 
 # ac_fn_c_try_compile LINENO
 # --------------------------
@@ -4851,6 +4858,210 @@ fi
 
 
 
+
+    remove="ThorSerialize ThorsSocket ThorsStorage ThorsLogging"
+    libs="ThorSerialize ThorsSocket ThorsStorage ThorsLogging"
+    libs=${libs//"${remove}"/}
+    echo "Libs: ${libs}"
+
+
+# Check whether --with-thorserialize-root was given.
+if test ${with_thorserialize_root+y}
+then :
+  withval=$with_thorserialize_root;
+fi
+
+
+    if test "xThorSerialize" != "x"
+then :
+
+
+    if [ "x12" == "x12" ] || [ "x12" == "x10" ]; then
+
+        grep -q 'ThorSerialize_ROOT_DIR=@ThorSerialize_ROOT_DIR@' Makefile.config.in
+        result=$?
+        if test "x${result}" != "x0"
+then :
+
+                as_fn_error $? "
+                    Expecting ThorSerialize_ROOT_DIR to be defined in Makefile.config.in
+                    You should probably add this line to Makefile.config.in
+
+                        ThorSerialize_ROOT_DIR=@ThorSerialize_ROOT_DIR@
+                " "$LINENO" 5
+
+
+fi
+    fi
+
+    if [ "x12" == "x12" ] || [ "x12" == "x11" ]; then
+
+        grep -q 'ThorSerialize_ROOT_LIB=@ThorSerialize_ROOT_LIB@' Makefile.config.in
+        result=$?
+        if test "x${result}" != "x0"
+then :
+
+                as_fn_error $? "
+                    Expecting ThorSerialize_ROOT_LIB to be defined in Makefile.config.in
+                    You should probably add this line to Makefile.config.in
+
+                        ThorSerialize_ROOT_LIB=@ThorSerialize_ROOT_LIB@
+                " "$LINENO" 5
+
+
+fi
+    fi
+
+    if [ "x12" == "x13" ]; then
+        grep -q 'ThorSerializeHeaderOnly_ROOT_DIR=@ThorSerializeHeaderOnly_ROOT_DIR@' Makefile.config.in
+        result=$?
+        if test "x${result}" != "x0"
+then :
+
+                as_fn_error $? "
+                    Expecting ThorSerializeHeaderOnly_ROOT_DIR to be defined in Makefile.config.in
+                    You should probably add this line to Makefile.config.in
+
+                        ThorSerializeHeaderOnly_ROOT_DIR=@ThorSerializeHeaderOnly_ROOT_DIR@
+                " "$LINENO" 5
+
+
+fi
+    fi
+
+
+fi
+
+    LIBRARY_DIR="-L ${with_thorserialize_root}/lib"
+    if test "x${with_thorserialize_root}" == "x"
+then :
+  LIBRARY_DIR="-L ${DefaultLinkDir}/lib"
+
+fi
+
+    if test "x${thorserialize_header_only_defined}" == "x"
+then :
+
+            ORIG_LDFLAGS="${LDFLAGS}"
+            LDFLAGS="$LDFLAGS ${LIBRARY_DIR}"
+
+            echo "Building: ThorsSerializer"
+            echo "Mark:     $BUILDING_ThorsSerializer"
+            echo "Checking"
+            if test "x$BUILDING_ThorsSerializer" == "x1"
+then :
+
+
+    if test "x${with_thorserialize_root}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_THORSSERIALIZER 1" >>confdefs.h
+
+            ThorSerialize_ROOT_DIR=${with_thorserialize_root}
+
+            subconfigure="${subconfigure} --with-thorserialize-root=${with_thorserialize_root}"
+
+
+fi
+    echo "Setting: ThorSerialize_ROOT_LIB TO ${libs}"
+    ThorSerialize_ROOT_LIB="${libs}"
+
+
+
+else case e in #(
+  e)
+                    as_ac_Lib=`printf "%s\n" "ac_cv_lib_ThorSerialize${askedLangFeature}""__ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv" | sed "$as_sed_sh"`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for _ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv in -lThorSerialize${askedLangFeature}" >&5
+printf %s "checking for _ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv in -lThorSerialize${askedLangFeature}... " >&6; }
+if eval test \${$as_ac_Lib+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_check_lib_save_LIBS=$LIBS
+LIBS="-lThorSerialize${askedLangFeature}  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+namespace conftest {
+  extern "C" int _ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv ();
+}
+int
+main (void)
+{
+return conftest::_ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"
+then :
+  eval "$as_ac_Lib=yes"
+else case e in #(
+  e) eval "$as_ac_Lib=no" ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS ;;
+esac
+fi
+eval ac_res=\$$as_ac_Lib
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"
+then :
+
+
+    if test "x${with_thorserialize_root}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_THORSSERIALIZER 1" >>confdefs.h
+
+            ThorSerialize_ROOT_DIR=${with_thorserialize_root}
+
+            subconfigure="${subconfigure} --with-thorserialize-root=${with_thorserialize_root}"
+
+
+fi
+    echo "Setting: ThorSerialize_ROOT_LIB TO ${libs}"
+    ThorSerialize_ROOT_LIB="${libs}"
+
+
+
+else case e in #(
+  e)
+                            echo "FAIL: Using: >${with_thorserialize_root}<"
+                            as_fn_error $? "
+Error: Could not find libThorSerialize${askedLangFeature}
+
+You can solve this by installing Thors Serializer
+    brew install thors-mongo
+
+Alternately specify install location with:
+    --with-thorserialize-root=<location of ThorsSerializer installation>
+
+
+    " "$LINENO" 5
+                            echo "FAIL DONE"
+
+                     ;;
+esac
+fi
+
+
+             ;;
+esac
+fi
+            echo "Checking DONE"
+
+            LDFLAGS="${ORIG_LDFLAGS}"
+
+
+fi
+
+
 ac_header= ac_cache=
 for ac_item in $ac_header_cxx_list
 do
@@ -6238,6 +6449,66 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 int main() {
     char    buffer[] = "12.345";
     double  value;
+    auto result = std::from_chars(buffer, buffer+100, value);
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"
+then :
+
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Supports std::from_chars(begin, end, double)" >&5
+printf "%s\n" "$as_me: Supports std::from_chars(begin, end, double)" >&6;}
+
+
+else case e in #(
+  e)
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Setting NO_STD_SUPPORT_FROM_CHAR_DOUBLE" >&5
+printf "%s\n" "$as_me: Setting NO_STD_SUPPORT_FROM_CHAR_DOUBLE" >&6;}
+
+printf "%s\n" "#define NO_STD_SUPPORT_FROM_CHAR_DOUBLE 1" >>confdefs.h
+
+
+
+
+             ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+            CXXFLAGS=${CXXFLAGS_SAVE}
+
+
+
+fi
+
+
+    if test "
+#include <charconv>
+int main() {
+    char    buffer[] = "12.345";
+    long double  value;
+    auto result = std::from_chars(buffer, buffer+100, value);
+}" != ""
+then :
+
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}" >&5
+printf %s "checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}... " >&6; }
+            ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+            CXXFLAGS_SAVE="${CXXFLAGS}"
+            CXXFLAGS=${CXX_STD_FLAG}
+
+            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <charconv>
+int main() {
+    char    buffer[] = "12.345";
+    long double  value;
     auto result = std::from_chars(buffer, buffer+100, value);
 }
 _ACEOF
