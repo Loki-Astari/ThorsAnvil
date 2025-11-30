@@ -700,6 +700,11 @@ SED
 ac_ct_CC
 CFLAGS
 CC
+LIBTOOL
+BOOST_ROOT_LIB
+BOOST_ROOT_DIR
+BOOST_LDFLAGS
+BOOST_CPPFLAGS
 host_os
 host_vendor
 host_cpu
@@ -708,9 +713,11 @@ build_os
 build_vendor
 build_cpu
 build
-LIBTOOL
+DISABLE_SLACKTEST
 THOR_DISABLE_TEST_WITH_MONGO_QUERY_DISABLE
 THOR_DISABLE_TEST_WITH_LOCKED_FILES_DISABLE
+event_ROOT_LIB
+event_ROOT_DIR
 ZLIB_ROOT_LIB
 ZLIB_ROOT_DIR
 crypto_ROOT_LIB
@@ -761,7 +768,6 @@ VERATOOL
 TestVera
 COV
 DefaultLinkDir
-THOR_PACKAGE_NAME
 target_alias
 host_alias
 build_alias
@@ -817,6 +823,7 @@ with_yaml_root
 with_snappy_root
 with_crypto_root
 with_zlib_root
+with_event_root
 enable_test_with_locked_file
 enable_test_with_mongo_query
 enable_Mongo_Service
@@ -825,6 +832,13 @@ with_TestMongoUser
 with_TestMongoPass
 with_TestMongoDatabase
 with_mongosh_tool
+enable_slacktest
+with_botToken
+with_userToken
+with_slackSecret
+with_slackChannel
+with_boost
+with_boost_libdir
 enable_shared
 enable_static
 enable_pic
@@ -1505,6 +1519,9 @@ Optional Features:
 
   --disable-Mongo-Service Disable Mongo Service Test
 
+  --disable-slacktest     Disable Slack Testing. Slack testing requires you
+                          set up slack tokens.
+
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-pic[=PKGS]     try to use only PIC/non-PIC objects [default=use
@@ -1549,6 +1566,9 @@ Optional Packages:
   --with-zlib-root=<location>
                           Define the root directory of package ZLIB
 
+  --with-event-root=<location>
+                          Define the root directory of package Event
+
   --with-TestMongoHost=<Host>
                           Use an alternative mongosh host for testing with
                           Default(127.0.0.1)
@@ -1565,6 +1585,29 @@ Optional Packages:
                           The default tool name is mongosh. But this can be
                           overridden with this flag
 
+  --with-botToken=<token> Slack authentication token. Used to authenticate
+                          with Slack when running tests
+
+  --with-userToken=<token>
+                          Slack authentication token. Used to authenticate
+                          with Slack when running tests
+
+  --with-slackSecret=<secret>
+                          Slack secret. Used to hash requests and thus
+                          validate incomming requests from slack
+
+  --with-slackChannel=<channel>
+                          Slack channel to use for testing.
+
+  --with-boost[=ARG]      use Boost library from a standard location
+                          (ARG=yes), from the specified location (ARG=<path>),
+                          or disable it (ARG=no) [ARG=yes]
+  --with-boost-libdir=LIB_DIR
+                          Force given directory for boost libraries. Note that
+                          this will override library path detection, so use
+                          this parameter only if default library detection
+                          fails and you know exactly where your boost
+                          libraries are located.
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
                           compiler's sysroot if not specified).
@@ -2859,7 +2902,7 @@ main (int argc, char **argv)
 
 
 # Auxiliary files required by this configure script.
-ac_aux_files="missing install-sh compile config.guess config.sub ltmain.sh"
+ac_aux_files="missing install-sh compile ltmain.sh config.guess config.sub"
 
 # Locations in which to look for auxiliary files.
 ac_aux_dir_candidates="${srcdir}/build/autotools/build"
@@ -3685,11 +3728,8 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
     export BUILDING_ThorsSerializer=1
-
-printf "%s\n" "#define THOR_PACKAGE_NAME ThorsSerializer" >>confdefs.h
-
-    THOR_PACKAGE_NAME=ThorsSerializer
-
+    # AC_DEFINE([THOR_PACKAGE_NAME], [ThorsSerializer], [Name of package for header files])
+    # AC_SUBST([THOR_PACKAGE_NAME], [ThorsSerializer])
 
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -4820,7 +4860,19 @@ test -n "$UNZIP" || UNZIP=":"
         " "$LINENO" 5
     fi
     pushd build/third
-    ./setup "${CXX}  ${CXX_STD_FLAG}" || as_fn_error $? "Failed to set up the test utilities" "$LINENO" 5
+    buildTool="make"
+    buildConfig=""
+    sedStrip='s/-.*//'
+    UNAME=`uname -s | sed "${sedStrip}"`
+    if  test "x${UNAME}" = "xMSYS_NT" || test "x${UNAME}" = "xMINGW64_NT"
+then :
+
+            buildTool="ninja"
+            buildConfig="-G Ninja"
+
+
+fi
+    ./setup "${CXX}  ${CXX_STD_FLAG}" "${buildTool}" "${buildConfig}" || as_fn_error $? "Failed to set up the test utilities" "$LINENO" 5
     popd
 
 
@@ -4879,7 +4931,7 @@ fi
 then :
 
 
-    if [ "x12" == "x12" ] || [ "x12" == "x10" ]; then
+    if [ "x" == "x12" ] || [ "x" == "x10" ]; then
 
         grep -q 'ThorSerialize_ROOT_DIR=@ThorSerialize_ROOT_DIR@' Makefile.config.in
         result=$?
@@ -4897,7 +4949,7 @@ then :
 fi
     fi
 
-    if [ "x12" == "x12" ] || [ "x12" == "x11" ]; then
+    if [ "x" == "x12" ] || [ "x" == "x11" ]; then
 
         grep -q 'ThorSerialize_ROOT_LIB=@ThorSerialize_ROOT_LIB@' Makefile.config.in
         result=$?
@@ -4915,7 +4967,7 @@ then :
 fi
     fi
 
-    if [ "x12" == "x13" ]; then
+    if [ "x" == "x13" ]; then
         grep -q 'ThorSerializeHeaderOnly_ROOT_DIR=@ThorSerializeHeaderOnly_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -5317,7 +5369,7 @@ fi
 then :
 
 
-    if [ "x12" == "x12" ] || [ "x12" == "x10" ]; then
+    if [ "x" == "x12" ] || [ "x" == "x10" ]; then
 
         grep -q 'yaml_ROOT_DIR=@yaml_ROOT_DIR@' Makefile.config.in
         result=$?
@@ -5335,7 +5387,7 @@ then :
 fi
     fi
 
-    if [ "x12" == "x12" ] || [ "x12" == "x11" ]; then
+    if [ "x" == "x12" ] || [ "x" == "x11" ]; then
 
         grep -q 'yaml_ROOT_LIB=@yaml_ROOT_LIB@' Makefile.config.in
         result=$?
@@ -5353,7 +5405,7 @@ then :
 fi
     fi
 
-    if [ "x12" == "x13" ]; then
+    if [ "x" == "x13" ]; then
         grep -q 'yamlHeaderOnly_ROOT_DIR=@yamlHeaderOnly_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -5515,7 +5567,7 @@ fi
 then :
 
 
-    if [ "x12" == "x12" ] || [ "x12" == "x10" ]; then
+    if [ "x" == "x12" ] || [ "x" == "x10" ]; then
 
         grep -q 'snappy_ROOT_DIR=@snappy_ROOT_DIR@' Makefile.config.in
         result=$?
@@ -5533,7 +5585,7 @@ then :
 fi
     fi
 
-    if [ "x12" == "x12" ] || [ "x12" == "x11" ]; then
+    if [ "x" == "x12" ] || [ "x" == "x11" ]; then
 
         grep -q 'snappy_ROOT_LIB=@snappy_ROOT_LIB@' Makefile.config.in
         result=$?
@@ -5551,7 +5603,7 @@ then :
 fi
     fi
 
-    if [ "x12" == "x13" ]; then
+    if [ "x" == "x13" ]; then
         grep -q 'snappyHeaderOnly_ROOT_DIR=@snappyHeaderOnly_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -5713,7 +5765,7 @@ fi
 then :
 
 
-    if [ "x12" == "x12" ] || [ "x12" == "x10" ]; then
+    if [ "x" == "x12" ] || [ "x" == "x10" ]; then
 
         grep -q 'crypto_ROOT_DIR=@crypto_ROOT_DIR@' Makefile.config.in
         result=$?
@@ -5731,7 +5783,7 @@ then :
 fi
     fi
 
-    if [ "x12" == "x12" ] || [ "x12" == "x11" ]; then
+    if [ "x" == "x12" ] || [ "x" == "x11" ]; then
 
         grep -q 'crypto_ROOT_LIB=@crypto_ROOT_LIB@' Makefile.config.in
         result=$?
@@ -5749,7 +5801,7 @@ then :
 fi
     fi
 
-    if [ "x12" == "x13" ]; then
+    if [ "x" == "x13" ]; then
         grep -q 'cryptoHeaderOnly_ROOT_DIR=@cryptoHeaderOnly_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -5918,7 +5970,7 @@ fi
 then :
 
 
-    if [ "x12" == "x12" ] || [ "x12" == "x10" ]; then
+    if [ "x" == "x12" ] || [ "x" == "x10" ]; then
 
         grep -q 'ZLIB_ROOT_DIR=@ZLIB_ROOT_DIR@' Makefile.config.in
         result=$?
@@ -5936,7 +5988,7 @@ then :
 fi
     fi
 
-    if [ "x12" == "x12" ] || [ "x12" == "x11" ]; then
+    if [ "x" == "x12" ] || [ "x" == "x11" ]; then
 
         grep -q 'ZLIB_ROOT_LIB=@ZLIB_ROOT_LIB@' Makefile.config.in
         result=$?
@@ -5954,7 +6006,7 @@ then :
 fi
     fi
 
-    if [ "x12" == "x13" ]; then
+    if [ "x" == "x13" ]; then
         grep -q 'ZLIBHeaderOnly_ROOT_DIR=@ZLIBHeaderOnly_ROOT_DIR@' Makefile.config.in
         result=$?
         if test "x${result}" != "x0"
@@ -6079,6 +6131,207 @@ Error: Could not find libz
 
             brew install libz
             ./configure --with-zlib-root=/usr/local/Cellar/libz/1.0.2j/
+
+
+
+
+    " "$LINENO" 5
+                            echo "FAIL DONE"
+
+                     ;;
+esac
+fi
+
+
+             ;;
+esac
+fi
+            echo "Checking DONE"
+
+            LDFLAGS="${ORIG_LDFLAGS}"
+
+
+fi
+
+
+
+
+
+# Check whether --with-event-root was given.
+if test ${with_event_root+y}
+then :
+  withval=$with_event_root;
+fi
+
+
+    if test "xevent" != "x"
+then :
+
+
+    if [ "x" == "x12" ] || [ "x" == "x10" ]; then
+
+        grep -q 'event_ROOT_DIR=@event_ROOT_DIR@' Makefile.config.in
+        result=$?
+        if test "x${result}" != "x0"
+then :
+
+                as_fn_error $? "
+                    Expecting event_ROOT_DIR to be defined in Makefile.config.in
+                    You should probably add this line to Makefile.config.in
+
+                        event_ROOT_DIR=@event_ROOT_DIR@
+                " "$LINENO" 5
+
+
+fi
+    fi
+
+    if [ "x" == "x12" ] || [ "x" == "x11" ]; then
+
+        grep -q 'event_ROOT_LIB=@event_ROOT_LIB@' Makefile.config.in
+        result=$?
+        if test "x${result}" != "x0"
+then :
+
+                as_fn_error $? "
+                    Expecting event_ROOT_LIB to be defined in Makefile.config.in
+                    You should probably add this line to Makefile.config.in
+
+                        event_ROOT_LIB=@event_ROOT_LIB@
+                " "$LINENO" 5
+
+
+fi
+    fi
+
+    if [ "x" == "x13" ]; then
+        grep -q 'eventHeaderOnly_ROOT_DIR=@eventHeaderOnly_ROOT_DIR@' Makefile.config.in
+        result=$?
+        if test "x${result}" != "x0"
+then :
+
+                as_fn_error $? "
+                    Expecting eventHeaderOnly_ROOT_DIR to be defined in Makefile.config.in
+                    You should probably add this line to Makefile.config.in
+
+                        eventHeaderOnly_ROOT_DIR=@eventHeaderOnly_ROOT_DIR@
+                " "$LINENO" 5
+
+
+fi
+    fi
+
+
+fi
+
+    LIBRARY_DIR="-L ${with_event_root}/lib"
+    if test "x${with_event_root}" == "x"
+then :
+  LIBRARY_DIR="-L ${DefaultLinkDir}/lib"
+
+fi
+
+    if test "x${event_header_only_defined}" == "x"
+then :
+
+            ORIG_LDFLAGS="${LDFLAGS}"
+            LDFLAGS="$LDFLAGS ${LIBRARY_DIR}"
+
+            echo "Building: NotThor"
+            echo "Mark:     $BUILDING_NotThor"
+            echo "Checking"
+            if test "x$BUILDING_NotThor" == "x1"
+then :
+
+
+    if test "x${with_event_root}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_EVENT 1" >>confdefs.h
+
+            event_ROOT_DIR=${with_event_root}
+
+            subconfigure="${subconfigure} --with-event-root=${with_event_root}"
+
+
+fi
+    echo "Setting: event_ROOT_LIB TO event"
+    event_ROOT_LIB="event"
+
+
+
+else case e in #(
+  e)
+                    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for event_dispatch in -levent" >&5
+printf %s "checking for event_dispatch in -levent... " >&6; }
+if test ${ac_cv_lib_event_event_dispatch+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_check_lib_save_LIBS=$LIBS
+LIBS="-levent  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+namespace conftest {
+  extern "C" int event_dispatch ();
+}
+int
+main (void)
+{
+return conftest::event_dispatch ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"
+then :
+  ac_cv_lib_event_event_dispatch=yes
+else case e in #(
+  e) ac_cv_lib_event_event_dispatch=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_event_event_dispatch" >&5
+printf "%s\n" "$ac_cv_lib_event_event_dispatch" >&6; }
+if test "x$ac_cv_lib_event_event_dispatch" = xyes
+then :
+
+
+    if test "x${with_event_root}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_EVENT 1" >>confdefs.h
+
+            event_ROOT_DIR=${with_event_root}
+
+            subconfigure="${subconfigure} --with-event-root=${with_event_root}"
+
+
+fi
+    echo "Setting: event_ROOT_LIB TO event"
+    event_ROOT_LIB="event"
+
+
+
+else case e in #(
+  e)
+                            echo "FAIL: Using: >${with_event_root}<"
+                            as_fn_error $? "
+
+Error: Could not find libevent
+
+    You can solve this by installing libevent
+    see http://libevent.org/
+
+    If libevent is not installed in the default location (/usr/local or /opt/homebrew) then you will need to specify its location.
+    --with-event-root=<location of event installation>
 
 
 
@@ -6304,275 +6557,133 @@ fi
 
 
 
+# Check whether --enable-slacktest was given.
+if test ${enable_slacktest+y}
+then :
+  enableval=$enable_slacktest;
+fi
 
-    if test "
-#include <utility>
-int main() {
-    std::index_sequence<1,2,3,4>    seq;
-}" != ""
+
+# Check whether --with-botToken was given.
+if test ${with_botToken+y}
+then :
+  withval=$with_botToken;
+fi
+
+
+# Check whether --with-userToken was given.
+if test ${with_userToken+y}
+then :
+  withval=$with_userToken;
+fi
+
+
+# Check whether --with-slackSecret was given.
+if test ${with_slackSecret+y}
+then :
+  withval=$with_slackSecret;
+fi
+
+
+# Check whether --with-slackChannel was given.
+if test ${with_slackChannel+y}
+then :
+  withval=$with_slackChannel;
+fi
+
+
+DISABLE_SLACKTEST=0
+
+if test "x$enable_slacktest" == "xno"
 then :
 
-            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}" >&5
-printf %s "checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}... " >&6; }
-            ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-            CXXFLAGS_SAVE="${CXXFLAGS}"
-            CXXFLAGS=${CXX_STD_FLAG}
-
-            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <utility>
-int main() {
-    std::index_sequence<1,2,3,4>    seq;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"
-then :
-
-
-            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: good" >&5
-printf "%s\n" "good" >&6; }
+    subconfigure="${subconfigure} --disable-slacktest";
+    DISABLE_SLACKTEST=1
 
 
 else case e in #(
   e)
+if test "x${with_botToken}" == "x"
+then :
+  as_fn_error $? "No Bot token defined. Can not run the slack tests. Please look at tutorials on how to generate a slack Bot Token." "$LINENO" 5
 
-            as_fn_error $? "
+fi
+if test "x${with_userToken}" == "x"
+then :
+  as_fn_error $? "No User token defined. Can not run the slack tests. Please look at tutorials on how to generate a slack User Token." "$LINENO" 5
 
-Error: Your compiler does not seem to support the language features required.
-       Try updating your compiler to use a more recent version.
+fi
+if test "x${with_slackSecret}" == "x"
+then :
+  as_fn_error $? "No slack secret defined. Can not run the slack tests. Please look at tutorials on how to generate a slack Bot Secret." "$LINENO" 5
 
-       Compiler used: ${CXX} ${CXX_STD_FLAG}
-            " "$LINENO" 5
+fi
+if test "x${with_slackChannel}" == "x"
+then :
+  as_fn_error $? "No slack channel defined. Can not run the slack tests. Please look at tutorials on how to generate a slack Bot Secret." "$LINENO" 5
 
-
-
-             ;;
+fi
+ ;;
 esac
 fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-            CXXFLAGS=${CXXFLAGS_SAVE}
+if test "x${with_botToken}" != "x"
+then :
+  subconfigure="${subconfigure} --with-botToken=${with_botToken}"
+fi
+if test "x${with_userToken}" != "x"
+then :
+  subconfigure="${subconfigure} --with-userToken=${with_userToken}"
+fi
+if test "x${with_slackSecret}" != "x"
+then :
+  subconfigure="${subconfigure} --with-slackSecret=${with_slackSecret}"
+fi
+if test "x${with_slackChannel}" != "x"
+then :
+  subconfigure="${subconfigure} --with-slackChannel=${with_slackChannel}"
+fi
 
+if test "x$enable_slacktest" != "xno"
+then :
+
+data=$(curl \
+   --header "authorization: Bearer ${with_botToken}" \
+✗  --header "content-type: application/json; charset=utf-8" \
+│  --request GET \
+│  https://slack.com/api/auth.test 2> /dev/null)
+
+dataok=$(echo ${data} | jq -r .ok)
+if test "x${dataok}" != "xtrue"
+then :
+
+        as_fn_error $? "
+Failed to authenticate with slack please check your token
+
+Command used:
+    curl --header \"authorization: Bearer ${with_botToken}\" --header \"content-type: application/json; charset=utf-8\" --request GET https://slack.com/api/auth.test
+
+Response:
+    ${data}
+        " "$LINENO" 5
 
 
 fi
 
 
-
-
-    if test "
-#include <charconv>
-int main() {
-    char    buffer[100];
-    double  value = 12.345;
-    auto result = std::to_chars(buffer, buffer+100, value, std::chars_format::fixed, 6);
-}" != ""
-then :
-
-            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}" >&5
-printf %s "checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}... " >&6; }
-            ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-            CXXFLAGS_SAVE="${CXXFLAGS}"
-            CXXFLAGS=${CXX_STD_FLAG}
-
-            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <charconv>
-int main() {
-    char    buffer[100];
-    double  value = 12.345;
-    auto result = std::to_chars(buffer, buffer+100, value, std::chars_format::fixed, 6);
+mkdir -p src/ThorsSlack/test/data
+cat - <<ENVIRONMENT > src/ThorsSlack/test/data/environment.json
+{
+    "botToken": "${with_botToken}",
+    "userToken": "${with_userToken}",
+    "slackSecret": "${with_slackSecret}",
+    "slackChannel": "${with_slackChannel}"
 }
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"
-then :
-
-
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Supports std::to_chars(begin, end, double)" >&5
-printf "%s\n" "$as_me: Supports std::to_chars(begin, end, double)" >&6;}
-
-
-else case e in #(
-  e)
-
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Setting NO_STD_SUPPORT_TO_CHAR_DOUBLE" >&5
-printf "%s\n" "$as_me: Setting NO_STD_SUPPORT_TO_CHAR_DOUBLE" >&6;}
-
-printf "%s\n" "#define NO_STD_SUPPORT_TO_CHAR_DOUBLE 1" >>confdefs.h
-
-
-
-
-             ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-            CXXFLAGS=${CXXFLAGS_SAVE}
-
+ENVIRONMENT
 
 
 fi
 
 
-    if test "
-#include <charconv>
-int main() {
-    char    buffer[] = "12.345";
-    double  value;
-    auto result = std::from_chars(buffer, buffer+100, value);
-}" != ""
-then :
-
-            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}" >&5
-printf %s "checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}... " >&6; }
-            ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-            CXXFLAGS_SAVE="${CXXFLAGS}"
-            CXXFLAGS=${CXX_STD_FLAG}
-
-            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <charconv>
-int main() {
-    char    buffer[] = "12.345";
-    double  value;
-    auto result = std::from_chars(buffer, buffer+100, value);
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"
-then :
-
-
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Supports std::from_chars(begin, end, double)" >&5
-printf "%s\n" "$as_me: Supports std::from_chars(begin, end, double)" >&6;}
-
-
-else case e in #(
-  e)
-
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Setting NO_STD_SUPPORT_FROM_CHAR_DOUBLE" >&5
-printf "%s\n" "$as_me: Setting NO_STD_SUPPORT_FROM_CHAR_DOUBLE" >&6;}
-
-printf "%s\n" "#define NO_STD_SUPPORT_FROM_CHAR_DOUBLE 1" >>confdefs.h
-
-
-
-
-             ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-            CXXFLAGS=${CXXFLAGS_SAVE}
-
-
-
-fi
-
-
-    if test "
-#include <charconv>
-int main() {
-    char    buffer[] = "12.345";
-    long double  value;
-    auto result = std::from_chars(buffer, buffer+100, value);
-}" != ""
-then :
-
-            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}" >&5
-printf %s "checking Checking Compiler Compatibility ${CXX} ${CXX_STD_FLAG}... " >&6; }
-            ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-            CXXFLAGS_SAVE="${CXXFLAGS}"
-            CXXFLAGS=${CXX_STD_FLAG}
-
-            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <charconv>
-int main() {
-    char    buffer[] = "12.345";
-    long double  value;
-    auto result = std::from_chars(buffer, buffer+100, value);
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"
-then :
-
-
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Supports std::from_chars(begin, end, double)" >&5
-printf "%s\n" "$as_me: Supports std::from_chars(begin, end, double)" >&6;}
-
-
-else case e in #(
-  e)
-
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Setting NO_STD_SUPPORT_FROM_CHAR_DOUBLE" >&5
-printf "%s\n" "$as_me: Setting NO_STD_SUPPORT_FROM_CHAR_DOUBLE" >&6;}
-
-printf "%s\n" "#define NO_STD_SUPPORT_FROM_CHAR_DOUBLE 1" >>confdefs.h
-
-
-
-
-             ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-            CXXFLAGS=${CXXFLAGS_SAVE}
-
-
-
-fi
-
-
-
-
-
-case `pwd` in
-  *\ * | *\	*)
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Libtool does not cope well with whitespace in \`pwd\`" >&5
-printf "%s\n" "$as_me: WARNING: Libtool does not cope well with whitespace in \`pwd\`" >&2;} ;;
-esac
-
-
-
-macro_version='2.5.4'
-macro_revision='2.5.4'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-ltmain=$ac_aux_dir/ltmain.sh
 
 
 
@@ -6650,6 +6761,402 @@ host_os=$*
 IFS=$ac_save_IFS
 case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
+
+
+
+
+# Check whether --with-boost was given.
+if test ${with_boost+y}
+then :
+  withval=$with_boost;
+     case $withval in #(
+  no) :
+    want_boost="no";_AX_BOOST_BASE_boost_path="" ;; #(
+  yes) :
+    want_boost="yes";_AX_BOOST_BASE_boost_path="" ;; #(
+  *) :
+    want_boost="yes";_AX_BOOST_BASE_boost_path="$withval" ;;
+esac
+
+else case e in #(
+  e) want_boost="yes" ;;
+esac
+fi
+
+
+
+
+# Check whether --with-boost-libdir was given.
+if test ${with_boost_libdir+y}
+then :
+  withval=$with_boost_libdir;
+   if test -d "$withval"
+then :
+  _AX_BOOST_BASE_boost_lib_path="$withval"
+else case e in #(
+  e) as_fn_error $? "--with-boost-libdir expected directory name" "$LINENO" 5 ;;
+esac
+fi
+
+else case e in #(
+  e) _AX_BOOST_BASE_boost_lib_path="" ;;
+esac
+fi
+
+
+BOOST_LDFLAGS=""
+BOOST_CPPFLAGS=""
+if test "x$want_boost" = "xyes"
+then :
+
+
+  if test "x1.70" = "x"
+then :
+  _AX_BOOST_BASE_TONUMERICVERSION_req="1.20.0"
+else case e in #(
+  e) _AX_BOOST_BASE_TONUMERICVERSION_req="1.70" ;;
+esac
+fi
+  _AX_BOOST_BASE_TONUMERICVERSION_req_shorten=`expr $_AX_BOOST_BASE_TONUMERICVERSION_req : '\([0-9]*\.[0-9]*\)'`
+  _AX_BOOST_BASE_TONUMERICVERSION_req_major=`expr $_AX_BOOST_BASE_TONUMERICVERSION_req : '\([0-9]*\)'`
+  if test "x$_AX_BOOST_BASE_TONUMERICVERSION_req_major" = "x"
+then :
+  as_fn_error $? "You should at least specify libboost major version" "$LINENO" 5
+fi
+  _AX_BOOST_BASE_TONUMERICVERSION_req_minor=`expr $_AX_BOOST_BASE_TONUMERICVERSION_req : '[0-9]*\.\([0-9]*\)'`
+  if test "x$_AX_BOOST_BASE_TONUMERICVERSION_req_minor" = "x"
+then :
+  _AX_BOOST_BASE_TONUMERICVERSION_req_minor="0"
+fi
+  _AX_BOOST_BASE_TONUMERICVERSION_req_sub_minor=`expr $_AX_BOOST_BASE_TONUMERICVERSION_req : '[0-9]*\.[0-9]*\.\([0-9]*\)'`
+  if test "X$_AX_BOOST_BASE_TONUMERICVERSION_req_sub_minor" = "X"
+then :
+  _AX_BOOST_BASE_TONUMERICVERSION_req_sub_minor="0"
+fi
+  _AX_BOOST_BASE_TONUMERICVERSION_RET=`expr $_AX_BOOST_BASE_TONUMERICVERSION_req_major \* 100000 \+  $_AX_BOOST_BASE_TONUMERICVERSION_req_minor \* 100 \+ $_AX_BOOST_BASE_TONUMERICVERSION_req_sub_minor`
+  WANT_BOOST_VERSION=$_AX_BOOST_BASE_TONUMERICVERSION_RET
+
+    succeeded=no
+
+
+
+                        case ${host_cpu} in #(
+  x86_64) :
+    libsubdirs="lib64 libx32 lib lib64" ;; #(
+  mips*64*) :
+    libsubdirs="lib64 lib32 lib lib64" ;; #(
+  ppc64|powerpc64|s390x|sparc64|aarch64|ppc64le|powerpc64le|riscv64|e2k|loongarch64) :
+    libsubdirs="lib64 lib lib64" ;; #(
+  *) :
+    libsubdirs="lib"
+     ;;
+esac
+
+                case ${host_cpu} in #(
+  i?86) :
+    multiarch_libsubdir="lib/i386-${host_os}" ;; #(
+  armv7l) :
+    multiarch_libsubdir="lib/arm-${host_os}" ;; #(
+  *) :
+    multiarch_libsubdir="lib/${host_cpu}-${host_os}"
+     ;;
+esac
+
+                if test "x$_AX_BOOST_BASE_boost_path" != "x"
+then :
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for boostlib >= 1.70 ($WANT_BOOST_VERSION) includes in \"$_AX_BOOST_BASE_boost_path/include\"" >&5
+printf %s "checking for boostlib >= 1.70 ($WANT_BOOST_VERSION) includes in \"$_AX_BOOST_BASE_boost_path/include\"... " >&6; }
+         if test -d "$_AX_BOOST_BASE_boost_path/include" && test -r "$_AX_BOOST_BASE_boost_path/include"
+then :
+
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+           BOOST_CPPFLAGS="-I$_AX_BOOST_BASE_boost_path/include"
+           for _AX_BOOST_BASE_boost_path_tmp in $multiarch_libsubdir $libsubdirs; do
+                { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for boostlib >= 1.70 ($WANT_BOOST_VERSION) lib path in \"$_AX_BOOST_BASE_boost_path/$_AX_BOOST_BASE_boost_path_tmp\"" >&5
+printf %s "checking for boostlib >= 1.70 ($WANT_BOOST_VERSION) lib path in \"$_AX_BOOST_BASE_boost_path/$_AX_BOOST_BASE_boost_path_tmp\"... " >&6; }
+                if test -d "$_AX_BOOST_BASE_boost_path/$_AX_BOOST_BASE_boost_path_tmp" && test -r "$_AX_BOOST_BASE_boost_path/$_AX_BOOST_BASE_boost_path_tmp"
+then :
+
+                        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+                        BOOST_LDFLAGS="-L$_AX_BOOST_BASE_boost_path/$_AX_BOOST_BASE_boost_path_tmp";
+                        break;
+
+else case e in #(
+  e) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; } ;;
+esac
+fi
+           done
+else case e in #(
+  e)
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; } ;;
+esac
+fi
+
+else case e in #(
+  e)
+        if test X"$cross_compiling" = Xyes; then
+            search_libsubdirs=$multiarch_libsubdir
+        else
+            search_libsubdirs="$multiarch_libsubdir $libsubdirs"
+        fi
+        for _AX_BOOST_BASE_boost_path_tmp in /usr /usr/local /opt /opt/local /opt/homebrew ; do
+            if test -d "$_AX_BOOST_BASE_boost_path_tmp/include/boost" && test -r "$_AX_BOOST_BASE_boost_path_tmp/include/boost" ; then
+                for libsubdir in $search_libsubdirs ; do
+                    if ls "$_AX_BOOST_BASE_boost_path_tmp/$libsubdir/libboost_"* >/dev/null 2>&1 ; then break; fi
+                done
+                BOOST_LDFLAGS="-L$_AX_BOOST_BASE_boost_path_tmp/$libsubdir"
+                BOOST_CPPFLAGS="-I$_AX_BOOST_BASE_boost_path_tmp/include"
+                break;
+            fi
+        done
+     ;;
+esac
+fi
+
+            if test "x$_AX_BOOST_BASE_boost_lib_path" != "x"
+then :
+  BOOST_LDFLAGS="-L$_AX_BOOST_BASE_boost_lib_path"
+fi
+
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for boostlib >= 1.70 ($WANT_BOOST_VERSION)" >&5
+printf %s "checking for boostlib >= 1.70 ($WANT_BOOST_VERSION)... " >&6; }
+    CPPFLAGS_SAVED="$CPPFLAGS"
+    CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+    export CPPFLAGS
+
+    LDFLAGS_SAVED="$LDFLAGS"
+    LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"
+    export LDFLAGS
+
+
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <boost/version.hpp>
+
+int
+main (void)
+{
+
+(void) ((void)sizeof(char[1 - 2*!!((BOOST_VERSION) < ($WANT_BOOST_VERSION))]));
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"
+then :
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+    succeeded=yes
+    found_system=yes
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+
+
+            if test "x$succeeded" != "xyes" ; then
+        CPPFLAGS="$CPPFLAGS_SAVED"
+        LDFLAGS="$LDFLAGS_SAVED"
+        BOOST_CPPFLAGS=
+        if test -z "$_AX_BOOST_BASE_boost_lib_path" ; then
+            BOOST_LDFLAGS=
+        fi
+        _version=0
+        if test -n "$_AX_BOOST_BASE_boost_path" ; then
+            if test -d "$_AX_BOOST_BASE_boost_path" && test -r "$_AX_BOOST_BASE_boost_path"; then
+                for i in `ls -d $_AX_BOOST_BASE_boost_path/include/boost-* 2>/dev/null`; do
+                    _version_tmp=`echo $i | sed "s#$_AX_BOOST_BASE_boost_path##" | sed 's/\/include\/boost-//' | sed 's/_/./'`
+                    V_CHECK=`expr $_version_tmp \> $_version`
+                    if test "x$V_CHECK" = "x1" ; then
+                        _version=$_version_tmp
+                    fi
+                    VERSION_UNDERSCORE=`echo $_version | sed 's/\./_/'`
+                    BOOST_CPPFLAGS="-I$_AX_BOOST_BASE_boost_path/include/boost-$VERSION_UNDERSCORE"
+                done
+                                if test -z "$BOOST_CPPFLAGS"; then
+                    if test -d "$_AX_BOOST_BASE_boost_path/boost" && test -r "$_AX_BOOST_BASE_boost_path/boost"; then
+                        BOOST_CPPFLAGS="-I$_AX_BOOST_BASE_boost_path"
+                    fi
+                fi
+                                                if test -n "$BOOST_CPPFLAGS" && test -z "$BOOST_LDFLAGS"; then
+                    for libsubdir in $libsubdirs ; do
+                        if ls "$_AX_BOOST_BASE_boost_path/$libsubdir/libboost_"* >/dev/null 2>&1 ; then break; fi
+                    done
+                    BOOST_LDFLAGS="-L$_AX_BOOST_BASE_boost_path/$libsubdir"
+                fi
+            fi
+        else
+            if test "x$cross_compiling" != "xyes" ; then
+                for _AX_BOOST_BASE_boost_path in /usr /usr/local /opt /opt/local /opt/homebrew ; do
+                    if test -d "$_AX_BOOST_BASE_boost_path" && test -r "$_AX_BOOST_BASE_boost_path" ; then
+                        for i in `ls -d $_AX_BOOST_BASE_boost_path/include/boost-* 2>/dev/null`; do
+                            _version_tmp=`echo $i | sed "s#$_AX_BOOST_BASE_boost_path##" | sed 's/\/include\/boost-//' | sed 's/_/./'`
+                            V_CHECK=`expr $_version_tmp \> $_version`
+                            if test "x$V_CHECK" = "x1" ; then
+                                _version=$_version_tmp
+                                best_path=$_AX_BOOST_BASE_boost_path
+                            fi
+                        done
+                    fi
+                done
+
+                VERSION_UNDERSCORE=`echo $_version | sed 's/\./_/'`
+                BOOST_CPPFLAGS="-I$best_path/include/boost-$VERSION_UNDERSCORE"
+                if test -z "$_AX_BOOST_BASE_boost_lib_path" ; then
+                    for libsubdir in $libsubdirs ; do
+                        if ls "$best_path/$libsubdir/libboost_"* >/dev/null 2>&1 ; then break; fi
+                    done
+                    BOOST_LDFLAGS="-L$best_path/$libsubdir"
+                fi
+            fi
+
+            if test -n "$BOOST_ROOT" ; then
+                for libsubdir in $libsubdirs ; do
+                    if ls "$BOOST_ROOT/stage/$libsubdir/libboost_"* >/dev/null 2>&1 ; then break; fi
+                done
+                if test -d "$BOOST_ROOT" && test -r "$BOOST_ROOT" && test -d "$BOOST_ROOT/stage/$libsubdir" && test -r "$BOOST_ROOT/stage/$libsubdir"; then
+                    version_dir=`expr //$BOOST_ROOT : '.*/\(.*\)'`
+                    stage_version=`echo $version_dir | sed 's/boost_//' | sed 's/_/./g'`
+                        stage_version_shorten=`expr $stage_version : '\([0-9]*\.[0-9]*\)'`
+                    V_CHECK=`expr $stage_version_shorten \>\= $_version`
+                    if test "x$V_CHECK" = "x1" && test -z "$_AX_BOOST_BASE_boost_lib_path" ; then
+                        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: We will use a staged boost library from $BOOST_ROOT" >&5
+printf "%s\n" "$as_me: We will use a staged boost library from $BOOST_ROOT" >&6;}
+                        BOOST_CPPFLAGS="-I$BOOST_ROOT"
+                        BOOST_LDFLAGS="-L$BOOST_ROOT/stage/$libsubdir"
+                    fi
+                fi
+            fi
+        fi
+
+        CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+        export CPPFLAGS
+        LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"
+        export LDFLAGS
+
+        ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <boost/version.hpp>
+
+int
+main (void)
+{
+
+(void) ((void)sizeof(char[1 - 2*!!((BOOST_VERSION) < ($WANT_BOOST_VERSION))]));
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"
+then :
+
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+        succeeded=yes
+        found_system=yes
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+        ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+    fi
+
+    if test "x$succeeded" != "xyes" ; then
+        if test "x$_version" = "x0" ; then
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: We could not detect the boost libraries (version 1.70 or higher). If you have a staged boost library (still not installed) please specify \$BOOST_ROOT in your environment and do not give a PATH to --with-boost option.  If you are sure you have boost installed, then check your version number looking in <boost/version.hpp>. See http://randspringer.de/boost for more documentation." >&5
+printf "%s\n" "$as_me: We could not detect the boost libraries (version 1.70 or higher). If you have a staged boost library (still not installed) please specify \$BOOST_ROOT in your environment and do not give a PATH to --with-boost option.  If you are sure you have boost installed, then check your version number looking in <boost/version.hpp>. See http://randspringer.de/boost for more documentation." >&6;}
+        else
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Your boost libraries seems to old (version $_version)." >&5
+printf "%s\n" "$as_me: Your boost libraries seems to old (version $_version)." >&6;}
+        fi
+        BOOST_LDFLAGS=""
+        BOOST_CPPFLAGS=""
+        # execute ACTION-IF-NOT-FOUND (if present):
+
+    as_fn_error $? "
+        Nisse requires boost CoRoutine2
+        The minimum version we support is via boost 1.70 please upgrade your boost libraries to this (or later).
+   " "$LINENO" 5
+
+    else
+
+printf "%s\n" "#define HAVE_BOOST /**/" >>confdefs.h
+
+        # execute ACTION-IF-FOUND (if present):
+        :
+    fi
+
+    CPPFLAGS="$CPPFLAGS_SAVED"
+    LDFLAGS="$LDFLAGS_SAVED"
+
+
+fi
+
+
+
+    BOOST_ROOT_DIR=${_AX_BOOST_BASE_boost_path}
+
+
+
+
+
+case `pwd` in
+  *\ * | *\	*)
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Libtool does not cope well with whitespace in \`pwd\`" >&5
+printf "%s\n" "$as_me: WARNING: Libtool does not cope well with whitespace in \`pwd\`" >&2;} ;;
+esac
+
+
+
+macro_version='2.5.4'
+macro_revision='2.5.4'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ltmain=$ac_aux_dir/ltmain.sh
 
 # Backslashify metacharacters that are still active within
 # double-quoted strings.
@@ -20219,7 +20726,7 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
-subconfigure="${subconfigure} --with-thorserialize-root=$(pwd)/build "
+subconfigure="${subconfigure} --with-thorserialize-root=$(pwd)/build --with-nisse-root=$(pwd)/build "
 
 
 
@@ -20955,6 +21462,13 @@ fi
     pushd third
     if [ $? == 0 ]; then
         for third in $(ls); do
+
+    export BUILDING_${third}=1
+    # AC_DEFINE([THOR_PACKAGE_NAME], [${third}], [Name of package for header files])
+    # AC_SUBST([THOR_PACKAGE_NAME], [${third}])
+
+        done
+        for third in $(ls); do
             echo
             echo
             echo "Building Third Party: ${third}"
@@ -21461,7 +21975,7 @@ fi
 
 
 
-    ac_config_headers="$ac_config_headers config.h src/Serialize/SerializeConfig.h:config.h.in"
+    ac_config_headers="$ac_config_headers config.h localConfigSummary.h:config.h.in"
 
     ac_config_files="$ac_config_files Makefile.extra Makefile.config:build/autotools/build/Makefile.config.in:Makefile.config.in"
 
@@ -22592,7 +23106,7 @@ do
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
-    "src/Serialize/SerializeConfig.h") CONFIG_HEADERS="$CONFIG_HEADERS src/Serialize/SerializeConfig.h:config.h.in" ;;
+    "localConfigSummary.h") CONFIG_HEADERS="$CONFIG_HEADERS localConfigSummary.h:config.h.in" ;;
     "Makefile.extra") CONFIG_FILES="$CONFIG_FILES Makefile.extra" ;;
     "Makefile.config") CONFIG_FILES="$CONFIG_FILES Makefile.config:build/autotools/build/Makefile.config.in:Makefile.config.in" ;;
 

@@ -15,6 +15,7 @@ vera/
 makefile_tmp
 Makefile.extra
 Makefile.config
+localConfigSummary.h
 
 aclocal.m4
 autom4te.cache/

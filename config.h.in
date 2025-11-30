@@ -9,11 +9,17 @@
 
     
 
+/* define if the Boost library is available */
+#undef HAVE_BOOST
+
 /* We have found package CRYPTO */
 #undef HAVE_CRYPTO
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
+
+/* We have found package Event */
+#undef HAVE_EVENT
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -69,12 +75,6 @@
 /* "Get mongosh version into #define. That way we can turn off some tests" */
 #undef MONGO_MAJOR_VERSION
 
-/* Check for older build tools and use simpler code with old tools */
-#undef NO_STD_SUPPORT_FROM_CHAR_DOUBLE
-
-/* Check for older build tools and use simpler code with old tools */
-#undef NO_STD_SUPPORT_TO_CHAR_DOUBLE
-
 /* Name of package */
 #undef PACKAGE
 
@@ -114,9 +114,6 @@
 /* Disable test that require the Mongo server to support the OP_QUERY command
    */
 #undef THOR_DISABLE_TEST_WITH_MONGO_QUERY
-
-/* Name of package for header files */
-#undef THOR_PACKAGE_NAME
 
 /* mongosh DB for testing */
 #undef THOR_TESTING_MONGO_DB

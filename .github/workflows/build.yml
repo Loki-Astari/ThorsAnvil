@@ -22,11 +22,13 @@ jobs:
             - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install vera++
             - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install magic_enum
             - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install snappy
+            - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install libevent
+            - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install boost
             - uses: actions/checkout@master
               with:
                 submodules: recursive
                 token: ${{ secrets.GITHUB_TOKEN }}
-            - run: ./configure --disable-colour --disable-test-with-mongo-query --disable-Mongo-Service
+            - run: ./configure --disable-colour --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
             - run: make
             - run: make install
     Build_on_Linux:
@@ -36,13 +38,16 @@ jobs:
             - run: which g++
             - run: sudo apt-get install vera++
             - run: sudo apt-get install libsnappy-dev
+            - run: sudo apt-get install libevent-dev
+            - run: sudo apt-get install libsnappy-dev
+            - run: sudo apt-get install libboost-all-dev
             - run: sudo apt-get update -y && sudo apt-get install lsb-release -y && sudo apt-get clean all
             - run: git clone https://github.com/Neargye/magic_enum.git /tmp/magic_enum
             - uses: actions/checkout@master
               with:
                 submodules: recursive
                 token: ${{ secrets.GITHUB_TOKEN }}
-            - run: ./configure --enable-dark-mode --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --disable-test-with-mongo-query --disable-Mongo-Service
+            - run: ./configure --enable-dark-mode --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
             - run: |
                 cat Makefile.config
                 cat third/ThorsStorage/Makefile.config
@@ -73,6 +78,10 @@ jobs:
                     mingw-w64-x86_64-libyaml
                     mingw-w64-x86_64-dlfcn
                     mingw-w64-x86_64-snappy
+                    mingw-w64-x86_64-libevent
+                    mingw-w64-x86_64-boost
+                    cmake
+                    ninja
             - name: GetInfo
               shell: msys2 {0}
               run: |
@@ -87,7 +96,7 @@ jobs:
               shell: msys2 {0}
               env:
                      MSYS:  winsymlinks:nativestrict
-              run:  ./configure --disable-colour --disable-vera --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --with-yaml-root=/mingw64/ --disable-test-with-locked-file --disable-test-with-mongo-query --disable-Mongo-Service
+              run:  ./configure --disable-colour --disable-vera --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --with-yaml-root=/mingw64/ --disable-test-with-locked-file --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
             - name: Make
               shell: msys2 {0}
               run:   make
@@ -104,6 +113,6 @@ jobs:
               with:
                 submodules: recursive
                 token: ${{ secrets.GITHUB_TOKEN }}
-            - run: ./configure --disable-colour --disable-test-with-mongo-query --disable-Mongo-Service
+            - run: ./configure --disable-colour --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
             - run: make header-only
 

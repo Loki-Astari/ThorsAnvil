@@ -25,3 +25,9 @@
 [submodule "third/ThorsMongoAPI"]
 	path = third/ThorsMongoAPI
 	url = ../../Loki-Astari/ThorsMongoAPI.git
+[submodule "third/Nisse"]
+	path = third/Nisse
+	url = ../../Loki-Astari/Nisse.git
+[submodule "third/Mug"]
+	path = third/Mug
+	url = ../../Loki-Astari/Mug.git
