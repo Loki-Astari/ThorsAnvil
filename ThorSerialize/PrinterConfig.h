@@ -22,7 +22,7 @@ struct PrinterConfig
      * Please use the set<Attribute>() methods.
      */
     PrinterConfig(OutputType characteristics,
-                  std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
+                  std::string const& polymorphicMarker = "",
                   bool catchExceptions = true)
         : characteristics(characteristics)
         , polymorphicMarker(polymorphicMarker)
@@ -55,7 +55,7 @@ struct PrinterConfig
     PrinterConfig& setExactPreFlightCalc()                                      {exactPreFlight = true;                    return *this;}
 
     OutputType      characteristics         = OutputType::Default;
-    std::string     polymorphicMarker       = Private::getDefaultPolymorphicMarker();
+    std::string     polymorphicMarker       = "";
     bool            catchExceptions         = true;
     bool            catchUnknownExceptions  = false;
     long            parserInfo              = 0;

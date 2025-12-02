@@ -11,6 +11,7 @@
  *      std::cin  >> jsonImporter(object); // converts Json to a C++ object from an input stream
  */
 
+#include "PrinterConfig.h"
 #include "SerializeConfig.h"
 #include "JsonParser.h"
 #include "JsonPrinter.h"
@@ -38,12 +39,16 @@ Exporter<Json, T> jsonExporter(T const& value, PrinterConfig config = PrinterCon
 {
     return Exporter<Json, T>(value, config);
 }
+
+/*
+ * Size of the output (if streamed with no extra space)
+ */
 template<typename T>
-[[deprecated("Upgrade to use jsonExporter(). It has a more consistent interface. The difference is exceptions are caught by default and you need to manually turn the    m off. Turning the exceptions on/off is now part of the config object rahter than a seprate parameter.")]]
-Exporter<Json, T> jsonExport(T const& value, PrinterConfig config = PrinterConfig{}, bool catchExceptions = false)
+std::size_t jsonStreanSize(T const& value)
 {
-    config.catchExceptions = catchExceptions;
-    return jsonExporter(value, config);
+    ThorsAnvil::Serialize::JsonPrinter      printer(std::cout, PrinterConfig{OutputType::Stream});
+    std::size_t size = ThorsAnvil::Serialize::Traits<T>::getPrintSize(printer, value, true);
+    return size;
 }
 // @function-api
 // @param value                     The object to be de-serialized.
@@ -55,13 +60,6 @@ template<typename T>
 Importer<Json, T> jsonImporter(T& value, ParserConfig config = ParserConfig{})
 {
     return Importer<Json, T>(value, config);
-}
-template<typename T>
-[[deprecated("Upgrade to use jsonImporter(). It has a more consistent interface. The difference is exceptions are caught by default and you need to manually turn the    m off. Turning the exceptions on/off is now part of the config object rahter than a seprate parameter.")]]
-Importer<Json, T> jsonImport(T& value, ParserConfig config = ParserConfig{}, bool catchExceptions = false)
-{
-    config.catchExceptions = catchExceptions;
-    return jsonImporter(value, config);
 }
 
 }

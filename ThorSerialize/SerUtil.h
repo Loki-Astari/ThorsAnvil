@@ -22,6 +22,7 @@
 #include <cstring>
 #include <functional>
 #include <optional>
+#include <variant>
 
 /*
  * Container Types:
@@ -61,6 +62,10 @@
  *
  * Traits<std::unique_ptr<T>>
  * Traits<std::reference_wrapper<T>>
+ *
+ * C++ 17 Containers
+ * Traits<std::optional>
+ * Traits<std::variant>
  */
 
 namespace ThorsAnvil::Serialize
@@ -126,9 +131,10 @@ class GetValueType<V, TraitType::Value>
         {
             if (parser.getToken() != ThorsAnvil::Serialize::ParserToken::Value)
             {
-                ThorsLogAndThrow("ThorsAnvil::Serializer::SerMap::GetValueType",
-                                 "GetValueType<Value>",
-                                 "Expecting a normal value after the key");
+                ThorsLogAndThrowDebug(std::runtime_error,
+                                      "ThorsAnvil::Serializer::SerMap::GetValueType",
+                                      "GetValueType<Value>",
+                                      "Expecting a normal value after the key");
             }
             parser.getValue(value);
         }
@@ -975,6 +981,31 @@ class Traits<std::optional<T>>
             return (object.has_value())
                 ? Traits<std::remove_cv_t<T>>::getPrintSize(printer, object.value(), p)
                 : 0;
+        }
+};
+
+struct SizeVisitor
+{
+    PrinterInterface& printer;
+    bool pval;
+    SizeVisitor(PrinterInterface& printer, bool pval)
+        : printer(printer)
+        , pval(pval)
+    {}
+    template<typename T>
+    std::size_t operator()(T const& value) const
+    {
+        return Traits<std::remove_cv_t<T>>::getPrintSize(printer, value, pval);
+    }
+};
+template<typename... Args>
+class Traits<std::variant<Args...>>
+{
+    public:
+        static constexpr TraitType type = TraitType::Variant;
+        static std::size_t getPrintSize(PrinterInterface& printer, std::variant<Args...> const& object, bool p)
+        {
+            return std::visit(SizeVisitor{printer, p}, object);
         }
 };
 

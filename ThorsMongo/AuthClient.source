@@ -56,7 +56,7 @@ OS::OS()
 #endif
     if (fp == nullptr)
     {
-        ThorsLogAndThrowFatal("ThorsAnvil::DB::Mongo::OS", "OS", "Can not get OS Information");
+        ThorsLogAndThrowFatal(std::runtime_error, "ThorsAnvil::DB::Mongo::OS", "OS", "Can not get OS Information");
     }
     char pBuffer[100];
     std::string nameBuilder;

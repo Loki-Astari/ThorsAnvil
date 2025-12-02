@@ -77,6 +77,7 @@ class PrinterInterface
         virtual void        popLevel()                              {}
         virtual std::size_t getSizeMap(std::size_t /*count*/)       {return 0;}
         virtual std::size_t getSizeArray(std::size_t /*count*/)     {return 0;}
+        virtual std::size_t getSizeMember(std::string_view const&)  {return 0;}
         virtual std::size_t getSizeNull()                           {return 0;}
         virtual std::size_t getSizeValue(short int)                 {return 0;}
         virtual std::size_t getSizeValue(int)                       {return 0;}

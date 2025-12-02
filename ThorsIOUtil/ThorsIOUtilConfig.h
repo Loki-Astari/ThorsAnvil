@@ -16,12 +16,6 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
-/* Magic Enum V1 being used */
-/* #undef HAVE_MagicEnumHeaderOnlyV1 */
-
-/* Magic Enum V2 being used */
-/* #undef HAVE_MagicEnumHeaderOnlyV2 */
-
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
 
@@ -43,6 +37,9 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
 
+/* We have found package Thors Serializer */
+#define HAVE_THORSSERIALIZER 1
+
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
@@ -53,7 +50,7 @@
 #define PACKAGE "thorsioutil"
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "Loki.Astari+ThorsAnvil@gmail.com"
+#define PACKAGE_BUGREPORT "Loki.Astari+ThorsIOUtil@gmail.com"
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "ThorsIOUtil"

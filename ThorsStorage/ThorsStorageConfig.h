@@ -20,10 +20,10 @@
 #define HAVE_MagicEnumHeaderOnly 1
 
 /* Magic Enum V1 being used */
-#define HAVE_MagicEnumHeaderOnlyV1 1
+/* #undef HAVE_MagicEnumHeaderOnlyV1 */
 
 /* Magic Enum V2 being used */
-/* #undef HAVE_MagicEnumHeaderOnlyV2 */
+#define HAVE_MagicEnumHeaderOnlyV2 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -62,7 +62,7 @@
 #define PACKAGE "thorsstorage"
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "Loki.Astari+ThorsAnvil@gmail.com"
+#define PACKAGE_BUGREPORT "Loki.Astari+ThorsStorage@gmail.com"
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "ThorsStorage"

@@ -60,23 +60,23 @@ class DigestStoreBase
     std::array<Byte, size>      data;
     public:
         using iterator = typename std::array<Byte, size>::iterator;
+        using const_iterator = typename std::array<Byte, size>::const_iterator;
 
         operator DigestPtr()                        {return &data[0];}
         std::string_view  view()                    {return std::string_view(reinterpret_cast<char const*>(&data[0]), std::size(data));}
         Byte&             operator[](std::size_t i) {return data[i % size];}
         iterator          begin()                   {return std::begin(data);}
+        const_iterator    begin() const             {return std::begin(data);}
         iterator          end()                     {return std::end(data);}
+        const_iterator    end() const               {return std::end(data);}
 };
 
 template<typename Hash>
 using Digest = typename Hash::DigestStore;
 
 template<typename Hash>
-std::string hexdigest(std::string const& message)
+std::string hexdigest(Digest<Hash> const& digest)
 {
-    Digest<Hash>    digest;
-    Hash::hash(message, digest);
-
     std::string buffer;
     buffer.reserve(Hash::digestSize * 2);
     for (auto val: digest)
@@ -90,6 +90,15 @@ std::string hexdigest(std::string const& message)
     }
 
     return buffer;
+}
+
+template<typename Hash>
+std::string hexdigest(std::string const& message)
+{
+    Digest<Hash>    digest;
+    Hash::hash(message, digest);
+
+    return hexdigest<Hash>(digest);
 }
 
 // These versions of the hashing function are good for hashing short

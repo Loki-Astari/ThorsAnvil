@@ -62,9 +62,10 @@ struct BsonBaseTypeGetter<T, TraitType::Pointer>
     {
         if (!pointer)
         {
-            ThorsLogAndThrow("ThorsAnvil::Serialize::BsonBaseTypeGetter<T, Pointer>",
-                             "validate",
-                             "Bson does not support serialization of null at the top level");
+            ThorsLogAndThrowDebug(std::runtime_error,
+                                  "ThorsAnvil::Serialize::BsonBaseTypeGetter<T, Pointer>",
+                                  "validate",
+                                  "Bson does not support serialization of null at the top level");
         }
     }
 };

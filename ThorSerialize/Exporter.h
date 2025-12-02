@@ -32,7 +32,7 @@ class Exporter
 
                 serializer.print(value);
             }
-            catch (ThorsAnvil::Logging::CriticalException const& e)
+            catch (DepricatedIssue const& e)
             {
                 ThorsCatchMessage("ThorsAnvil::Serialize::Exporter", "operator<<", e.what());
                 ThorsRethrowMessage("ThorsAnvil::Serialize::Exporter", "operator<<", e.what());

@@ -37,7 +37,8 @@ void SocketStandard::createSocket()
     if (fd == thorInvalidFD())
     {
         int saveErrno = thorGetSocketError();
-        ThorsLogAndThrow(
+        ThorsLogAndThrowDebug(
+            std::runtime_error,
             "ThorsAnvil::ThorsSocket::ConnectionType::SocketStandard",
             "createSocket",
             " :Failed on ::socket.",
@@ -57,7 +58,8 @@ void SocketStandard::setUpBlocking(Blocking blocking)
             int saveErrno = thorGetSocketError();
             ::thorCloseSocket(fd);
 
-            ThorsLogAndThrow(
+            ThorsLogAndThrowDebug(
+                std::runtime_error,
                 "ThorsAnvil::ThorsSocket::ConnectionType::SocketStandard",
                 "setUpBlocking",
                 " :Failed on ::thorSetSocketNonBlocking",
@@ -71,20 +73,42 @@ void SocketStandard::setUpBlocking(Blocking blocking)
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 void SocketStandard::setUpServerSocket(ServerInfo const& socketInfo)
 {
+    int status;
+
+    // If we are restarting an application quickly the socket may
+    // by in a TIME_WAIT state. This will generate an error in bind (below)
+    // Thsi says we don't care about the timed wait state and to continue.
+    int yes = 1;
+    status = ::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+    if (status == -1) {
+        int saveErrno = thorGetSocketError();
+        ::thorCloseSocket(fd);
+
+        ThorsLogAndThrowDebug(
+                std::runtime_error,
+                "ThorsAnvil::ThorsSocket::ConnectionType::SocketStandard",
+                "setUpServerSocket",
+                " :Failed on ::setsockopt to port: ", socketInfo.port,
+                " errno = ", saveErrno, " ", getErrNoStrSocket(saveErrno),
+                " msg >", getErrMsgSocket(saveErrno), "<"
+                );
+    }
+
     SocketAddrIn        serverAddr{};
     serverAddr.sin_family       = AF_INET;
     serverAddr.sin_port         = htons(socketInfo.port);
     serverAddr.sin_addr.s_addr  = INADDR_ANY;
-    int status = ::bind(fd, reinterpret_cast<SocketAddr*>(&serverAddr), sizeof(serverAddr));
+    status = ::bind(fd, reinterpret_cast<SocketAddr*>(&serverAddr), sizeof(serverAddr));
     if (status == -1)
     {
         int saveErrno = thorGetSocketError();
         ::thorCloseSocket(fd);
 
-        ThorsLogAndThrow(
+        ThorsLogAndThrowDebug(
+                std::runtime_error,
                 "ThorsAnvil::ThorsSocket::ConnectionType::SocketStandard",
                 "setUpServerSocket",
-                " :Failed on ::bind",
+                " :Failed on ::bind to port: ", socketInfo.port,
                 " errno = ", saveErrno, " ", getErrNoStrSocket(saveErrno),
                 " msg >", getErrMsgSocket(saveErrno), "<"
                 );
@@ -96,10 +120,11 @@ void SocketStandard::setUpServerSocket(ServerInfo const& socketInfo)
         int saveErrno = thorGetSocketError();
         ::thorCloseSocket(fd);
 
-        ThorsLogAndThrow(
+        ThorsLogAndThrowDebug(
+                std::runtime_error,
                 "ThorsAnvil::ThorsSocket::ConnectionType::SocketStandard",
                 "setUpServerSocket",
-                " :Failed on ::listen",
+                " :Failed on ::listen to port ", socketInfo.port,
                 " errno = ", saveErrno, " ", getErrNoStrSocket(saveErrno),
                 " msg >", getErrMsgSocket(saveErrno), "<"
                 );
@@ -122,7 +147,8 @@ void SocketStandard::setUpClientSocket(SocketInfo const& socketInfo)
         int saveErrno = thorGetSocketError();
         ::thorCloseSocket(fd);
 
-        ThorsLogAndThrow(
+        ThorsLogAndThrowDebug(
+            std::runtime_error,
             "ThorsAnvil::ThorsSocket::ConnectionType::SocketStandard",
             "setUpClientSocket",
             " :Failed on ::gethostbyname.",
@@ -146,7 +172,8 @@ void SocketStandard::setUpClientSocket(SocketInfo const& socketInfo)
         int saveErrno = thorGetSocketError();
         ::thorCloseSocket(fd);
 
-        ThorsLogAndThrow(
+        ThorsLogAndThrowDebug(
+            std::runtime_error,
             "ThorsAnvil::ThorsSocket::ConnectionType::SocketStandard",
             "setUpClientSocket",
             " :Failed on ::connect.",
@@ -240,7 +267,8 @@ void SocketClient::tryFlushBuffer()
     if (result != 0)
     {
         int saveErrno = thorGetSocketError();
-        ThorsLogAndThrow(
+        ThorsLogAndThrowDebug(
+            std::runtime_error,
             "ThorsAnvil::ThorsSocket::ConnectionType::SocketClient",
             "tryFlushBuffer",
             " :Win Failed on ::shutdown.",
@@ -280,7 +308,8 @@ IOData SocketClient::readFromStream(char* buffer, std::size_t size)
             case WSAEOPNOTSUPP:     [[fallthrough]];
             case WSAEINVAL:
             {
-                ThorsLogAndThrowCritical(
+                ThorsLogAndThrowError(
+                    std::runtime_error,
                     "ThorsAnvil::ThorsSocket::ConnectionType::SocketClient",
                     "readFromStream",
                     " :Win Failed on ::recv with SocketCritical",
@@ -291,7 +320,8 @@ IOData SocketClient::readFromStream(char* buffer, std::size_t size)
             case WSAEMSGSIZE:       [[fallthrough]];
             default:
             {
-                ThorsLogAndThrowLogical(
+                ThorsLogAndThrowWarning(
+                    std::runtime_error,
                     "ThorsAnvil::ThorsSocket::ConnectionType::SocketClient",
                     "readFromStream",
                     " :Win Failed on ::recv with SocketUnknown",
@@ -333,7 +363,8 @@ IOData SocketClient::writeToStream(char const* buffer, std::size_t size)
             case WSAEHOSTUNREACH:   [[fallthrough]];
             case WSAEINVAL:
             {
-                ThorsLogAndThrowCritical(
+                ThorsLogAndThrowError(
+                    std::runtime_error,
                     "ThorsAnvil::ThorsSocket::ConnectionType::SocketClient",
                     "writeToStream",
                     " :Win Failed on ::send with SocketCritical",
@@ -345,7 +376,8 @@ IOData SocketClient::writeToStream(char const* buffer, std::size_t size)
             case WSAEMSGSIZE:       [[fallthrough]];
             default:
             {
-                ThorsLogAndThrowLogical(
+                ThorsLogAndThrowWarning(
+                    std::runtime_error,
                     "ThorsAnvil::ThorsSocket::ConnectionType::SocketClient",
                     "writeToStream",
                     " :Win Failed on ::send with SocketUnknown",
@@ -417,7 +449,7 @@ void SocketServer::waitForFileDescriptor(int fd)
     while ((result = THOR_POLL(fds, 1, -1)) <= 0)
     {
         if (result == THOR_POLL_ERROR) {
-            ThorsLogAndThrow("ThorsAnvil::ThorsSocket::SocketServer", "waitForInput", ": poll return an error");
+            ThorsLogAndThrowDebug(std::runtime_error,"ThorsAnvil::ThorsSocket::SocketServer", "waitForInput", ": poll return an error");
         }
     }
 }
@@ -461,7 +493,8 @@ int SocketServer::acceptSocket(YieldFunc& yield)
             continue;
         }
 
-        ThorsLogAndThrow(
+        ThorsLogAndThrowDebug(
+                std::runtime_error,
                 "ThorsAnvil::ThorsSocket::ConnectionType::SocketServer",
                 "accept",
                 " :Failed on ::accept.",

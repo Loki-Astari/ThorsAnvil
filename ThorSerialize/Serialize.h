@@ -203,16 +203,22 @@ struct TraitsInfo<T, M, TraitType::Enum>
     using SerializeMember       = SerializeMemberValue<T, M, TraitType::Enum>;
 };
 template<typename T, typename M>
+struct TraitsInfo<T, M, TraitType::Pointer>
+{
+    using DeSerializeMember     = DeSerializeMemberValue<T, M, TraitType::Pointer>;
+    using SerializeMember       = SerializeMemberValue<T, M, TraitType::Pointer>;
+};
+template<typename T, typename M>
 struct TraitsInfo<T, M, TraitType::Reference>
 {
     using DeSerializeMember     = DeSerializeMemberValue<T, M, TraitType::Reference>;
     using SerializeMember       = SerializeMemberValue<T, M, TraitType::Reference>;
 };
 template<typename T, typename M>
-struct TraitsInfo<T, M, TraitType::Pointer>
+struct TraitsInfo<T, M, TraitType::Variant>
 {
-    using DeSerializeMember     = DeSerializeMemberValue<T, M, TraitType::Pointer>;
-    using SerializeMember       = SerializeMemberValue<T, M, TraitType::Pointer>;
+    using DeSerializeMember     = DeSerializeMemberValue<T, M, TraitType::Variant>;
+    using SerializeMember       = SerializeMemberValue<T, M, TraitType::Variant>;
 };
 template<typename T, typename M>
 struct TraitsInfo<T, M, TraitType::Custom_Depricated>
@@ -242,9 +248,10 @@ inline void ParserInterface::pushBackToken(ParserToken token)
 #if defined(VALIDATE_EXTRA_PUSH_BACK_TOKEN)
     if (pushBack != ParserToken::Error)
     {
-        ThorsLogAndThrow("ThorsAnvil::Serialize::ParserInterface",
-                         "pushBackToken",
-                         "Push only allows for single push back. More than one token has been pushed back between reads.");
+        ThorsLogAndThrowDebug(std::runtime_error,
+                              "ThorsAnvil::Serialize::ParserInterface",
+                              "pushBackToken",
+                              "Push only allows for single push back. More than one token has been pushed back between reads.");
     }
 #endif
     pushBack    = token;
@@ -265,9 +272,10 @@ inline DeSerializer::DeSerializer(ParserInterface& parser, bool root)
         //  We will get that in the next version
         if (parser.getToken() != ParserToken::DocStart)
         {
-            ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializer",
-                             "DeSerializer",
-                             "Invalid Doc Start");
+            ThorsLogAndThrowDebug(std::runtime_error,
+                                  "ThorsAnvil::Serialize::DeSerializer",
+                                  "DeSerializer",
+                                  "Invalid Doc Start");
         }
     }
 }
@@ -277,9 +285,10 @@ inline DeSerializer::~DeSerializer() noexcept(false)
     {
         if (parser.getToken() != ParserToken::DocEnd)
         {
-            ThorsLogAndThrow("ThorsAnvil::Serialize::DeSerializer",
-                             "~DeSerializer",
-                             "Expected Doc End");
+            ThorsLogAndThrowDebug(std::runtime_error,
+                                  "ThorsAnvil::Serialize::DeSerializer",
+                                  "~DeSerializer",
+                                  "Expected Doc End");
         }
     }
 }

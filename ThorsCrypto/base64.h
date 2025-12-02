@@ -62,9 +62,10 @@ class Base64DecodeIterator
                 unsigned char b64 = convert[tmp & 0x7F];
                 if (b64 == 0x8F || tmp > 0x7F)
                 {
-                    ThorsLogAndThrow("ThorsAnvil::Crypto::Base64DecodeIterator",
-                                     "operator*()",
-                                     "invalid input");
+                    ThorsLogAndThrowDebug(std::runtime_error,
+                                          "ThorsAnvil::Crypto::Base64DecodeIterator",
+                                          "operator*()",
+                                          "invalid input");
                 }
                 if (b64 == 0x40)    // We found a padding byte '='
                 {

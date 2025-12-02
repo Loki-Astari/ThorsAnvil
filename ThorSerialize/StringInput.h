@@ -31,7 +31,7 @@ struct StringInput
         bool read(char* dst, std::size_t size)
         {
             std::size_t copySize = std::min(size, data.size() - position);
-            std::copy(&data[position], &data[position + copySize], dst);
+            std::copy(data.begin() + position, data.begin() + (position + copySize), dst);
 
             position += copySize;
             lastRead = copySize;
@@ -48,7 +48,7 @@ struct StringInput
 
             std::size_t start = dst.size();
             dst.resize(start + size);
-            std::copy(&data[position], &data[position + size], &dst[start]);
+            std::copy(data.begin() + position, data.begin() + (position + size), &dst[start]);
 
             position += (size + 1);
             return good = position <= data.size();
@@ -63,11 +63,11 @@ struct StringInput
         }
         int get()
         {
-            return good ? data[position++] : EOF;
+            return good && position < data.size() ? data[position++] : EOF;
         }
         int peek() const
         {
-            return data[position];
+            return position < data.size() ? data[position] : EOF;
         }
         void ignore(std::size_t size)
         {
@@ -100,8 +100,8 @@ struct StringInput
             using fast_float::from_chars;
 #endif
 
-            auto start = &data[position];
-            auto result = from_chars(start, &data[0] + data.size(), value);
+            auto start = data.begin() + position;
+            auto result = from_chars(start, data.begin() + data.size(), value);
             if (result.ec != std::errc::invalid_argument)
             {
                 lastRead = (result.ptr - start);
@@ -111,7 +111,7 @@ struct StringInput
             }
             return false;
         }
-#if defined(NO_STD_SUPPORT_FROM_CHAR_DOUBLE) && (NO_STD_SUPPORT_FROM_CHAR_DOUBLE >= 1)
+#if (defined(NO_STD_SUPPORT_FROM_CHAR_DOUBLE) && (NO_STD_SUPPORT_FROM_CHAR_DOUBLE >= 1)) || (defined(NO_STD_SUPPORT_FROM_CHAR_LOG_DOUBLE) && (NO_STD_SUPPORT_FROM_CHAR_LONG_DOUBLE >= 1))
         bool readValue(long double& value)
         {
             double tmp;

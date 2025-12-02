@@ -71,7 +71,7 @@ ConnectionBufferMongo::int_type ConnectionBufferMongo::underflow()
 
             if (newDataCount != kSizeOpMsgHeaderSize)
             {
-                ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Failed to get next message header: Got: ", newDataCount);
+                ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Failed to get next message header: Got: ", newDataCount);
                 return traits::eof();
             }
 
@@ -108,7 +108,7 @@ ConnectionBufferMongo::int_type ConnectionBufferMongo::underflow()
                         bool suc = snappy::RawUncompress(&compressedData[0], compressMessageSize, eback() + kSizeOpMsgHeaderSize);
                         if (!suc)
                         {
-                            ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Failed to uncompress data with snappy");
+                            ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Failed to uncompress data with snappy");
                             return traits::eof();
                         }
 
@@ -119,7 +119,7 @@ ConnectionBufferMongo::int_type ConnectionBufferMongo::underflow()
                     // TODO Support ZLib and ZStd
                     default:
                     {
-                        ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Failed to uncompress. Only support snappy compression. Compression: ", static_cast<unsigned int>(message->compression));
+                        ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Failed to uncompress. Only support snappy compression. Compression: ", static_cast<unsigned int>(message->compression));
                         return traits::eof();
                     }
                 }
@@ -133,7 +133,7 @@ ConnectionBufferMongo::int_type ConnectionBufferMongo::underflow()
             }
             else
             {
-                ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Unknown message opCode: ",  static_cast<unsigned int>(headerInfo->opCode));
+                ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Unknown message opCode: ",  static_cast<unsigned int>(headerInfo->opCode));
                 return traits::eof();
             }
             setg(eback(), gptr(), egptr() + newDataCount);
@@ -147,7 +147,7 @@ ConnectionBufferMongo::int_type ConnectionBufferMongo::underflow()
         std::size_t maxAvailableData = inMessageSize - messageReadSize();
         if (underflowNeeds > maxAvailableData)
         {
-            ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Should never need to read more bytes than in the message! Message Size: ", inMessageSize, "already read: ", (gptr() - eback()), " requested bytes: ", underflowNeeds);
+            ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Should never need to read more bytes than in the message! Message Size: ", inMessageSize, "already read: ", (gptr() - eback()), " requested bytes: ", underflowNeeds);
             return traits::eof();
         }
 
@@ -173,7 +173,7 @@ ConnectionBufferMongo::int_type ConnectionBufferMongo::underflow()
 
             if (newDataCount < underflowNeeds)
             {
-                ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Should never need to read more bytes than in the message! Message Size: ", inMessageSize, " requested bytes: ", underflowNeeds);
+                ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Should never need to read more bytes than in the message! Message Size: ", inMessageSize, " requested bytes: ", underflowNeeds);
                 return traits::eof();
             }
         }
@@ -198,7 +198,7 @@ ConnectionBufferMongo::int_type ConnectionBufferMongo::underflow()
 
             if (check != 0)
             {
-                ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Checksum does not match expected checksum");
+                ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Checksum does not match expected checksum");
             }
         }
     }
@@ -242,7 +242,7 @@ std::streamsize ConnectionBufferMongo::xsgetn(char_type* dest, std::streamsize c
     std::uint32_t    messageLeft = inMessageSize - messageReadSize();
     if (messageLeft != 0 && count > messageLeft)
     {
-        ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "xsgetn", "Can not read more data than left in the message: requested: ", count, " data left: ", messageLeft);
+        ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "xsgetn", "Can not read more data than left in the message: requested: ", count, " data left: ", messageLeft);
         return 0;
     }
 
@@ -254,7 +254,7 @@ std::streamsize ConnectionBufferMongo::xsgetn(char_type* dest, std::streamsize c
         UnderflowCountSetter    set(underflowNeeds, (count - currentBufferSize));
         if (underflow() == traits::eof())
         {
-            ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "xsgetn", "Underflow failed to retrieve enough data");
+            ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "xsgetn", "Underflow failed to retrieve enough data");
             return 0;
         }
     }
@@ -279,7 +279,7 @@ ConnectionBufferMongo::int_type ConnectionBufferMongo::overflow(int_type ch)
     // out to the stream and reset outMessageSize to zero.
     if (outMessageSize != 0)
     {
-        ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "overflow", "Unexpected call to overflow. The outMessageSize is set and we reservered space. outMessageSize: ", outMessageSize, " Buffer: [pbase(): " , pbase(), " pptr(): " , pptr(), " epptr: ", epptr(), "]");
+        ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "overflow", "Unexpected call to overflow. The outMessageSize is set and we reservered space. outMessageSize: ", outMessageSize, " Buffer: [pbase(): " , pbase(), " pptr(): " , pptr(), " epptr: ", epptr(), "]");
         return traits::eof();
     }
 
@@ -291,7 +291,7 @@ ConnectionBufferMongo::int_type ConnectionBufferMongo::overflow(int_type ch)
         std::copy(pbase(), pbase() + kSizeUInt32, reinterpret_cast<char*>(&outMessageSize));
         if (outMessageSize < kSizeSmallestPossibleMessage)
         {
-            ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "overflow", "Minimum message size is 26 bytes.");
+            ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "overflow", "Minimum message size is 26 bytes.");
             return traits::eof();
         }
         // OK. So we have the message size.
@@ -325,7 +325,7 @@ std::streamsize ConnectionBufferMongo::xsputn(char_type const* source, std::stre
     std::streamsize spaceInBuffer = epptr() - pptr();
     if (count > spaceInBuffer)
     {
-        ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "xsputn", "Failed to put data in buffer as it was not large enough. ExtraSpaceneeded: ", (count - spaceInBuffer));
+        ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "xsputn", "Failed to put data in buffer as it was not large enough. ExtraSpaceneeded: ", (count - spaceInBuffer));
         return 0;
     }
 
@@ -343,7 +343,7 @@ int ConnectionBufferMongo::sync()
 {
     if (pptr() != epptr())
     {
-        ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "sync", "unexpected sync! The buffer is not yet full");
+        ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "sync", "unexpected sync! The buffer is not yet full");
         return -1;
     }
     OpMsgBlock* messageBlock = reinterpret_cast<OpMsgBlock*>(pbase());
@@ -391,7 +391,7 @@ int ConnectionBufferMongo::sync()
         // TODO ZLib ZStd
         default:
         {
-            ThorsLogCritical("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "sync", "Unsupoorted compression mechanism suggested");
+            ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "sync", "Unsupoorted compression mechanism suggested");
         }
     }
     outMessageSize = 0;

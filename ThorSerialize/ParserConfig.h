@@ -2,14 +2,20 @@
 #define THORSANVIL_SERIALIZER_PARSER_CONFIG_H
 
 #include "SerializeConfig.h"
+#include "StringInput.h"
 #include "ThorsSerializerUtilTypes.h"
 #include "PolymorphicMarker.h"
 #include <string>
+#include <variant>
+#include <functional>
 #include <utility>
+#include <istream>
 
 namespace ThorsAnvil::Serialize
 {
 
+using DataInputStream = std::variant<std::istream*, StringInput>;
+using IdFunc = std::function<std::string(DataInputStream&)>;
 struct ParserConfig
 {
     /*
@@ -18,7 +24,7 @@ struct ParserConfig
      */
     ParserConfig(IgnoreCallBack&& cb,
                  ParseType parseStrictness = ParseType::Weak,
-                 std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
+                 std::string const& polymorphicMarker = "",
                  bool catchExceptions = true)
         : parseStrictness(parseStrictness)
         , polymorphicMarker(polymorphicMarker)
@@ -26,7 +32,7 @@ struct ParserConfig
         , ignoreCallBack(std::move(cb))
     {}
     ParserConfig(ParseType parseStrictness,
-                 std::string const& polymorphicMarker = Private::getDefaultPolymorphicMarker(),
+                 std::string const& polymorphicMarker = "",
                  bool catchExceptions = true)
         : parseStrictness(parseStrictness)
         , polymorphicMarker(polymorphicMarker)
@@ -53,8 +59,9 @@ struct ParserConfig
     ParserConfig& setUseOldSharedPtr()                                          {useOldSharedPtr = true;                    return *this;}
     ParserConfig& setValidateNoTrailingData()                                   {validateNoTrailingData = true;             return *this;}
     ParserConfig& setNoBackslashConversion()                                    {convertBackSlash = false;                  return *this;}
+    ParserConfig& setIdentifyDynamicClass(IdFunc func)                          {identifyDynamcClass = std::move(func);     return *this;}
     ParseType       parseStrictness         = ParseType::Weak;
-    std::string     polymorphicMarker       = Private::getDefaultPolymorphicMarker();
+    std::string     polymorphicMarker       = "";
     bool            catchExceptions         = true;
     bool            catchUnknownExceptions  = false;
     long            parserInfo              = 0;
@@ -62,6 +69,7 @@ struct ParserConfig
     bool            useOldSharedPtr         = false;
     bool            validateNoTrailingData  = false;
     bool            convertBackSlash        = true;
+    IdFunc          identifyDynamcClass     = [](DataInputStream&){return "";};
 };
 
 }

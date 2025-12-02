@@ -321,6 +321,10 @@ class ParserInterface
             std::shared_ptr<T>  sharedPtr = std::any_cast<std::shared_ptr<T>>(savedSharedPtr[index]);
             object = sharedPtr;
         }
+        std::string identifyDynamicType()
+        {
+            return config.identifyDynamcClass(input);
+        }
 
     private:
         using DataInputStream = std::variant<std::istream*, StringInput>;

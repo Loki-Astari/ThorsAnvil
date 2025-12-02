@@ -10,9 +10,6 @@
 
     
 
-/* We have found package CRYPTO */
-/* #undef HAVE_CRYPTO */
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
 
@@ -23,13 +20,10 @@
 #define HAVE_MagicEnumHeaderOnly 1
 
 /* Magic Enum V1 being used */
-#define HAVE_MagicEnumHeaderOnlyV1 1
+/* #undef HAVE_MagicEnumHeaderOnlyV1 */
 
 /* Magic Enum V2 being used */
-/* #undef HAVE_MagicEnumHeaderOnlyV2 */
-
-/* We have found package SNAPPY */
-/* #undef HAVE_SNAPPY */
+#define HAVE_MagicEnumHeaderOnlyV2 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -52,20 +46,17 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
 
+/* We have found package Thors Serializer */
+#define HAVE_THORSSERIALIZER 1
+
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
 /* We have found package YAML */
 /* #undef HAVE_YAML */
 
-/* We have found package ZLIB */
-/* #undef HAVE_ZLIB */
-
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #define LT_OBJDIR ".libs/"
-
-/* "Get mongosh version into #define. That way we can turn off some tests" */
-#define MONGO_MAJOR_VERSION 7
 
 /* Check for older build tools and use simpler code with old tools */
 #define NO_STD_SUPPORT_FROM_CHAR_DOUBLE 1
@@ -77,7 +68,7 @@
 #define PACKAGE "thorsserialize"
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "Loki.Astari+ThorsAnvil@gmail.com"
+#define PACKAGE_BUGREPORT "Loki.Astari+ThorsSerializer@gmail.com"
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "ThorsSerialize"
@@ -106,27 +97,8 @@
 /* Set up to build on Conan */
 #define THOR_CONAN 0
 
-/* Disable test that require files to be locked */
-#define THOR_DISABLE_TEST_WITH_LOCKED_FILES 0
-
-/* Disable test that require the Mongo server to support the OP_QUERY command
-   */
-#define THOR_DISABLE_TEST_WITH_MONGO_QUERY 0
-
 /* Name of package for header files */
 #define THOR_PACKAGE_NAME ThorsSerializer
-
-/* mongosh DB for testing */
-#define THOR_TESTING_MONGO_DB "test"
-
-/* mongosh DB host for testing */
-#define THOR_TESTING_MONGO_HOST "127.0.0.1"
-
-/* mongosh DB password for testing */
-#define THOR_TESTING_MONGO_PASS "testPassword"
-
-/* mongosh DB user for testing */
-#define THOR_TESTING_MONGO_USER "test"
 
 /* Version number of package */
 #define VERSION "0.1"

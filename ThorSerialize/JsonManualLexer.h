@@ -49,9 +49,10 @@ inline T JsonManualLexer::scan()
     bool readOK = parser.readValue(value);
     if (!readOK)
     {
-        ThorsLogAndThrow("ThorsAnvil::Serialize::JsonManualLexer",
-                         "scan",
-                         "Failed to Scan a number correctly");
+        ThorsLogAndThrowDebug(std::runtime_error,
+                              "ThorsAnvil::Serialize::JsonManualLexer",
+                              "scan",
+                              "Failed to Scan a number correctly");
     }
     return value;
 }

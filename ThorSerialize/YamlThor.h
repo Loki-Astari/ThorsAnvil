@@ -39,13 +39,6 @@ Exporter<Yaml, T> yamlExporter(T const& value, PrinterConfig config = PrinterCon
 {
     return Exporter<Yaml, T>(value, config);
 }
-template<typename T>
-[[deprecated("Upgrade to use yamlExporter(). It has a more consistent interface. The difference is exceptions are caught by default and you need to manually turn the    m off. Turning the exceptions on/off is now part of the config object rahter than a seprate parameter.")]]
-Exporter<Yaml, T> yamlExport(T const& value, PrinterConfig config = PrinterConfig{}, bool catchExceptions = false)
-{
-    config.catchExceptions = catchExceptions;
-    return yamlExporter(value, config);
-}
 // @function-api
 // @param value                     The object to be de-serialized.
 // @param config.parseStrictness    'Weak':    ignore missing extra fields. 'Strict': Any missing or extra fields throws exception.
@@ -56,13 +49,6 @@ template<typename T>
 Importer<Yaml, T> yamlImporter(T& value, ParserConfig config = ParserConfig{})
 {
     return Importer<Yaml, T>(value, config);
-}
-template<typename T>
-[[deprecated("Upgrade to use yamlImporter(). It has a more consistent interface. The difference is exceptions are caught by default and you need to manually turn them off. Turning the exceptions on/off is now part of the config object rahter than a seprate parameter.")]]
-Importer<Yaml, T> yamlImport(T& value, ParserConfig config = ParserConfig{}, bool catchExceptions = false)
-{
-    config.catchExceptions = catchExceptions;
-    return yamlImporter(value, config);
 }
 }
 

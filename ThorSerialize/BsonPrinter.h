@@ -100,6 +100,7 @@ class BsonPrinter: public PrinterInterface
         virtual void        popLevel()                              override;
         virtual std::size_t getSizeMap(std::size_t count)           override;
         virtual std::size_t getSizeArray(std::size_t count)         override;
+        virtual std::size_t getSizeMember(std::string_view const& m)override    {return std::size(m);}
         virtual std::size_t getSizeNull()                           override    {return getSize(0);}
         virtual std::size_t getSizeValue(short int)                 override    {return getSize(MaxTemplate<sizeof(short int), 4>::value);}
         virtual std::size_t getSizeValue(int)                       override    {return getSize(sizeof(int));}

@@ -12,6 +12,7 @@
 #include "StringInput.h"
 #include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"
+#include <stdexcept>
 #include <type_traits>
 #include <string>
 #include <map>
@@ -31,7 +32,7 @@ namespace ThorsAnvil::Serialize
 /*
  * Defines the generic type that all serialization types can expand on
  */
-enum class TraitType {Invalid, Parent, Value, Map, Array, Enum, Pointer, Reference, Custom_Depricated, Custom_Serialize};
+enum class TraitType {Invalid, Parent, Value, Map, Array, Enum, Pointer, Reference, Variant, Custom_Depricated, Custom_Serialize};
 
 template<typename T, typename SFINE = void>
 class Traits;
@@ -247,7 +248,16 @@ auto tryGetPolyMorphicPrintSize(PrinterInterface& printer, T const& object, bool
     // `printPolyMorphicObject()`. Thus you get a call to the current
     // object and thus we simply use `T` and we can simply print the
     // normal members.
-    return getNormalPrintSize(printer, object, 0, 0);
+    std::size_t count = 0;
+    std::size_t memberSize = 0;
+
+    if constexpr (Private::CheckForPoly<T>::value)
+    {
+        ++count;
+        memberSize = printer.getSizeMember(ThorsAnvil::Serialize::Private::getPolymorphicMarker<T>(printer.config.polymorphicMarker))
+                   + printer.getSizeValue(std::string(T::polyMorphicSerializerName()));
+    }
+    return getNormalPrintSize(printer, object, count, memberSize);
 }
 
 template<typename T>
@@ -264,12 +274,19 @@ auto tryGetSizeFromSerializeType(PrinterInterface& printer, T const& value, int)
     return printer.getSizeRaw(size);
 }
 
+class DepricatedIssue: public std::runtime_error
+{
+    public:
+        using std::runtime_error::runtime_error;
+};
+
 template<typename T>
 auto tryGetSizeFromSerializeType(PrinterInterface&, T const&, long) -> std::size_t
 {
-    ThorsLogAndThrowCritical("ThorsAnvil::Serialize",
-                             "tryGetSizeFromSerializeType",
-                             "BSON backward compatibility. See comments in function.");
+    ThorsLogAndThrowError(DepricatedIssue,
+                          "ThorsAnvil::Serialize",
+                          "tryGetSizeFromSerializeType",
+                          "BSON backward compatibility. See comments in function.");
     // This function is needed for backward compatibility to make things compile without
     // requiring user code to be changed.
     //

@@ -23,10 +23,10 @@
 #define HAVE_MagicEnumHeaderOnly 1
 
 /* Magic Enum V1 being used */
-#define HAVE_MagicEnumHeaderOnlyV1 1
+/* #undef HAVE_MagicEnumHeaderOnlyV1 */
 
 /* Magic Enum V2 being used */
-/* #undef HAVE_MagicEnumHeaderOnlyV2 */
+#define HAVE_MagicEnumHeaderOnlyV2 1
 
 /* We have found package SNAPPY */
 /* #undef HAVE_SNAPPY */
@@ -65,7 +65,7 @@
 #define LT_OBJDIR ".libs/"
 
 /* "Get mongosh version into #define. That way we can turn off some tests" */
-#define MONGO_MAJOR_VERSION 7
+#define MONGO_MAJOR_VERSION 8
 
 /* Check for older build tools and use simpler code with old tools */
 #define NO_STD_SUPPORT_FROM_CHAR_DOUBLE 1

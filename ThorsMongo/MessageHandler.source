@@ -67,7 +67,7 @@ bool MessageHandler::sendMessage(MongoActionWriteInterface const& mongoAction, M
     }
     else
     {
-        ThorsLogCritical("ThorsAnvil::DB::Mongo::MessageHandler", "sendMessage", "Serialization of message failed.");
+        ThorsLogError("ThorsAnvil::DB::Mongo::MessageHandler", "sendMessage", "Serialization of message failed.");
     }
     stream.flush();
     return static_cast<bool>(stream);
@@ -98,7 +98,7 @@ bool MessageHandler::recvMessage(MongoActionReadInterface& mongoAction, MessageI
             if (handleChecksum && checksum != 0)
             {
                 stream.setstate(std::ios::failbit);
-                ThorsLogCritical("ThorsAnvil::DB::Mongo::MessageHandler", "recvMessage", "Deserialization checksum validation failed");
+                ThorsLogError("ThorsAnvil::DB::Mongo::MessageHandler", "recvMessage", "Deserialization checksum validation failed");
             }
         }
 
@@ -107,17 +107,17 @@ bool MessageHandler::recvMessage(MongoActionReadInterface& mongoAction, MessageI
         if (size != wireMessage.messageSize)
         {
             stream.setstate(std::ios::failbit);
-            ThorsLogCritical("ThorsAnvil::DB::Mongo::MessageHandler", "recvMessage", "Deserialization of message failed. Invalid Size: Bytes read: ", size, " Wire Message Size: ", wireMessage.messageSize);
+            ThorsLogError("ThorsAnvil::DB::Mongo::MessageHandler", "recvMessage", "Deserialization of message failed. Invalid Size: Bytes read: ", size, " Wire Message Size: ", wireMessage.messageSize);
         }
         if (wireMessage.opCode != OpCode::OP_MSG)
         {
             stream.setstate(std::ios::failbit);
-            ThorsLogCritical("ThorsAnvil::DB::Mongo::MessageHandler", "recvMessage", "Unexpected Message Type. Expected: OP_MSG(", static_cast<int>(OpCode::OP_MSG), ") Got(", static_cast<int>(wireMessage.opCode));
+            ThorsLogError("ThorsAnvil::DB::Mongo::MessageHandler", "recvMessage", "Unexpected Message Type. Expected: OP_MSG(", static_cast<int>(OpCode::OP_MSG), ") Got(", static_cast<int>(wireMessage.opCode));
         }
         if (wireMessage.messageResponseId != messageId)
         {
             stream.setstate(std::ios::failbit);
-            ThorsLogCritical("ThorsAnvil::DB::Mongo::MessageHandler", "recvMessage", "This message is not the expected reply: Expected: ", messageId, " Got: ", wireMessage.messageResponseId);
+            ThorsLogError("ThorsAnvil::DB::Mongo::MessageHandler", "recvMessage", "This message is not the expected reply: Expected: ", messageId, " Got: ", wireMessage.messageResponseId);
         }
     }
     return static_cast<bool>(stream);

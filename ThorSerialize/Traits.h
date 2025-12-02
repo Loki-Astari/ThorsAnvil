@@ -15,7 +15,14 @@
  *      ThorsAnvil_MakeEnum(EnumType, EnumValues...)
  *
  *      ThorsAnvil_PolyMorphicSerializer(Type)
- *      ThorsAnvil_RegisterPolyMorphicType(Type)
+ *      ThorsAnvil_PolyMorphicSerializerWithName(Type, Name)
+ *      ThorsAnvil_PolyMorphicSerializerWithOverride(Type)
+ *      ThorsAnvil_PolyMorphicSerializerWithOverrideWithName(Type, Name)
+ *      ThorsAnvil_RegisterPolyMorphicTypeNamed(Type, CustomName)
+ *
+ *      ThorsAnvil_VariantSerializer(Type)
+ *      ThorsAnvil_VariantSerializerWithName(Type, Name)
+ *      ThorsAnvil_TypeFieldName(Name)
  *
  *      ThorsAnvil_MakeTraitCustomSerialize(Type, SerializableType)
  *
@@ -65,8 +72,19 @@
  *              Add the following to your class definition:
  *                  ThorsAnvil_PolyMorphicSerializer(Type)
  *
- *              Then in a source file add the following line:
- *                  ThorsAnvil_RegisterPolyMorphicType(Type)
+ *              Note-1:
+ *              In most situations this will be enough.
+ *              The exact type name will be serialized into the object and used to reform the object when
+ *              de-serializeing. But sometimes this is not appropriate and you want to use a custom name
+ *              in the serialization processes. Use the following macro to declare a custom name.
+ *                  ThorsAnvil_RegisterPolyMorphicTypeNamed(Type, CustomName)
+ *                  Note: The CustomName must be globally unique to the application.
+ *
+ *              Note-2:
+ *              The label name used for serialization will be "__type" by default.
+ *              You can specify a class specific label with:
+ *                  static std::string polyname() {return XXX;}
+ *                  See test/PolymorphicTest.cpp for an example
  *
  *      The new version of Custom serializable:
  *
@@ -211,7 +229,7 @@
  *                  public:
  *                      using BankAccount::BankAccount;
  *                      CurrentAccount() {}
- *                      ThorsAnvil_PolyMorphicSerializer(OnLineBank::CurrentAccount);
+ *                      ThorsAnvil_PolyMorphicSerializerWithOverride(OnLineBank::CurrentAccount);
  *                      void addTransaction(long timeStamp, int amount, TransType type)
  *                      {
  *                          actions.emplace_back(timeStamp, amount, type);
@@ -231,7 +249,7 @@
  *                  public:
  *                      using BankAccount::BankAccount;
  *                      DepositAccount() {}
- *                      ThorsAnvil_PolyMorphicSerializer(OnLineBank::DepositAccount);
+ *                      ThorsAnvil_PolyMorphicSerializerWithOverride(OnLineBank::DepositAccount);
  *              };
  *          }
  *
@@ -242,11 +260,6 @@
  *          ThorsAnvil_MakeTrait(OnLineBank::BankAccount, id, balance, details, valid);
  *          ThorsAnvil_ExpandTrait(OnLineBank::BankAccount, OnLineBank::CurrentAccount, actions);
  *          ThorsAnvil_ExpandTrait(OnLineBank::BankAccount, OnLineBank::DepositAccount, withdrawlLimit);
- *
- *      // Bank.cpp
- *
- *          ThorsAnvil_RegisterPolyMorphicType(OnLineBank::CurrentAccount);
- *          ThorsAnvil_RegisterPolyMorphicType(OnLineBank::DepositAccount);
  *
  */
 
@@ -727,9 +740,10 @@ class Traits<DataType>                                                  \
             case FormatType::Yaml:  /* Fall Through */                  \
             default:                                                    \
             {                                                           \
-                ThorsLogAndThrowCritical("ThorsAnivl::Seriaizlize::Traits<DataType>",   \
-                                         "getPrintSize",                \
-                                         "Should not get here");        \
+                ThorsLogAndThrowError(std::runtime_error,               \
+                                      "ThorsAnivl::Seriaizlize::Traits<DataType>",   \
+                                      "getPrintSize",                   \
+                                      "Should not get here");           \
             }                                                           \
         }                                                               \
     }                                                                   \
@@ -766,9 +780,10 @@ class Traits<EnumName>                                                  \
                     return value.first;                                 \
                 }                                                       \
             }                                                           \
-            ThorsLogAndThrow("ThorsAnvil::Serialize::Traits<EnumName>", \
-                             "getValue",                                \
-                             "Invalid Enum Value");                     \
+            ThorsLogAndThrowDebug(std::runtime_error,                   \
+                                  "ThorsAnvil::Serialize::Traits<EnumName>", \
+                                  "getValue",                           \
+                                  "Invalid Enum Value");                \
         }                                                               \
         static std::size_t getPrintSize(PrinterInterface& printer, EnumName const& value, bool)\
         {                                                               \
@@ -780,9 +795,10 @@ class Traits<EnumName>                                                  \
             auto values = getValues();                                  \
             auto find = values.find(object);                            \
             if (find == values.end()) {                                 \
-                ThorsLogAndThrow("ThorsAnvil::Serialize::Traits<EnumName>", \
-                                 "serializeForBlock",                       \
-                                 "Invalid Enum Value");                     \
+                ThorsLogAndThrowDebug(std::runtime_error,               \
+                                      "ThorsAnvil::Serialize::Traits<EnumName>", \
+                                      "serializeForBlock",              \
+                                      "Invalid Enum Value");            \
             }                                                           \
             printer.addValue(getValues().find(object)->second);         \
         }                                                               \
@@ -845,16 +861,16 @@ class Traits<DataType*>                                                 \
 }
 
 #define ThorsAnvil_RegisterPolyMorphicType_Internal(DataType, ...)      \
-    ThorsAnvil_RegisterPolyMorphicType(DataType)
+    ThorsAnvil_RegisterPolyMorphicTypeNamed(DataType, DataType)
 
 #if defined(NEOVIM)
-#define ThorsAnvil_RegisterPolyMorphicType(DataType)
+#define ThorsAnvil_RegisterPolyMorphicTypeNamed(DataType, Name)
 #else
-#define ThorsAnvil_RegisterPolyMorphicType(DataType)                    \
+#define ThorsAnvil_RegisterPolyMorphicTypeNamed(DataType, Name)         \
 namespace ThorsAnvil::Serialize {                                       \
 namespace                                                               \
 {                                                                       \
-    ThorsAnvil_InitPolyMorphicType<DataType>   THOR_UNIQUE_NAME ( # DataType); \
+    ThorsAnvil_InitPolyMorphicType<DataType>   THOR_UNIQUE_NAME ( #Name); \
 }                                                                       \
 }
 #endif
@@ -862,30 +878,45 @@ namespace                                                               \
 /*
  * Defined the virtual function needed by tryPrintPolyMorphicObject()
  */
-#define ThorsAnvil_PolyMorphicSerializer(Type)              ThorsAnvil_PolyMorphicSerializer_Internal(Type,)
-#define ThorsAnvil_PolyMorphicSerializerWithOverride(Type)  ThorsAnvil_PolyMorphicSerializer_Internal(Type, override)
+#define ThorsAnvil_PolyMorphicSerializer(Type)                      ThorsAnvil_PolyMorphicSerializer_Internal(Type, Type, )
+#define ThorsAnvil_PolyMorphicSerializerWithName(Type, Name)        ThorsAnvil_PolyMorphicSerializer_Internal(Type, Name, )
+#define ThorsAnvil_PolyMorphicSerializerWithOverride(Type)          ThorsAnvil_PolyMorphicSerializer_Internal(Type, Type, override)
+#define ThorsAnvil_PolyMorphicSerializerWithNameWithOverride(Type)  ThorsAnvil_PolyMorphicSerializer_Internal(Type, Name, override)
 
-#define ThorsAnvil_PolyMorphicSerializer_Internal(Type, OVERRIDE)                           \
+#define ThorsAnvil_PolyMorphicSerializer_Internal(Type, Name, OVERRIDE)                     \
     virtual void printPolyMorphicObject(ThorsAnvil::Serialize::Serializer&         parent,  \
                                        ThorsAnvil::Serialize::PrinterInterface&    printer) OVERRIDE \
     {                                                                                       \
-        ThorsAnvil::Serialize::printPolyMorphicObject<Type>(parent, printer, *this);        \
+        ThorsAnvil::Serialize::printPolyMorphicObject(parent, printer, *this);              \
     }                                                                                       \
     virtual void parsePolyMorphicObject(ThorsAnvil::Serialize::DeSerializer&       parent,  \
                                        ThorsAnvil::Serialize::ParserInterface&     parser)  OVERRIDE \
     {                                                                                       \
-        ThorsAnvil::Serialize::parsePolyMorphicObject<Type>(parent, parser, *this);         \
+        ThorsAnvil::Serialize::parsePolyMorphicObject(parent, parser, *this);               \
     }                                                                                       \
     virtual std::size_t getPolyMorphicPrintSize(ThorsAnvil::Serialize::PrinterInterface& printer) const OVERRIDE \
     {                                                                                       \
         std::size_t count = 1;                                                              \
-        std::size_t memberSize = (printer.config.polymorphicMarker.size() + printer.getSizeValue(std::string(polyMorphicSerializerName())));\
+        std::size_t memberSize = printer.getSizeMember(ThorsAnvil::Serialize::Private::getPolymorphicMarker<Type>(printer.config.polymorphicMarker)) \
+                               + printer.getSizeValue(std::string(polyMorphicSerializerName()));\
                                                                                             \
         return getNormalPrintSize(printer, *this, count, memberSize);                       \
     }                                                                                       \
+    ThorsAnvil_SerializeName(Name)
+
+#define ThorsAnvil_VariantSerializer(Type)  ThorsAnvil_VariantSerializerWithName(Type, Type)
+#define ThorsAnvil_VariantSerializerWithName(Type, Name) ThorsAnvil_SerializeName(Name)
+
+#define ThorsAnvil_TypeFieldName(Name)                                                      \
+    static constexpr char const* polyname()                                                 \
+    {                                                                                       \
+        return #Name;                                                                       \
+    }
+
+#define ThorsAnvil_SerializeName(Name)                                                      \
     static constexpr char const* polyMorphicSerializerName()                                \
     {                                                                                       \
-        return #Type;                                                                       \
+        return #Name;                                                                       \
     }
 
 
@@ -983,7 +1014,7 @@ class TraitsSizeCalculator
                 return std::make_pair(0UL,0UL);
             }
             auto partSize   = addSizeOneMember(printer, object, item.second);
-            auto nameSize   = std::size(Override<MyType>::nameOverride(item.first));
+            auto nameSize = printer.getSizeMember(Override<MyType>::nameOverride(item.first));
             return std::make_pair(partSize + nameSize, 1);
         }
         template<typename MyType, typename M, typename C>
@@ -993,7 +1024,7 @@ class TraitsSizeCalculator
                 return std::make_pair(0UL,0UL);
             }
             auto partSize   = addSizeOneMember(printer, object, item.second);
-            auto nameSize   = std::size(Override<MyType>::nameOverride(item.first));
+            auto nameSize = printer.getSizeMember(Override<MyType>::nameOverride(item.first));
             return std::make_pair(partSize + nameSize, 1);
         }
         template<typename MyType, typename Members, std::size_t... Seq>
@@ -1044,9 +1075,10 @@ class Traits<EnumName, std::enable_if_t<std::is_enum<EnumName>::value>>
             {
                 return enumDecode.value();
             }
-            ThorsLogAndThrow("ThorsAnvil::Serialize::Traits<EnumName>",
-                             "getValue",
-                             "Invalid Enum Value");
+            ThorsLogAndThrowDebug(std::runtime_error,
+                                  "ThorsAnvil::Serialize::Traits<EnumName>",
+                                  "getValue",
+                                  "Invalid Enum Value");
         }
         static std::size_t getPrintSize(PrinterInterface& printer, EnumName const& value, bool)
         {
@@ -1058,9 +1090,10 @@ class Traits<EnumName, std::enable_if_t<std::is_enum<EnumName>::value>>
             auto findValue = magic_enum::enum_name(object);
             if (findValue == "")
             {
-                ThorsLogAndThrow("ThorsAnvil::Serialize::Traits<EnumName(With Magic)>",
-                                 "serializeForBlock",
-                                 "Invalid Enum Value");
+                ThorsLogAndThrowDebug(std::runtime_error,
+                                      "ThorsAnvil::Serialize::Traits<EnumName(With Magic)>",
+                                      "serializeForBlock",
+                                      "Invalid Enum Value");
             }
             printer.addValue(magic_enum::enum_name(object));
         }
@@ -1144,9 +1177,10 @@ class PolyMorphicRegistry
             auto     find       = cont.find(name);
             if (find == cont.end())
             {
-                ThorsLogAndThrow("ThorsAnvil::Serialize::PolyMorphicRegistry",
-                                 "getNamedTypeConvertedTo",
-                                 "Non polymorphic type");
+                ThorsLogAndThrowDebug(std::runtime_error,
+                                      "ThorsAnvil::Serialize::PolyMorphicRegistry",
+                                      "getNamedTypeConvertedTo",
+                                      "Non polymorphic type");
             }
             void*       data        = find->second();
             AllocType*  dataBase    = reinterpret_cast<AllocType*>(data);
