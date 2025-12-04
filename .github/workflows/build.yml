@@ -52,6 +52,11 @@ jobs:
                 cat Makefile.config
                 cat third/ThorsStorage/Makefile.config
                 cat third/ThorsStorage/src/ThorsStorage/Makefile
+            - run: |
+                cat third/Nisse/src/NisseHTTP/NisseHTTPConfig.h
+                cat third/Nisse/src/NisseServer/NisseConfig.h
+                cat third/Mug/src/ThorsMug/ThorsMugConfig.h
+                cat third/ThorsSerializer/src/Serialize/SerializeConfig.h
             - run: make
             - run: sudo make install
     Build_on_Windows:
