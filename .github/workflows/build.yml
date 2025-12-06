@@ -106,7 +106,7 @@ jobs:
               shell: msys2 {0}
               run:   make
     Build_Header_Only_Version:
-        needs:      [Build_on_Mac, Build_on_Linux, Build_on_Windows]
+        needs:      [Build_on_Mac, Build_on_Linux]
         runs-on:    macos-latest
         #- if:         github.ref == 'refs/heads/master'
         steps:
@@ -114,6 +114,8 @@ jobs:
             - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install vera++
             - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install magic_enum
             - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install snappy
+            - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install libevent
+            - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install boost
             - uses: actions/checkout@master
               with:
                 submodules: recursive
