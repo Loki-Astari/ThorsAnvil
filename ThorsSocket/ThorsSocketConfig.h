@@ -94,9 +94,6 @@
 /* Disable integration tests */
 #define THOR_DISABLE_TEST_WITH_INTEGRATION 0
 
-/* Name of package for header files */
-#define THOR_PACKAGE_NAME ThorsSocket
-
 /* Version number of package */
 #define VERSION "3.0"
 

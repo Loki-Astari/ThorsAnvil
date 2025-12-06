@@ -110,9 +110,6 @@
    */
 #define THOR_DISABLE_TEST_WITH_MONGO_QUERY 0
 
-/* Name of package for header files */
-#define THOR_PACKAGE_NAME ThorsMongo
-
 /* mongosh DB for testing */
 #define THOR_TESTING_MONGO_DB "test"
 

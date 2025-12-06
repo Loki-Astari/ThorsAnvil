@@ -76,9 +76,6 @@
 
 /* For header only convert to inline */
 
-/* Name of package for header files */
-#define THOR_PACKAGE_NAME ThorsLogging
-
 /* Version number of package */
 #define VERSION "0.1"
 

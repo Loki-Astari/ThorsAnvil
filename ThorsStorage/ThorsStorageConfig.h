@@ -91,9 +91,6 @@
 /* Disable test that require files to be locked */
 #define THOR_DISABLE_TEST_WITH_LOCKED_FILES 0
 
-/* Name of package for header files */
-#define THOR_PACKAGE_NAME ThorsStorage
-
 /* Version number of package */
 #define VERSION "0.1"
 

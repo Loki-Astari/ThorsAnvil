@@ -80,9 +80,6 @@
 
 /* For header only convert to inline */
 
-/* Name of package for header files */
-#define THOR_PACKAGE_NAME ThorsIOUtil
-
 /* Version number of package */
 #define VERSION "3.0"
 

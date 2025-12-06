@@ -79,7 +79,7 @@ void SocketStandard::setUpServerSocket(ServerInfo const& socketInfo)
     // by in a TIME_WAIT state. This will generate an error in bind (below)
     // Thsi says we don't care about the timed wait state and to continue.
     int yes = 1;
-    status = ::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+    status = ::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<char*>(&yes), sizeof(yes));
     if (status == -1) {
         int saveErrno = thorGetSocketError();
         ::thorCloseSocket(fd);

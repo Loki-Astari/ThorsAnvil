@@ -85,9 +85,6 @@
 /* Set up to build on Conan */
 #define THOR_CONAN 0
 
-/* Name of package for header files */
-#define THOR_PACKAGE_NAME ThorsCrypto
-
 /* Version number of package */
 #define VERSION "3.0"
 
