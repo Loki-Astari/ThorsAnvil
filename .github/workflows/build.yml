@@ -106,7 +106,6 @@ jobs:
               shell: msys2 {0}
               run:   make
     Build_Header_Only_Version:
-        needs:      [Build_on_Mac, Build_on_Linux]
         runs-on:    macos-latest
         #- if:         github.ref == 'refs/heads/master'
         steps:
