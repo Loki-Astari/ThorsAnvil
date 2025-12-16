@@ -20726,7 +20726,7 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
-subconfigure="${subconfigure} --with-thorserialize-root=$(pwd)/build --with-nisse-root=$(pwd)/build "
+subconfigure="${subconfigure} --with-thorserialize-root=$(pwd)/build --with-nisse-root=$(pwd)/build --disable-slacktest"
 
 
 
