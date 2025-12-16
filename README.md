@@ -11,16 +11,20 @@ This project provides the following libraries:
 
 1. [Mug](https://github.com/Loki-Astari/Mug)  
    A simple configurable C++ `NissaServer` that dynamically loads shared libraries that install `NisseHTTP` handlers.
-1. [ThorsSlack](https://github.com/Loki-Astari/Mug/tree/master/src/ThorsSlack)  
-   Type-safe API to send REST messages to/from Slack.
 1. [Nisse](https://github.com/Loki-Astari/Nisse)  
    + **NisseServer**  
      Provides a server object that handles socket events and non-blocking async IO operations.
-   - **NisseHTTP**  
+   + **NisseHTTP**  
      Provides HTTP request/response objects exposing the body as an async std::iostream. This allows C++ objects to be streamed directly via a REST interface with no serialization code.
-1. [ThorsMongo](https://github.com/Loki-Astari/ThorsMongo)  
-   Sends and receives MongoDB wire protocol messages.  
-   Type-safe interface for inserting/updating/finding objects in a collection. Directly send C++ objects to a Mongo collection with no serialization code.
+1. API Supported:
+   + [ThorsSlack](https://github.com/Loki-Astari/Mug/tree/master/src/ThorsSlack)  
+     Type-safe API to send REST messages to/from Slack.  
+     Supports REST Slack API and Slack webhooks via NissaHTTP.  
+     Use C++ objects, no serialization code required.
+   + [ThorsMongo](https://github.com/Loki-Astari/ThorsMongo)  
+     Type-safe interface for inserting/updating/finding objects in a collection.  
+     Sends and receives MongoDB wire protocol messages.  
+     Directly send C++ objects to a Mongo collection with no serialization code.
 1. [ThorsSerializer](https://github.com/Loki-Astari/ThorsSerializer)  
    Automatically converts C++ objects into **JSON** / **BSON** / **YAML**
 
