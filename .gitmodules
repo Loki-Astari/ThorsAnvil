@@ -30,4 +30,4 @@
 	url = ../../Loki-Astari/Mug.git
 [submodule "third/ThorsMongo"]
 	path = third/ThorsMongo
-	url = git@github.com:Loki-Astari/ThorsMongo.git
+	url = ../../Loki-Astari/ThorsMongo.git
