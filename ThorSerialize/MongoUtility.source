@@ -2,6 +2,7 @@
 #include <chrono>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <tuple>
 #ifndef __WINNT
 #include <arpa/inet.h>
@@ -23,6 +24,13 @@ ObjectID::ObjectID(std::int32_t timestamp, std::int64_t random, std::int32_t cou
     , random(random)
     , counter(counter)
 {}
+
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+ObjectID::ObjectID(std::string const& idStr)
+{
+    std::stringstream idStrStream(idStr);
+    idStrStream >> (*this);
+}
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 UTCDateTime::UTCDateTime(std::int64_t datetime)

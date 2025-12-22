@@ -260,8 +260,8 @@ std::ostream& operator<<(std::ostream& stream, ObjectID const& data)
 {
     stream << ThorsAnvil::Utility::StreamFormatterNoChange{}
                      << std::hex << std::setfill('0')
-                     << std::setw( 8) << data.timestamp << "-"
-                     << std::setw(10) << data.random    << "-"
+                     << std::setw( 8) << data.timestamp
+                     << std::setw(10) << data.random
                      << std::setw( 6) << data.counter;
     return stream;
 }
@@ -286,11 +286,28 @@ JsonParser& operator>>(JsonParser& parser, ObjectID& data)
     return parser;
 }
 
+inline std::size_t readNumberMaxLenFromStream(std::istream& stream, std::size_t maxSize, bool ignoreLeadingDash)
+{
+    std::size_t result = 0;
+    char c;
+    for (std::size_t loop = 0; loop < maxSize; ++loop) {
+        stream >> c;
+        if (c == '-' && loop == 0 && ignoreLeadingDash) {
+            stream >> c;
+        }
+        result = result * 16 + ((c >= '0' && c <= '9') ? (c - '0') : (c >= 'a' && c <= 'f') ? (c - 'a' + 10) : (c - 'A' + 10));
+    }
+    return result;
+}
+
 inline
 std::istream& operator>>(std::istream& stream, ObjectID& data)
 {
-    char x2, x3;
-    return stream >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> data.timestamp >> x2 >> data.random >> x3 >> data.counter >> std::dec;
+    // return stream >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> data.timestamp >> x2 >> data.random >> x3 >> data.counter >> std::dec;
+    data.timestamp = readNumberMaxLenFromStream(stream, 8, false);
+    data.random    = readNumberMaxLenFromStream(stream, 10, true);
+    data.counter   = readNumberMaxLenFromStream(stream, 6, true);
+    return stream;
 }
 
 inline

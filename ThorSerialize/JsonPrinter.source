@@ -177,7 +177,7 @@ void JsonPrinter::closeMap()
 {
     if (state.back().f1 != TraitType::Map)
     {
-        ThorsLogAndThrowDebug(std::runtime_error,
+        ThorsLogAndThrowError(std::runtime_error,
                               "ThorsAnvil::Serialize::JsonPrinter",
                               "closeMap",
                               "Invalid call to closeMap(): Currently not in a map");
@@ -201,7 +201,7 @@ void JsonPrinter::closeArray()
 {
     if (state.back().f1 != TraitType::Array)
     {
-        ThorsLogAndThrowDebug(std::runtime_error,
+        ThorsLogAndThrowError(std::runtime_error,
                               "ThorsAnvil::Serialize::JsonPrinter",
                               "closeArray",
                               "Invalid call to closeArray(): Currently not in an array");
@@ -217,7 +217,7 @@ void JsonPrinter::addKey(std::string_view const& key)
 {
     if (state.back().f1 != TraitType::Map)
     {
-        ThorsLogAndThrowDebug(std::runtime_error,
+        ThorsLogAndThrowError(std::runtime_error,
                               "ThorsAnvil::Serialize::JsonPrinter",
                               "addKey",
                               "Invalid call to addKey(): Currently not in a map");

@@ -43,7 +43,7 @@ IOData FileDescriptor::readFromStream(char* buffer, std::size_t size)
                 ThorsLogAndThrowError(
                     std::runtime_error,
                     "ThorsAnvil::ThorsSocket::ConnectionType::FileDescriptor",
-                    " readFromStream",
+                    "readFromStream",
                     " :SocketCritical exception thrown.",
                     " errno = ", errno, " ", getErrNoStrUnix(errno),
                     " msg >", getErrMsgUnix(errno), "<"
@@ -57,7 +57,7 @@ IOData FileDescriptor::readFromStream(char* buffer, std::size_t size)
                 ThorsLogAndThrowWarning(
                     std::runtime_error,
                     "ThorsAnvil::ThorsSocket::ConnectionType::FileDescriptor",
-                    " readFromStream",
+                    "readFromStream",
                     " :SocketUnknown exception thrown.",
                     " errno = ", errno, " ", getErrNoStrUnix(errno),
                     " msg >", getErrMsgUnix(errno), "<"
@@ -95,7 +95,7 @@ IOData FileDescriptor::writeToStream(char const* buffer, std::size_t size)
                 ThorsLogAndThrowError(
                     std::runtime_error,
                     "ThorsAnvil::ThorsSocket::ConnectionType::FileDescriptor",
-                    " writeToStream",
+                    "writeToStream",
                     " :SocketCritical exception thrown.",
                     " errno = ", errno, " ", getErrNoStrUnix(errno),
                     " msg >", getErrMsgUnix(errno), "<"
@@ -115,7 +115,7 @@ IOData FileDescriptor::writeToStream(char const* buffer, std::size_t size)
                 ThorsLogAndThrowWarning(
                     std::runtime_error,
                     "ThorsAnvil::ThorsSocket::ConnectionType::FileDescriptor",
-                    " readFromStream",
+                    "writeToStream",
                     " :SocketUnknown exception thrown",
                     " errno = ", errno, " ", getErrNoStrUnix(errno),
                     " msg >", getErrMsgUnix(errno), "<"

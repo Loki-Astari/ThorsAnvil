@@ -780,7 +780,7 @@ class Traits<EnumName>                                                  \
                     return value.first;                                 \
                 }                                                       \
             }                                                           \
-            ThorsLogAndThrowDebug(std::runtime_error,                   \
+            ThorsLogAndThrowError(std::runtime_error,                   \
                                   "ThorsAnvil::Serialize::Traits<EnumName>", \
                                   "getValue",                           \
                                   "Invalid Enum Value");                \
@@ -795,7 +795,7 @@ class Traits<EnumName>                                                  \
             auto values = getValues();                                  \
             auto find = values.find(object);                            \
             if (find == values.end()) {                                 \
-                ThorsLogAndThrowDebug(std::runtime_error,               \
+                ThorsLogAndThrowError(std::runtime_error,               \
                                       "ThorsAnvil::Serialize::Traits<EnumName>", \
                                       "serializeForBlock",              \
                                       "Invalid Enum Value");            \
@@ -1075,7 +1075,7 @@ class Traits<EnumName, std::enable_if_t<std::is_enum<EnumName>::value>>
             {
                 return enumDecode.value();
             }
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize::Traits<EnumName>",
                                   "getValue",
                                   "Invalid Enum Value");
@@ -1090,7 +1090,7 @@ class Traits<EnumName, std::enable_if_t<std::is_enum<EnumName>::value>>
             auto findValue = magic_enum::enum_name(object);
             if (findValue == "")
             {
-                ThorsLogAndThrowDebug(std::runtime_error,
+                ThorsLogAndThrowError(std::runtime_error,
                                       "ThorsAnvil::Serialize::Traits<EnumName(With Magic)>",
                                       "serializeForBlock",
                                       "Invalid Enum Value");
@@ -1177,7 +1177,7 @@ class PolyMorphicRegistry
             auto     find       = cont.find(name);
             if (find == cont.end())
             {
-                ThorsLogAndThrowDebug(std::runtime_error,
+                ThorsLogAndThrowError(std::runtime_error,
                                       "ThorsAnvil::Serialize::PolyMorphicRegistry",
                                       "getNamedTypeConvertedTo",
                                       "Non polymorphic type");

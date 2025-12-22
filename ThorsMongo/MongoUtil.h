@@ -13,8 +13,8 @@
 #define LAST_THORMONGO_BUILD_FIELD_NAME_(TC, TypeName, IG, FN)      #FN
 #define THORMONGO_BUILD_FIELD_NAME(TypeName, ...)                   REP_CMD_N(THORMONGO_BUILD_FIELD_NAME_, 00, TypeName, Ignore, __VA_ARGS__)
 
-#define THORMONGO_BULD_TYPE_INFO_(TC, TypeName, Last, FN)           using Type ## FN = typename ThorsAnvil::Serialize::Traits<Type ## Last>::THOR_BUILD_NAME(Type, FN);
-#define LAST_THORMONGO_BULD_TYPE_INFO_(TC, TypeName, Last, FN)      using TypeBase = typename ThorsAnvil::Serialize::Traits<Type ## Last>::THOR_BUILD_NAME(Type, FN)
+#define THORMONGO_BULD_TYPE_INFO_(TC, TypeName, Last, FN)           using Type ## FN = typename ::ThorsAnvil::Serialize::Traits<Type ## Last>::THOR_BUILD_NAME(Type, FN);
+#define LAST_THORMONGO_BULD_TYPE_INFO_(TC, TypeName, Last, FN)      using TypeBase = typename ::ThorsAnvil::Serialize::Traits<Type ## Last>::THOR_BUILD_NAME(Type, FN)
 #define THORMONGO_BULD_TYPE_INFO(TypeName, First, TC, ...)          REP_CMD_N(THORMONGO_BULD_TYPE_INFO_, TC, TypeName, First, __VA_ARGS__)
 
 #define THORMONGO_BUILD_USE_FIRST(value, ...)                       value
@@ -33,35 +33,35 @@ namespace ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) {  
     template<typename T>                                                                            \
     struct Access                                                                                   \
     {                                                                                               \
-        using CType = ThorsAnvil::DB::Mongo::ConstructorType<T>;                                    \
+        using CType = ::ThorsAnvil::DB::Mongo::ConstructorType<T>;                                  \
         Access(CType init) : THORMONGO_BUILD_USE_FIRST(__VA_ARGS__, 1)(std::move(init)) {}          \
         T          THORMONGO_BUILD_USE_FIRST(__VA_ARGS__, 1);                                       \
     };                                                                                              \
     using TypeFirst = ::TypeName;                                                                   \
     THORMONGO_BULD_TYPE_INFO(TypeName, First, 00, __VA_ARGS__);                                     \
-    using TypeOperat = ThorsAnvil::DB::Mongo::RemoveOptional<TypeBase>;                             \
+    using TypeOperat = ::ThorsAnvil::DB::Mongo::RemoveOptional<TypeBase>;                           \
 }                                                                                                   \
 ThorsAnvil_Template_MakeOverride(1,                                                                 \
-    ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) ::Access,                    \
+    ::ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) ::Access,                    \
     {THORMONGO_BUILD_USE_FIRST_Q(__VA_ARGS__, 1), THORMONGO_BUILD_FIELD_NAME(TypeName, __VA_ARGS__)}\
 );                                                                                                  \
 ThorsAnvil_Template_MakeTrait(1,                                                                    \
-    ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) ::Access,                    \
+    ::ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) ::Access,                    \
     THORMONGO_BUILD_USE_FIRST(__VA_ARGS__, 1)                                                       \
 );
 
 
 #define ThorsMongo_FilterFromAccess(Operator, TypeName, ...)                                        \
-ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) ::Access<                        \
-    ThorsAnvil::DB::Mongo::QueryOp::Operator<                                                       \
-        typename ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) ::TypeOperat    \
+::ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) ::Access<                        \
+    ::ThorsAnvil::DB::Mongo::QueryOp::Operator<                                                       \
+        typename ::ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) ::TypeOperat    \
     >                                                                                               \
 >
 
 #define ThorsMongo_UpdateFromAccess(Action, TypeName, ...)                                          \
-ThorsAnvil::DB::Mongo::QueryOp:: Action <                                                           \
-    ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) ::Access<                    \
-        ThorsAnvil::DB::Mongo::QueryOp::Action ## Param<                                            \
+::ThorsAnvil::DB::Mongo::QueryOp:: Action <                                                           \
+    ::ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) ::Access<                    \
+        ::ThorsAnvil::DB::Mongo::QueryOp::Action ## Param<                                            \
             typename ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__)::TypeOperat \
         >                                                                                           \
     >                                                                                               \
@@ -70,11 +70,11 @@ ThorsAnvil::DB::Mongo::QueryOp:: Action <                                       
 // Used For Push     [Each / Position / Slice / Sort
 //          AddToSet [Each / Position / Slice / Sort ]
 #define ThorsMongo_UpdateExtendFromAccess(Action, Action2, TypeName, ...)                           \
-ThorsAnvil::DB::Mongo::QueryOp:: Action <                                                           \
-    ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) ::Access<                    \
-        ThorsAnvil::DB::Mongo::QueryOp:: Action2 <                                                  \
-            ThorsAnvil::DB::Mongo::QueryOp::Action2 ## Param<                                       \
-                typename ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__)::TypeOperat \
+::ThorsAnvil::DB::Mongo::QueryOp:: Action <                                                           \
+    ::ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) ::Access<                    \
+        ::ThorsAnvil::DB::Mongo::QueryOp:: Action2 <                                                  \
+            ::ThorsAnvil::DB::Mongo::QueryOp::Action2 ## Param<                                       \
+                typename ::ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__)::TypeOperat \
             >                                                                                       \
         >                                                                                           \
     >                                                                                               \

@@ -117,7 +117,7 @@ class ThorsMongo
         ReadPreference          getReadPreference() const;
         ReadPreference          setReadPreference(ReadPreference);
 
-        DB operator[](std::string&& dbName);
+        DB operator[](std::string dbName);
 
         template<typename F>
         DBRange                 listDatabases(F const& filter, CommandConfig const& config = CommandConfig{});
@@ -166,7 +166,7 @@ class DB
         LCRange                 listCollections(CommandConfig const& config = CommandConfig{});
         AdminResult             createCollection(std::string colName, CreateCollectionConfig const& config = CreateCollectionConfig{});
 
-        Collection operator[](std::string&& collectionName);
+        Collection operator[](std::string collectionName);
 };
 
 class Collection
@@ -225,8 +225,8 @@ class Collection
 
 };
 
-inline DB          ThorsMongo::operator[](std::string&& dbName)     {return DB(*this, std::move(dbName));}
-inline Collection  DB::operator[](std::string&& collectionName)     {return Collection(*this, std::move(collectionName));}
+inline DB          ThorsMongo::operator[](std::string dbName)     {return DB(*this, std::move(dbName));}
+inline Collection  DB::operator[](std::string collectionName)     {return Collection(*this, std::move(collectionName));}
 
 // See MongoCursor.h for declaration.
 template<typename T>

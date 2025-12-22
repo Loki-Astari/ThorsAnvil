@@ -42,8 +42,8 @@ int ThorsAnvil::ThorsSocket::certificateInfo_PasswdCBNormal(char* buf, int size,
     if (password.size() > static_cast<std::size_t>(size))
     {
         ThorsLogAndThrowDebug(std::runtime_error,
-                              "ThorsAnvil::ThorsSocket::CertificateInfo",
-                              "setCertificateInfo",
+                              "ThorsAnvil::ThorsSocket"
+                              "certificateInfo_PasswdCBNormal",
                               "certificateInfo_PasswdCB failed: password size exceeds max space. Max=", size, " Actual=", password.size());
     }
     for (std::size_t loop = 0; loop < password.size(); ++loop) {
@@ -76,7 +76,7 @@ void ProtocolInfo::apply(SSL_CTX* ctx) const
     {
         ThorsLogAndThrowDebug(std::runtime_error,
                               "ThorsAnvil::ThorsSocket::ProtocolInfo",
-                              "setProtocolInfo",
+                              "apply",
                               "SSL_CTX_set_min_proto_version() failed: ", buildOpenSSLErrorMessage());
     }
     //if (SSL_CTX_set_max_proto_version(ctx, convertProtocolToOpenSSL(maxProtocol)) != 1)
@@ -84,7 +84,7 @@ void ProtocolInfo::apply(SSL_CTX* ctx) const
     {
         ThorsLogAndThrowDebug(std::runtime_error,
                               "ThorsAnvil::ThorsSocket::ProtocolInfo",
-                              "setProtocolInfo",
+                              "apply",
                               "SSL_CTX_set_max_proto_version() failed: ", buildOpenSSLErrorMessage());
     }
 }
@@ -97,7 +97,7 @@ void ProtocolInfo::apply(SSL* ssl) const
     {
         ThorsLogAndThrowDebug(std::runtime_error,
                               "ThorsAnvil::ThorsSocket::ProtocolInfo",
-                              "setProtocolInfo",
+                              "apply",
                               "SSL_set_min_proto_version() failed: ", buildOpenSSLErrorMessage());
     }
     //if (SSL_set_max_proto_version(ssl, convertProtocolToOpenSSL(maxProtocol)) != 1)
@@ -105,7 +105,7 @@ void ProtocolInfo::apply(SSL* ssl) const
     {
         ThorsLogAndThrowDebug(std::runtime_error,
                               "ThorsAnvil::ThorsSocket::ProtocolInfo",
-                              "setProtocolInfo",
+                              "apply",
                               "SSL_set_max_proto_version() failed: ", buildOpenSSLErrorMessage());
     }
 }
@@ -118,14 +118,14 @@ void CipherInfo::apply(SSL_CTX* ctx) const
     {
         ThorsLogAndThrowDebug(std::runtime_error,
                               "ThorsAnvil::ThorsSocket::CipherInfo",
-                              "setCipherInfo",
+                              "apply",
                               "SSL_CTX_set_cipher_list() failed: ", buildOpenSSLErrorMessage());
     }
     if (::SSL_CTX_set_ciphersuites(ctx, cipherSuite.c_str()) <= 0)
     {
         ThorsLogAndThrowDebug(std::runtime_error,
                               "ThorsAnvil::ThorsSocket::CipherInfo",
-                              "setCipherInfo",
+                              "apply",
                               "SSL_CTX_set_ciphersuites() failed: ", buildOpenSSLErrorMessage());
     }
 }
@@ -138,14 +138,14 @@ void CipherInfo::apply(SSL* ssl) const
     {
         ThorsLogAndThrowDebug(std::runtime_error,
                               "ThorsAnvil::ThorsSocket::CipherInfo",
-                              "setCipherInfo",
+                              "apply",
                               "SSL_set_cipher_list() failed: ", buildOpenSSLErrorMessage());
     }
     if (::SSL_set_ciphersuites(ssl, cipherSuite.c_str()) <= 0)
     {
         ThorsLogAndThrowDebug(std::runtime_error,
                               "ThorsAnvil::ThorsSocket::CipherInfo",
-                              "setCipherInfo",
+                              "apply",
                               "SSL_set_ciphersuites() failed: ", buildOpenSSLErrorMessage());
     }
 }
@@ -198,7 +198,7 @@ void CertificateInfo::apply(SSL_CTX* ctx) const
         {
             ThorsLogAndThrowDebug(std::runtime_error,
                                   "ThorsAnvil::ThorsSocket::CertificateInfo",
-                                  "setCertificateInfo",
+                                  "apply",
                                   "SSL_CTX_use_certificate_file() failed: ", buildOpenSSLErrorMessage());
         }
 
@@ -207,7 +207,7 @@ void CertificateInfo::apply(SSL_CTX* ctx) const
         {
             ThorsLogAndThrowDebug(std::runtime_error,
                                   "ThorsAnvil::ThorsSocket::CertificateInfo",
-                                  "setCertificateInfo",
+                                  "apply",
                                   "SSL_CTX_use_PrivateKey_file() failed: ", buildOpenSSLErrorMessage());
         }
 
@@ -216,7 +216,7 @@ void CertificateInfo::apply(SSL_CTX* ctx) const
         {
             ThorsLogAndThrowDebug(std::runtime_error,
                                   "ThorsAnvil::ThorsSocket::CertificateInfo",
-                                  "setCertificateInfo",
+                                  "apply",
                                   "SSL_CTX_check_private_key() failed: ", buildOpenSSLErrorMessage());
         }
     }
@@ -239,7 +239,7 @@ void CertificateInfo::apply(SSL* ssl) const
         {
             ThorsLogAndThrowDebug(std::runtime_error,
                                   "ThorsAnvil::ThorsSocket::CertificateInfo",
-                                  "setCertificateInfo",
+                                  "apply",
                                   "SSL_use_certificate_file() failed: ", buildOpenSSLErrorMessage());
         }
 
@@ -248,7 +248,7 @@ void CertificateInfo::apply(SSL* ssl) const
         {
             ThorsLogAndThrowDebug(std::runtime_error,
                                   "ThorsAnvil::ThorsSocket::CertificateInfo",
-                                  "setCertificateInfo",
+                                  "apply",
                                   "SSL_use_PrivateKey_file() failed: ", buildOpenSSLErrorMessage());
         }
 
@@ -257,7 +257,7 @@ void CertificateInfo::apply(SSL* ssl) const
         {
             ThorsLogAndThrowDebug(std::runtime_error,
                                   "ThorsAnvil::ThorsSocket::CertificateInfo",
-                                  "setCertificateInfo",
+                                  "apply",
                                   "SSL_check_private_key() failed: ", buildOpenSSLErrorMessage());
         }
     }
@@ -274,7 +274,7 @@ void CertifcateAuthorityDataInfo<A>::apply(SSL_CTX* ctx) const
         {
             ThorsLogAndThrowDebug(std::runtime_error,
                                   "ThorsAnvil::ThorsSocket::CertifcateAuthorityDataInfo",
-                                  "setCertifcateAuthority",
+                                  "apply",
                                   "setDefaultCertifcateAuthorityInfo() failed: ", type(), ": ", buildOpenSSLErrorMessage());
         }
     }
@@ -287,7 +287,7 @@ void CertifcateAuthorityDataInfo<A>::apply(SSL_CTX* ctx) const
             {
                 ThorsLogAndThrowDebug(std::runtime_error,
                                       "ThorsAnvil::ThorsSocket::CertifcateAuthorityDataInfo",
-                                      "setCertifcateAuthority",
+                                      "apply",
                                       "setDefaultCertifcateAuthorityInfo() failed: ", type(), " ", item, ": " , buildOpenSSLErrorMessage());
             }
         }
@@ -366,7 +366,7 @@ STACK_OF(X509_NAME)* ClientCAListInfo::buildCAToList() const
         {
             ::sk_X509_NAME_pop_free_wrapper(list);
             ThorsLogAndThrowDebug(std::runtime_error,
-                                  "ThorsAnvil::ThorsSocket::ClientCAListDataInfo<File>",
+                                  "ThorsAnvil::ThorsSocket::ClientCAListInfo",
                                   "addCAToList failed: >", item, "< ", buildOpenSSLErrorMessage());
         }
     }
@@ -377,7 +377,7 @@ STACK_OF(X509_NAME)* ClientCAListInfo::buildCAToList() const
         {
             ::sk_X509_NAME_pop_free_wrapper(list);
             ThorsLogAndThrowDebug(std::runtime_error,
-                                  "ThorsAnvil::ThorsSocket::ClientCAListDataInfo<Dir>",
+                                  "ThorsAnvil::ThorsSocket::ClientCAListnfo",
                                   "addCAToList failed: >", item, "< ", buildOpenSSLErrorMessage());
         }
     }
@@ -388,7 +388,7 @@ STACK_OF(X509_NAME)* ClientCAListInfo::buildCAToList() const
         {
             ::sk_X509_NAME_pop_free_wrapper(list);
             ThorsLogAndThrowDebug(std::runtime_error,
-                                  "ThorsAnvil::ThorsSocket::ClientCAListDataInfo<Store>",
+                                  "ThorsAnvil::ThorsSocket::ClientCAListInfo",
                                   "addCAToList failed: >", item, "< ", buildOpenSSLErrorMessage());
         }
     }

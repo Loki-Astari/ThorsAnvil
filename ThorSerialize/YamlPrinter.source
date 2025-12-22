@@ -28,7 +28,7 @@ void YamlPrinter::checkYamlResultCode(int code, char const* method, char const* 
     if (code == 0)
     {
         error = true;
-        ThorsLogAndThrowDebug(std::runtime_error,
+        ThorsLogAndThrowError(std::runtime_error,
                               "ThorsAnvil::Serialize::YamlPrinter",
                               "checkYamlResultCode",
                               method, ":", msg);
@@ -225,7 +225,7 @@ void YamlPrinter::addKey(std::string_view const& key)
     if (state.back().second != TraitType::Map && state.back().first % 2 != 1)
     {
         error = true;
-        ThorsLogAndThrowDebug(std::runtime_error,
+        ThorsLogAndThrowError(std::runtime_error,
                               "ThorsAnvil::Serialize::YamlPrinter",
                               "addKey",
                               "Invalid call to addKey(): Currently not in a map");

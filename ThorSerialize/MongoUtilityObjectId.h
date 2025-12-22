@@ -5,6 +5,7 @@
 #include <chrono>
 #include <tuple>
 #include <iostream>
+#include <sstream>
 
 namespace ThorsAnvil::Serialize
 {
@@ -27,12 +28,25 @@ class ObjectID
     std::int32_t    timestamp;
     std::int64_t    random;
     std::int32_t    counter;
+
+    mutable std::string     str;
+
     public:
         static int getNextCounter()
         {
             return (classCounter()++) % 0xFFF;
         }
+        std::string const& to_string() const
+        {
+            if (str == "") {
+                std::stringstream stream;
+                stream << (*this);
+                str = stream.str();
+            }
+            return str;
+        }
         ObjectID(std::int32_t timestamp = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count(), std::int64_t random = std::rand(), std::int32_t counter = ObjectID::getNextCounter());
+        ObjectID(std::string const& idStr);
         bool operator==(ObjectID const& rhs) const {return std::tie(timestamp, random, counter) == std::tie(rhs.timestamp, rhs.random, rhs.counter);}
         bool operator<(ObjectID const& rhs)  const {return std::tie(timestamp, random, counter) <  std::tie(rhs.timestamp, rhs.random, rhs.counter);}
         friend BsonPrinter& operator<<(BsonPrinter& printer, ObjectID const& data);

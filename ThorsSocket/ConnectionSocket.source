@@ -496,7 +496,7 @@ int SocketServer::acceptSocket(YieldFunc& yield)
         ThorsLogAndThrowDebug(
                 std::runtime_error,
                 "ThorsAnvil::ThorsSocket::ConnectionType::SocketServer",
-                "accept",
+                "acceptSocket",
                 " :Failed on ::accept.",
                 " errno = ", saveErrno, " ", getErrNoStrSocket(saveErrno),
                 " msg >", getErrMsgSocket(saveErrno), "<"

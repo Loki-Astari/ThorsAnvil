@@ -107,7 +107,7 @@ struct HeedAllValues
     {
         if (membersFound.find(member.first) == std::end(membersFound))
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize::HeedAllValues",
                                   "checkAMember"
                                   "Did not fine: ", member.first);
@@ -194,7 +194,7 @@ class DeSerializationForBlock
 
             if (tokenType != ParserToken::MapStart)
             {
-                ThorsLogAndThrowDebug(std::runtime_error,
+                ThorsLogAndThrowError(std::runtime_error,
                                       "ThorsAnvil::Serialize::DeSerializationForBlock<Map>",
                                       "DeSerializationForBlock",
                                       "Invalid Object Start");
@@ -208,7 +208,7 @@ class DeSerializationForBlock
             {
                 if (!parent.scanObjectMembers(key, object))
                 {
-                    ThorsLogDebug("DeSerializationForBlock", "scanObject", "Ignoring field: ", key);
+                    ThorsLogTrack("DeSerializationForBlock", "scanObject", "Ignoring field: ", key);
                     parser.ignoreValue();
                 }
                 else
@@ -233,7 +233,7 @@ class DeSerializationForBlock
 #if defined(FULL_VALIDATION_OF_PARSER)
                 if (tokenType != ParserToken::Key)
                 {
-                    ThorsLogAndThrowDebug(std::runtime_error,
+                    ThorsLogAndThrowError(std::runtime_error,
                                           "ThorsAnvil::Serialize::DeSerializationForBlock<Map>",
                                           "hasMoreValue",
                                           "Expecting key token");
@@ -266,7 +266,7 @@ class DeSerializationForBlock<TraitType::Value, T>
             ParserToken    tokenType = parser.getToken();
             if (tokenType != ParserToken::Value)
             {
-                ThorsLogAndThrowDebug(std::runtime_error,
+                ThorsLogAndThrowError(std::runtime_error,
                                       "ThorsAnvil::Serialize::DeSerializationForBlock<Value>",
                                       "DeSerializationForBlock",
                                       "Invalid Object");
@@ -290,7 +290,7 @@ DeSerializationForBlock<TraitType::Custom_Depricated, T>
             ParserToken    tokenType = parser.getToken();
             if (tokenType != ParserToken::Value)
             {
-                ThorsLogAndThrowDebug(std::runtime_error,
+                ThorsLogAndThrowError(std::runtime_error,
                                       "ThorsAnvil::Serialize::DeSerializationForBlock<Serialize>",
                                       "DeSerializationForBlock",
                                       "Invalid Object");
@@ -314,7 +314,7 @@ class DeSerializationForBlock<TraitType::Custom_Serialize, T>
             ParserToken    tokenType = parser.getToken();
             if (tokenType != ParserToken::Value)
             {
-                ThorsLogAndThrowDebug(std::runtime_error,
+                ThorsLogAndThrowError(std::runtime_error,
                                       "ThorsAnvil::Serialize::DeSerializationForBlock<Value>",
                                       "DeSerializationForBlock",
                                       "Invalid Object");
@@ -367,7 +367,7 @@ auto tryParsePolyMorphicObject(DeSerializer& parent, ParserInterface& parser, T&
         tokenType = parser.getToken();
         if (tokenType != ParserToken::MapStart)
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize",
                                   "tryParsePolyMorphicObject",
                                   "Invalid Object. Expecting MapStart");
@@ -376,7 +376,7 @@ auto tryParsePolyMorphicObject(DeSerializer& parent, ParserInterface& parser, T&
         tokenType = parser.getToken();
         if (tokenType != ParserToken::Key)
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize",
                                   "tryParsePolyMorphicObject",
                                   "Invalid Object. Expecting Key");
@@ -385,7 +385,7 @@ auto tryParsePolyMorphicObject(DeSerializer& parent, ParserInterface& parser, T&
         std::string_view key = parser.getKey();
         if (key != Private::getPolymorphicMarker<AllocType>(parser.config.polymorphicMarker))
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize",
                                   "tryParsePolyMorphicObject",
                                   "Invalid PolyMorphic Object. Found: >", key, "< Config Key: >", parser.config.polymorphicMarker, "< Expecting Key Name <", Private::getPolymorphicMarker<T>(parser.config.polymorphicMarker), "<");
@@ -394,7 +394,7 @@ auto tryParsePolyMorphicObject(DeSerializer& parent, ParserInterface& parser, T&
         tokenType = parser.getToken();
         if (tokenType != ParserToken::Value)
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize",
                                   "tryParsePolyMorphicObject",
                                   "Invalid Object. Expecting Value");
@@ -464,18 +464,18 @@ void readVariant(ThorsAnvil::Serialize::DeSerializer& parent, ThorsAnvil::Serial
         tokenType = parser.getToken();
         if (tokenType != ParserToken::MapStart)
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize",
-                                  "tryParsePolyMorphicObject",
+                                  "readVariant",
                                   "Invalid Object. Expecting MapStart");
         }
 
         tokenType = parser.getToken();
         if (tokenType != ParserToken::Key)
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize",
-                                  "tryParsePolyMorphicObject",
+                                  "readVariant",
                                   "Invalid Object. Expecting Key");
         }
 
@@ -484,9 +484,9 @@ void readVariant(ThorsAnvil::Serialize::DeSerializer& parent, ThorsAnvil::Serial
         tokenType = parser.getToken();
         if (tokenType != ParserToken::Value)
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize",
-                                  "tryParsePolyMorphicObject",
+                                  "readVariant",
                                   "Invalid Object. Expecting Value");
         }
 
@@ -618,7 +618,7 @@ class DeSerializationForBlock<TraitType::Enum, T>
             ParserToken    tokenType = parser.getToken();
             if (tokenType != ParserToken::Value)
             {
-                ThorsLogAndThrowDebug(std::runtime_error,
+                ThorsLogAndThrowError(std::runtime_error,
                                       "ThorsAnvil::Serialize::DeSerializationForBlock<Enum>",
                                       "DeSerializationForBlock",
                                       "Invalid Object");
@@ -652,7 +652,7 @@ class DeSerializationForBlock<TraitType::Array, T>
 
             if (tokenType != ParserToken::ArrayStart)
             {
-                ThorsLogAndThrowDebug(std::runtime_error,
+                ThorsLogAndThrowError(std::runtime_error,
                                       "ThorsAnvil::Serialize::DeSerializationForBlock<Array>",
                                       "DeSerializationForBlock",
                                       "Invalid Object Start");

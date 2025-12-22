@@ -248,7 +248,7 @@ inline void ParserInterface::pushBackToken(ParserToken token)
 #if defined(VALIDATE_EXTRA_PUSH_BACK_TOKEN)
     if (pushBack != ParserToken::Error)
     {
-        ThorsLogAndThrowDebug(std::runtime_error,
+        ThorsLogAndThrowError(std::runtime_error,
                               "ThorsAnvil::Serialize::ParserInterface",
                               "pushBackToken",
                               "Push only allows for single push back. More than one token has been pushed back between reads.");
@@ -272,7 +272,7 @@ inline DeSerializer::DeSerializer(ParserInterface& parser, bool root)
         //  We will get that in the next version
         if (parser.getToken() != ParserToken::DocStart)
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize::DeSerializer",
                                   "DeSerializer",
                                   "Invalid Doc Start");
@@ -285,7 +285,7 @@ inline DeSerializer::~DeSerializer() noexcept(false)
     {
         if (parser.getToken() != ParserToken::DocEnd)
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize::DeSerializer",
                                   "~DeSerializer",
                                   "Expected Doc End");

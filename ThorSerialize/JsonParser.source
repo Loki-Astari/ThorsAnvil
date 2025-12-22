@@ -125,7 +125,7 @@ ParserToken JsonParser::getNextToken()
     }
     // If we hit anything else there was a serious problem in the
     // parser itself.
-    ThorsLogAndThrowDebug(std::runtime_error,
+    ThorsLogAndThrowError(std::runtime_error,
                           "ThorsAnvil::Serialize::JsonParser",
                           "getNextToken",
                           "Reached an Unnamed State");

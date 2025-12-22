@@ -110,7 +110,7 @@ void BsonPrinter::addKey(std::string_view const& key)
 {
     if (currentContainer.back() != BsonContainer::Map)
     {
-        ThorsLogAndThrowDebug(std::runtime_error,
+        ThorsLogAndThrowError(std::runtime_error,
                               "ThorsAnvil::Serialize::BsonPrinter",
                               "addKey",
                               "Adding a Key to a non map object");
@@ -191,7 +191,7 @@ void BsonPrinter::closeMap()
 {
     if (currentContainer.back() != BsonContainer::Map)
     {
-        ThorsLogAndThrowDebug(std::runtime_error,
+        ThorsLogAndThrowError(std::runtime_error,
                               "ThorsAnvil::Serialize::BsonPrinter",
                               "closeMap",
                               "Closing an unopened Map");
@@ -214,7 +214,7 @@ void BsonPrinter::closeArray()
 {
     if (currentContainer.back() != BsonContainer::Array)
     {
-        ThorsLogAndThrowDebug(std::runtime_error,
+        ThorsLogAndThrowError(std::runtime_error,
                               "ThorsAnvil::Serialize::BsonPrinter",
                               "closeArray",
                               "Closing an unopened Array");

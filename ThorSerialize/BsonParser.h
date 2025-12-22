@@ -169,7 +169,7 @@ class BsonParser: public ParserInterface
                 default:
                     gotName = "Unknown";
             }
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize::BsonParser",
                                   "badType",
                                   "Trying to read a type that we can can't convert.",
@@ -199,7 +199,7 @@ inline F BsonParser::readFloat()
         dataLeft.back() -= sizeof(F);
         return result;
     }
-    ThorsLogAndThrowDebug(std::runtime_error,
+    ThorsLogAndThrowError(std::runtime_error,
                           "ThorsAnvil::Serialize::BsonParser",
                           "readFloat",
                           "Failed to read Float Value. Size: ", sizeof(F));
@@ -208,17 +208,17 @@ inline F BsonParser::readFloat()
 template<std::size_t Size, typename Int>
 inline Int BsonParser::getIntValue()
 {
-    if (nextType == '\x10')     {ThorsMessage(5, "BsonParser", "getIntValue", "Int-32"); return static_cast<Int>(readInt<4, std::int32_t>());}
-    if (nextType == '\x12')     {ThorsMessage(5, "BsonParser", "getIntValue", "Int-64"); return static_cast<Int>(readInt<8, std::int64_t>());}
+    if (nextType == '\x10')     {ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "getIntValue", "Int-32"); return static_cast<Int>(readInt<4, std::int32_t>());}
+    if (nextType == '\x12')     {ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "getIntValue", "Int-64"); return static_cast<Int>(readInt<8, std::int64_t>());}
     badType("Int(32 or 64)", nextType);
 }
 
 template<std::size_t Size, typename Float>
 inline Float BsonParser::getFloatValue()
 {
-    if (nextType == '\x10')     {ThorsMessage(5, "BsonParser", "getFloatValue", "Double-32");return static_cast<Float>(readInt<4, std::int32_t>());}
-    if (nextType == '\x12')     {ThorsMessage(5, "BsonParser", "getFloatValue", "Double-64");return static_cast<Float>(readInt<8, std::int64_t>());}
-    if (nextType == '\x01')     {ThorsMessage(5, "BsonParser", "getFloatValue", "Double-128");return static_cast<Float>(readFloat<double>());}
+    if (nextType == '\x10')     {ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "getFloatValue", "Double-32");return static_cast<Float>(readInt<4, std::int32_t>());}
+    if (nextType == '\x12')     {ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "getFloatValue", "Double-64");return static_cast<Float>(readInt<8, std::int64_t>());}
+    if (nextType == '\x01')     {ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "getFloatValue", "Double-128");return static_cast<Float>(readFloat<double>());}
 #if 0
     // TODO
     if (nextType == '\x13')     {return readFloat<long double>();}

@@ -77,7 +77,7 @@ THORS_SOCKET_HEADER_ONLY_INCLUDE
 void Server::release()
 {
     if (!isConnected()) {
-        ThorsLogAndThrowDebug(std::runtime_error, "ThorsAnvil::ThorsServer::Server", "close", "Server is in an invalid state");
+        ThorsLogAndThrowDebug(std::runtime_error, "ThorsAnvil::ThorsServer::Server", "release", "Server is in an invalid state");
     }
     connection->release();
 }

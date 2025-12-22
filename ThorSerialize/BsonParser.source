@@ -143,13 +143,13 @@ ParserToken BsonParser::getNextToken()
         }
         default:
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize::BsonParser",
                                   "getNextToken",
                                   "Invalid state reached in switch");
         }
     }
-    ThorsMessage(5, "BsonParser", "getNextToken", getTokenTypeAsString(result));
+    ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "getNextToken", getTokenTypeAsString(result));
     return result;
 }
 
@@ -235,22 +235,22 @@ void BsonParser::ignoreDataValue()
                     -1:   => Min Key        Not supported (don't understand use case)
                     127:  => Max Key        Not supported (don't understand use case)
         */
-        case '\x01':    ignore(8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Double-64");   break;
-        case '\x13':    ignore(16);  dataLeft.back() -= 16;  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Double-128");  break;
-        case '\x10':    ignore(4);   dataLeft.back() -= 4;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Int-32");      break;
-        case '\x12':    ignore(8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Int-64");      break;
-        case '\x07':    ignore(12);  dataLeft.back() -= 12;  ThorsMessage(5, "BsonParser", "ignoreDataValue", "Obj-ID");      break;
-        case '\x08':    ignore(1);   dataLeft.back() -= 1;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "Bool");        break;
-        case '\x09':    ignore(8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "UTC DateTime");break;
-        case '\x11':    ignore(8);   dataLeft.back() -= 8;   ThorsMessage(5, "BsonParser", "ignoreDataValue", "TimeStamp");   break;
-        case '\x0A':                                                ThorsMessage(5, "BsonParser", "ignoreDataValue", "NULL");        break;
+        case '\x01':    ignore(8);   dataLeft.back() -= 8;   ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Double-64");   break;
+        case '\x13':    ignore(16);  dataLeft.back() -= 16;  ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Double-128");  break;
+        case '\x10':    ignore(4);   dataLeft.back() -= 4;   ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Int-32");      break;
+        case '\x12':    ignore(8);   dataLeft.back() -= 8;   ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Int-64");      break;
+        case '\x07':    ignore(12);  dataLeft.back() -= 12;  ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Obj-ID");      break;
+        case '\x08':    ignore(1);   dataLeft.back() -= 1;   ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Bool");        break;
+        case '\x09':    ignore(8);   dataLeft.back() -= 8;   ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "UTC DateTime");break;
+        case '\x11':    ignore(8);   dataLeft.back() -= 8;   ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "TimeStamp");   break;
+        case '\x0A':                                         ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "NULL");        break;
         case '\x02':
         {
             std::int32_t size;
             read(reinterpret_cast<char*>(&size), sizeof(size));
             ignore(size);
             dataLeft.back() -= (size + 4);
-            ThorsMessage(5, "BsonParser", "ignoreDataValue", "String");
+            ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "String");
             break;
         }
         case '\x05':
@@ -259,12 +259,12 @@ void BsonParser::ignoreDataValue()
             read(reinterpret_cast<char*>(&size), sizeof(size));
             ignore(size + 1);
             dataLeft.back() -= (size + 5);
-            ThorsMessage(5, "BsonParser", "ignoreDataValue", "Binary");
+            ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Binary");
             break;
         }
         default:
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize::BsonParser",
                                   "ignoreDataValue",
                                   "trying to ignore a non value. Type: ", static_cast<unsigned int>(static_cast<unsigned char>(nextType)));
@@ -275,7 +275,7 @@ void BsonParser::ignoreDataValue()
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 bool BsonParser::isEndOfContainer(std::size_t excess)
 {
-    ThorsMessage(5, "BsonParser", "isEndOfContainer", "isEndOfContainer: dataLeft.back(): ", dataLeft.back(), " Excess: ",  excess);
+    ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "isEndOfContainer", "isEndOfContainer: dataLeft.back(): ", dataLeft.back(), " Excess: ",  excess);
     if (dataLeft.back() - excess  == 1)
     {
         switch (currentContainer.back())
@@ -299,7 +299,7 @@ void BsonParser::readEndOfContainer()
         dataLeft.back() -= 1;
         if (mark != '\x00')
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize::BsonParser",
                                   "readEndOfContainer",
                                   "End of container marker should be '\\x00' but is >", static_cast<int>(mark), "<");
@@ -307,7 +307,7 @@ void BsonParser::readEndOfContainer()
     }
     else
     {
-        ThorsLogAndThrowDebug(std::runtime_error,
+        ThorsLogAndThrowError(std::runtime_error,
                               "ThorsAnvil::Serialize::BsonParser",
                               "readEndOfContainer",
                               "End of container marker should be '\\x00' but we failed to read any data from the stream");
@@ -319,11 +319,11 @@ void BsonParser::readKey()
 {
     if (read(&nextType, 1) && readTo(nextKey, '\0'))
     {
-        ThorsMessage(5, "BsonParser", "readKey", "Key: ", nextKey);
+        ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "readKey", "Key: ", nextKey);
         dataLeft.back() -= (1 + nextKey.size() + 1);
         return;
     }
-    ThorsLogAndThrowDebug(std::runtime_error,
+    ThorsLogAndThrowError(std::runtime_error,
                           "ThorsAnvil::Serialize::BsonParser",
                           "readKey",
                           "Failed to read Key");
@@ -338,7 +338,7 @@ bool BsonParser::readBool()
         dataLeft.back() -= 1;
         return result;
     }
-    ThorsLogAndThrowDebug(std::runtime_error,
+    ThorsLogAndThrowError(std::runtime_error,
                           "ThorsAnvil::Serialize::BsonParser",
                           "readBool",
                           "Failed to read Bool");
@@ -356,7 +356,7 @@ std::size_t BsonParser::peekSize()
         input.seekg(pos);
         return size;
     }
-    ThorsLogAndThrowDebug(std::runtime_error,
+    ThorsLogAndThrowError(std::runtime_error,
                           "ThorsAnvil::Serialize::BsonParser",
                           "peekSize",
                           "Failed to peek at the size of the next object");
@@ -377,7 +377,7 @@ void BsonParser::readString(std::string& dst)
         dst.resize(dstCurrentSize + size - 1);   // remove the trailing '\0'
         return;
     }
-    ThorsLogAndThrowDebug(std::runtime_error,
+    ThorsLogAndThrowError(std::runtime_error,
                           "ThorsAnvil::Serialize::BsonParser",
                           "readString",
                           "Failed to read String");
@@ -404,7 +404,7 @@ void BsonParser::readBinary(std::string& dst)
             return;
         }
     }
-    ThorsLogAndThrowDebug(std::runtime_error,
+    ThorsLogAndThrowError(std::runtime_error,
                           "ThorsAnvil::Serialize::BsonParser",
                           "readKBinary",
                           "Failed to read Binary Data");
@@ -429,25 +429,25 @@ std::string_view BsonParser::getRawValue()
     static std::string buffer;
     switch (nextType)
     {
-        case '\x01':            ThorsMessage(5, "BsonParser", "getRawValue", "Double-64");  buffer = std::to_string(readFloat<double>());       return buffer;
-        case '\x10':            ThorsMessage(5, "BsonParser", "getRawValue", "Int-32");     buffer = std::to_string(readInt<4, std::int32_t>());return buffer;
-        case '\x12':            ThorsMessage(5, "BsonParser", "getRawValue", "Int-64");     buffer = std::to_string(readInt<8, std::int64_t>());return buffer;
-        case '\x08':            ThorsMessage(5, "BsonParser", "getRawValue", "Bool");       return readBool() ? "true" : "false";
-        case '\x0A':            ThorsMessage(5, "BsonParser", "getRawValue", "Null");       readNull(); return "null";
+        case '\x01':            ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "getRawValue", "Double-64");  buffer = std::to_string(readFloat<double>());       return buffer;
+        case '\x10':            ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "getRawValue", "Int-32");     buffer = std::to_string(readInt<4, std::int32_t>());return buffer;
+        case '\x12':            ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "getRawValue", "Int-64");     buffer = std::to_string(readInt<8, std::int64_t>());return buffer;
+        case '\x08':            ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "getRawValue", "Bool");       return readBool() ? "true" : "false";
+        case '\x0A':            ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "getRawValue", "Null");       readNull(); return "null";
         case '\x02':
         {
             using std::string_literals::operator""s;
-            ThorsMessage(5, "BsonParser", "getRawValue", "String");
+            ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "getRawValue", "String");
             buffer.clear();
             buffer.append("\"");
             readString(buffer);
             buffer.append("\"");
             return buffer;
         }
-        case '\x05':         ThorsMessage(5, "BsonParser", "getRawValue", "Binary");        readBinary(buffer);return buffer;
+        case '\x05':         ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "getRawValue", "Binary");        readBinary(buffer);return buffer;
         default:
         {
-            ThorsLogAndThrowDebug(std::runtime_error,
+            ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize::BsonParser",
                                   "getRawValue",
                                   "Could not convert the data into raw output for some reason");
