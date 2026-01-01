@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_SERIALIZE_YAML_PRINTER_H
 #define THORSANVIL_SERIALIZE_YAML_PRINTER_H
 
+#include <cstddef>
 #include <functional>
 
 #include "SerializeConfig.h"
@@ -16,6 +17,7 @@ class YamlPrinter: public PrinterInterface
 {
     yaml_emitter_t    emitter;
     bool              error;
+    bool              firstLine;
     std::vector<std::pair<int, TraitType>> state;
 
     void checkYamlResultCode(int code, char const* method, char const* msg);
@@ -31,6 +33,8 @@ class YamlPrinter: public PrinterInterface
         YamlPrinter(std::ostream& output, PrinterConfig config = PrinterConfig{});
         YamlPrinter(std::string& output, PrinterConfig config = PrinterConfig{});
         ~YamlPrinter();
+
+        bool outputFirstLine()                              {bool result = firstLine;firstLine = true;return !result;}
 
         virtual void reset()                                override;
 
