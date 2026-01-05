@@ -923,6 +923,22 @@ namespace                                                               \
 namespace ThorsAnvil::Serialize
 {
 
+class AnyBlock
+{
+    std::stringstream data;
+    public:
+        std::string         getString() const {return data.str();}
+
+
+        void openMap()                              {data << "{";}
+        void closeMap()                             {data << "}";}
+        void openArray()                            {data << "[";}
+        void closeArray()                           {data << "]";}
+        void addKey(ParserInterface& parser)        {data << "\"" << parser.getKey() << "\":";}
+        void addValue(ParserInterface& parser)      {data << parser.getRawValue();}
+        void next()                                 {data << ",";}
+};
+
 template<typename T>
 class Override
 {

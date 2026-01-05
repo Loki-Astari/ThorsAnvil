@@ -235,22 +235,22 @@ void BsonParser::ignoreDataValue()
                     -1:   => Min Key        Not supported (don't understand use case)
                     127:  => Max Key        Not supported (don't understand use case)
         */
-        case '\x01':    ignore(8);   dataLeft.back() -= 8;   ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Double-64");   break;
-        case '\x13':    ignore(16);  dataLeft.back() -= 16;  ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Double-128");  break;
-        case '\x10':    ignore(4);   dataLeft.back() -= 4;   ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Int-32");      break;
-        case '\x12':    ignore(8);   dataLeft.back() -= 8;   ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Int-64");      break;
-        case '\x07':    ignore(12);  dataLeft.back() -= 12;  ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Obj-ID");      break;
-        case '\x08':    ignore(1);   dataLeft.back() -= 1;   ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Bool");        break;
-        case '\x09':    ignore(8);   dataLeft.back() -= 8;   ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "UTC DateTime");break;
-        case '\x11':    ignore(8);   dataLeft.back() -= 8;   ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "TimeStamp");   break;
-        case '\x0A':                                         ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "NULL");        break;
+        case '\x01':    ignore(8);   dataLeft.back() -= 8;   ThorsLogDebug("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Double-64");   break;
+        case '\x13':    ignore(16);  dataLeft.back() -= 16;  ThorsLogDebug("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Double-128");  break;
+        case '\x10':    ignore(4);   dataLeft.back() -= 4;   ThorsLogDebug("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Int-32");      break;
+        case '\x12':    ignore(8);   dataLeft.back() -= 8;   ThorsLogDebug("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Int-64");      break;
+        case '\x07':    ignore(12);  dataLeft.back() -= 12;  ThorsLogDebug("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Obj-ID");      break;
+        case '\x08':    ignore(1);   dataLeft.back() -= 1;   ThorsLogDebug("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Bool");        break;
+        case '\x09':    ignore(8);   dataLeft.back() -= 8;   ThorsLogDebug("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "UTC DateTime");break;
+        case '\x11':    ignore(8);   dataLeft.back() -= 8;   ThorsLogDebug("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "TimeStamp");   break;
+        case '\x0A':                                         ThorsLogDebug("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "NULL");        break;
         case '\x02':
         {
             std::int32_t size;
             read(reinterpret_cast<char*>(&size), sizeof(size));
             ignore(size);
             dataLeft.back() -= (size + 4);
-            ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "String");
+            ThorsLogDebug("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "String");
             break;
         }
         case '\x05':
@@ -259,7 +259,7 @@ void BsonParser::ignoreDataValue()
             read(reinterpret_cast<char*>(&size), sizeof(size));
             ignore(size + 1);
             dataLeft.back() -= (size + 5);
-            ThorsLogTrack("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Binary");
+            ThorsLogDebug("ThorsAnvil::Serialize::BsonParser", "ignoreDataValue", "Binary");
             break;
         }
         default:

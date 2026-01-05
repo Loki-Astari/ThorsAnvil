@@ -232,6 +232,12 @@ struct TraitsInfo<T, M, TraitType::Custom_Serialize>
     using DeSerializeMember     = DeSerializeMemberValue<T, M, TraitType::Custom_Serialize>;
     using SerializeMember       = SerializeMemberValue<T, M, TraitType::Custom_Serialize>;
 };
+template<typename T, typename M>
+struct TraitsInfo<T, M, TraitType::AnyBlock>
+{
+    using DeSerializeMember     = DeSerializeMemberValue<T, M, TraitType::AnyBlock>;
+    using SerializeMember       = SerializeMemberValue<T, M, TraitType::AnyBlock>;
+};
 
 /* ------------ ParserInterface ------------------------- */
 inline ParserToken ParserInterface::getToken()

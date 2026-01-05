@@ -197,7 +197,7 @@ class DeSerializationForBlock
                 ThorsLogAndThrowError(std::runtime_error,
                                       "ThorsAnvil::Serialize::DeSerializationForBlock<Map>",
                                       "DeSerializationForBlock",
-                                      "Invalid Object Start");
+                                      "Invalid Object Start: Token ", static_cast<int>(tokenType));
             }
         }
 
@@ -678,6 +678,133 @@ class DeSerializationForBlock<TraitType::Array, T>
             return result;
         }
 };
+
+template<>
+class DeSerializationForBlock<TraitType::AnyBlock, ::ThorsAnvil::Serialize::AnyBlock>
+{
+    ParserInterface& parser;
+    public:
+        DeSerializationForBlock(DeSerializer&, ParserInterface& parser)
+            : parser(parser)
+        {}
+
+        void scanObject(::ThorsAnvil::Serialize::AnyBlock& object)
+        {
+            ParserToken    tokenType = parser.getToken();
+            switch (tokenType)
+            {
+                case ParserToken::Error:
+                case ParserToken::DocStart:
+                case ParserToken::DocEnd:
+                case ParserToken::MapEnd:
+                case ParserToken::ArrayEnd:
+                case ParserToken::Key:
+                    ThorsLogAndThrowDebug(std::runtime_error, "DeSerializationForBlock<TraitType::AnyBlock, AnyBlock>", "scanObject", "Invalid token: ", static_cast<int>(tokenType));
+                    break;
+
+                case ParserToken::MapStart:
+                    object.openMap();
+                    readMap(object);
+                    break;
+
+                case ParserToken::ArrayStart:
+                    object.openArray();
+                    readArray(object);
+                    break;
+
+                case ParserToken::Value:
+                    object.addValue(parser);
+                    break;
+            }
+        }
+        void readMap(::ThorsAnvil::Serialize::AnyBlock& object)
+        {
+            bool            firstValue = true;
+            ParserToken     tokenType = parser.getToken();
+            while (tokenType != ParserToken::MapEnd) {
+                if (firstValue) {
+                    firstValue = false;
+                }
+                else {
+                    object.next();
+                }
+                if (tokenType != ParserToken::Key) {
+                    ThorsLogAndThrowDebug(std::runtime_error, "DeSerializationForBlock<TraitType::AnyBlock, AnyBlock>", "readMap", " Expecting Key. Invalid token: ", static_cast<int>(tokenType));
+                }
+                object.addKey(parser);
+                tokenType = parser.getToken();
+
+                switch (tokenType)
+                {
+                    case ParserToken::Error:
+                    case ParserToken::DocStart:
+                    case ParserToken::DocEnd:
+                    case ParserToken::MapEnd:
+                    case ParserToken::ArrayEnd:
+                    case ParserToken::Key:
+                        ThorsLogAndThrowDebug(std::runtime_error, "DeSerializationForBlock<TraitType::AnyBlock, AnyBlock>", "readMap", "Invalid token: ", static_cast<int>(tokenType));
+                        break;
+
+                    case ParserToken::MapStart:
+                        object.openMap();
+                        readMap(object);
+                        break;
+
+                    case ParserToken::ArrayStart:
+                        object.openArray();
+                        readArray(object);
+                        break;
+
+                    case ParserToken::Value:
+                        object.addValue(parser);
+                        break;
+                }
+                tokenType = parser.getToken();
+            }
+            object.closeMap();
+        }
+        void readArray(AnyBlock& object)
+        {
+            bool            firstValue = true;
+            ParserToken     tokenType = parser.getToken();
+            while (tokenType != ParserToken::ArrayEnd) {
+                if (firstValue) {
+                    firstValue = false;
+                }
+                else {
+                    object.next();
+                }
+                switch (tokenType)
+                {
+                    case ParserToken::Error:
+                    case ParserToken::DocStart:
+                    case ParserToken::DocEnd:
+                    case ParserToken::MapEnd:
+                    case ParserToken::ArrayEnd:
+                    case ParserToken::Key:
+                        ThorsLogAndThrowDebug(std::runtime_error, "DeSerializationForBlock<TraitType::AnyBlock, AnyBlock>", "readMap", "Invalid token: ", static_cast<int>(tokenType));
+                        break;
+
+                    case ParserToken::MapStart:
+                        object.openMap();
+                        readMap(object);
+                        break;
+
+                    case ParserToken::ArrayStart:
+                        object.openArray();
+                        readArray(object);
+                        break;
+
+                    case ParserToken::Value:
+                        object.addValue(parser);
+                        break;
+                }
+                tokenType = parser.getToken();
+            }
+            object.closeArray();
+        }
+};
+
 
 /* ------------ DeSerializeMember ------------------------- */
 

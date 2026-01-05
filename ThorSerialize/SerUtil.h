@@ -70,6 +70,15 @@
 
 namespace ThorsAnvil::Serialize
 {
+
+template<>
+class Traits<::ThorsAnvil::Serialize::AnyBlock>
+{
+    public:
+        static constexpr TraitType type = TraitType::AnyBlock;
+        static std::size_t getPrintSize(PrinterInterface&, ::ThorsAnvil::Serialize::AnyBlock const& data, bool)   {return data.getString().size();}
+};
+
 /* Container Helper */
 
 template<typename C, typename T>

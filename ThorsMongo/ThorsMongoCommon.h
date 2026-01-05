@@ -230,7 +230,7 @@ struct Collation
 
 struct LastErrorObject
 {
-    bool            updatedExisting;
+    bool            updatedExisting = false;
     ObjectID        upserted;
 };
 
