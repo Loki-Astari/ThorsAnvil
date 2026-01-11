@@ -83,12 +83,19 @@ struct Bson
 // @param config.catchExceptions    'false:    exceptions propogate.   'true':   parsing exceptions are stopped.
 // @return                          Object that can be passed to operator<< for serialization.
 template<typename T>
-Exporter<Bson, T, BsonPrinterConfig> bsonExporter(T const& value, BsonPrinterConfig config = PrinterConfig{})
+requires(Traits<T>::type != TraitType::Invalid)
+Exporter<Bson, T, BsonPrinterConfig> bsonExporter(T const& value, BsonPrinterConfig config = BsonPrinterConfig{})
 {
     config.parserInfo = static_cast<long>(BsonBaseTypeGetter<T>::value);
     BsonBaseTypeGetter<T>::validate(value);
 
-    return Exporter<Bson, T, BsonPrinterConfig>(value, config);
+    return Exporter<Bson, T, BsonPrinterConfig>(value, std::move(config));
+}
+template<std::ranges::range R>
+requires(Traits<R>::type == TraitType::Invalid)
+ExporterRangeBson<Bson, R> bsonExporter(R range, BsonPrinterConfig config = BsonPrinterConfig{})
+{
+    return ExporterRangeBson<Bson, R>(std::move(range), std::move(config));
 }
 
 // @function-api
@@ -103,6 +110,16 @@ Importer<Bson, T> bsonImporter(T& value, ParserConfig config = ParserConfig{})
     config.parserInfo = static_cast<long>(BsonBaseTypeGetter<T>::value);
 
     return Importer<Bson, T>(value, config);
+}
+template<typename T, typename I>
+T bsonBuilder(I&& stream, ParserConfig config = ParserConfig{})
+{
+    // Note: Stream can be std::istream / std::string / std::string_view
+    T value;
+    if (stream >> bsonImporter(value, std::move(config))) {
+        return value;
+    }
+    return T{};
 }
 
 // @function-api

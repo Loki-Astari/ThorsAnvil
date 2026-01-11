@@ -9,6 +9,7 @@
 #include "Serialize.h"
 #include "MongoUtilityObjectId.h"
 #include "BsonUtil.h"
+#include "BsonPrinterConfig.h"
 #include <vector>
 #include <iostream>
 #include <functional>
@@ -31,18 +32,6 @@ namespace MongoUtility
 }
 
 using IntTypes  = std::tuple<std::int32_t, std::int64_t>;
-using IdStore   = std::optional<std::reference_wrapper<std::vector<MongoUtility::ObjectID>>>;
-
-struct BsonPrinterConfig: public PrinterConfig
-{
-    IdStore    idStore;
-    public:
-        using PrinterConfig::PrinterConfig;
-        BsonPrinterConfig(PrinterConfig val, IdStore idStore = {})
-            : PrinterConfig(std::move(val))
-            , idStore(idStore)
-        {}
-};
 
 class BsonPrinter: public PrinterInterface
 {

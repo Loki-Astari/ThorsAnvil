@@ -8,29 +8,27 @@
 #include "SerializeConfig.h"
 #include "Serialize.h"
 #include "ThorsLogging/ThorsLogging.h"
+#include "BsonPrinterConfig.h"
 
 namespace ThorsAnvil::Serialize
 {
 
-template<typename Format, typename T, typename Config = PrinterConfig>
-class Exporter
+template<typename Format, typename Config = PrinterConfig>
+class ExporterBase
 {
-    T const&        value;
-    Config          config;
+    Config         config;
     public:
-        Exporter(T const& value, Config config)
-            : value(value)
-            , config(config)
+        ExporterBase(Config&& config)
+            : config(std::move(config))
         {}
+        virtual void doInserter(PrinterInterface& printer) const = 0;
         template<typename F>
         bool inserter(F& stream) const
         {
             typename Format::Printer    printer(stream, config);
             try
             {
-                Serializer                  serializer(printer);
-
-                serializer.print(value);
+                doInserter(printer);
             }
             catch (DepricatedIssue const& e)
             {
@@ -67,14 +65,86 @@ class Exporter
 
             return printer.ok();
         }
-        friend std::ostream& operator<<(std::ostream& stream, Exporter const& data)
+        friend std::ostream& operator<<(std::ostream& stream, ExporterBase const& data)
         {
             data.inserter(stream);
             return stream;
         }
-        friend bool operator<<(std::string& stream, Exporter const& data)
+        friend bool operator<<(std::string& stream, ExporterBase const& data)
         {
             return data.inserter(stream);
+        }
+};
+
+template<typename Format, typename T, typename Config = PrinterConfig>
+class Exporter: public ExporterBase<Format, Config>
+{
+    T const&        value;
+    public:
+        Exporter(T const& value, Config&& config)
+            : ExporterBase<Format, Config>(std::move(config))
+            , value(value)
+        {}
+        virtual void doInserter(PrinterInterface& printer) const
+        {
+            Serializer                  serializer(printer);
+            serializer.print(value);
+        }
+};
+
+template<typename Format, std::ranges::range R, typename Config = PrinterConfig>
+class ExporterRange: public ExporterBase<Format, Config>
+{
+    mutable R           range;
+    public:
+        ExporterRange(R&& range, Config&& config)
+            : ExporterBase<Format, Config>(std::move(config))
+            , range(std::move(range))
+        {}
+        virtual void doInserter(PrinterInterface& printer) const override
+        {
+            Serializer          serializer(printer);
+            //printer.openDoc();
+            printer.openArray(0);
+            for (auto const& item: range) {
+                serializer.print(item);
+            }
+            printer.closeArray();
+            //printer.closeDoc();
+        }
+};
+
+template<typename Format, std::ranges::sized_range R>
+requires (Traits<R>::type == TraitType::Invalid)
+class ExporterRangeBson: public ExporterBase<Format, BsonPrinterConfig>
+{
+    mutable R       range;
+    public:
+        ExporterRangeBson(R&& range, BsonPrinterConfig&& config)
+            : ExporterBase<Format, BsonPrinterConfig>(std::move(config))
+            , range(std::move(range))
+        {}
+        virtual void doInserter(PrinterInterface& printer) const override
+        {
+            printer.openDoc();
+
+            std::size_t size = printer.getSizeArray(std::size(range));
+            using VT = std::ranges::range_value_t<R>;
+            printer.pushLevel(false);
+            for (auto const& val: range) {
+                size += Traits<std::remove_cv_t<VT>>::getPrintSize(printer, val, false);
+            }
+            printer.popLevel();
+
+
+            Serializer          serializer(printer);
+            printer.openArray(size);
+            for (auto const& val: range) {
+                serializer.print(val);
+            }
+            printer.closeArray();
+            printer.closeDoc();
+            printer.finalizePrint();
         }
 };
 
