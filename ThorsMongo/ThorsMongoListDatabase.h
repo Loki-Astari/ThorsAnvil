@@ -28,11 +28,10 @@ struct ListDatabaseResult: public CmdReplyBase, public MongoActionReadInterfaceT
 
     // Index and following three functions are used by Range.
     private:
-        std::size_t         index       = 0;
     public:
-        bool increment()            {return ++index != databases.size();}
-        DBInfo& current()           {return databases[index];}
-        std::size_t size() const    {return databases.size();}
+        bool checkAvailable(std::size_t index)  {return index != databases.size();}
+        DBInfo& get(std::size_t index)          {return databases[index];}
+        std::size_t size() const                {return databases.size();}
 };
 
 using DBRange = Range<ListDatabaseResult>;

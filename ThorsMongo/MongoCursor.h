@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_DB_MONGO_MONGO_CURSOR_H
 #define THORSANVIL_DB_MONGO_MONGO_CURSOR_H
 
+#include <cstddef>
 #include "ThorsMongoConfig.h"
 #include "ThorsMongoCommon.h"
 #include "ThorsMongoGetMore.h"
@@ -80,6 +81,7 @@ class CursorIterator
 {
     using T = typename R::ValueType;
     Nref<R>                 cursorData;
+    std::size_t             index;
     bool                    input;
 
     public:
@@ -88,28 +90,46 @@ class CursorIterator
         using pointer           = T*;
         using reference         = T&;
         using iterator_category = std::input_iterator_tag;
+        CursorIterator()
+            : index(0)
+            , input(false)
+        {}
         CursorIterator(R& cursorData, bool input)
             : cursorData(cursorData)
+            , index(0)
             , input(input)
         {}
 
         // Input iterator.
         // If they are both the end they are equal.
         // Since this is an input iterator then if they are not the end they are also always equal.
-        friend bool operator==(CursorIterator const& lhs, CursorIterator const& rhs)    {return lhs.input == rhs.input;}
+        friend bool operator==(CursorIterator const& lhs, CursorIterator const& rhs)
+        {
+            if (lhs.input == false) {
+                return rhs.input == false;
+            }
+            else {
+                return lhs.input == rhs.input && lhs.index == rhs.index;
+            }
+        }
         friend bool operator!=(CursorIterator const& lhs, CursorIterator const& rhs)    {return !(lhs == rhs);}
 
-        T& operator*()  {return cursorData.get().current();}
-        T* operator->() {return &cursorData.get().current();}
+        T&    operator*()  const {return cursorData.get().get(index);}
+        T*    operator->() const {return &cursorData.get().get(index);}
         CursorIterator& operator++()     /* prefix */
         {
-            // increment() returns true if more data is
-            // available after getting more data.
-            input = cursorData.get().increment();
+            ++index;
+            input = cursorData.get().checkAvailable(index);
             return *this;
         }
-        // Postfix ++ is not supported on input iterators.
-        //CursorIterator  operator++(int)  /* postfix */
+        CursorIterator operator++(int)
+        {
+            CursorIterator  result{*this};
+
+            ++index;
+            input = cursorData.get().checkAvailable(index);
+            return result;
+        }
 };
 
 template<typename R> // FindType<T>
@@ -133,9 +153,17 @@ struct Range
         Range(std::unique_ptr<R> rangeData)
             : rangeData(std::move(rangeData))
         {}
+        Range(Range const& copy)
+            : rangeData(copy.rangeData)
+        {}
         Range(Range&& move)
             : rangeData(std::move(move.rangeData))
         {}
+        Range& operator=(Range const& copy)
+        {
+            rangeData = copy.rangeData;
+            return *this;
+        }
         Range& operator=(Range&& move)
         {
             rangeData = std::exchange(move.rangeData, nullptr);
@@ -169,8 +197,9 @@ class CursorData: public CmdReplyBase
     std::string                 colName;
     GetMoreConfig               getMoreConfig;
     KillCursorConfig            killCursorConfig;
-    std::size_t                 index;
     CursorFirst<T>              cursor;
+    std::vector<T>              postSave;
+    std::size_t                 offset;
     TimeStamp                   operationTime;
     ClusterTime                 $clusterTime;
 
@@ -181,7 +210,7 @@ class CursorData: public CmdReplyBase
             , colName(colName)
             , getMoreConfig(getMoreConfig)
             , killCursorConfig(killCursorConfig)
-            , index(0)
+            , offset(0)
         {}
         ~CursorData();
         // Destructor:  See ThorsMongo.h for definition.
@@ -199,16 +228,17 @@ class CursorData: public CmdReplyBase
         friend class CursorIterator<FindResult<T>>;
         friend class CursorIterator<ListCollectionResult>;
         // These functions are for the CursorIterator.
-        bool increment();
+        bool checkAvailable(std::size_t index);
         // increment: See ThorsMongo.h for definition.
         //               Need to placed after ThorsMongo class declaration.
-        T& current()
+        T& get(std::size_t pos)
         {
-            return cursor.firstBatch[index];
+            std::size_t     index = pos - offset;
+            return index == static_cast<std::size_t>(-1) ? postSave[0] : cursor.firstBatch[index];
         }
         std::size_t size() const
         {
-            return cursor.firstBatch.size();
+            return offset + cursor.firstBatch.size();
         }
 };
 }

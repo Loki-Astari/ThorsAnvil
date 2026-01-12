@@ -239,15 +239,21 @@ CursorData<T>::~CursorData()
 }
 template<typename T>
 inline
-bool CursorData<T>::increment()
+bool CursorData<T>::checkAvailable(std::size_t index)
 {
-    ++index;
-    if (cursor.data().size() == index)
+    if (offset + cursor.data().size() == index)
     {
-        index = 0;
+        offset += cursor.data().size();
+
+        if (postSave.size() == 0) {
+            postSave.emplace_back(cursor.firstBatch.back());
+        }
+        else {
+            postSave.back() = std::move(cursor.firstBatch.back());
+        }
         owner.get().getMore(*this, dbName, colName, cursor.getId(), getMoreConfig);
     }
-    return index != cursor.data().size();
+    return index != offset + cursor.data().size();
 }
 
 }
