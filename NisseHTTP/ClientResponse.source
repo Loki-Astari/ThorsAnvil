@@ -1,0 +1,63 @@
+#include <iomanip>
+#include <algorithm>
+
+using namespace ThorsAnvil::Nisse::HTTP;
+
+namespace ThorsAnvil::Nisse::HTTP
+{
+    NISSE_HEADER_ONLY_INCLUDE
+    std::istream& operator>>(std::istream& stream, StatusResponse& data)
+    {
+        stream >> data.code >> std::ws;
+        std::getline(stream, data.message);
+        if (data.message.size() > 0 && data.message[data.message.size() - 1] == '\r') {
+            data.message.resize(data.message.size() - 1);
+        }
+        return stream;
+    }
+    NISSE_HEADER_ONLY_INCLUDE
+    std::ostream& operator<<(std::ostream& stream, StatusResponse const& data)
+    {
+        return stream << data.code << " " << data.message;
+    }
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+ClientResponse::ClientResponse(std::istream& stream)
+{
+    std::string     line;
+    if (stream >> version >> status)
+    {
+        std::string     line;
+        while (std::getline(stream, line)) {
+            if (line == "\r") {
+                break;
+            }
+            auto colon = std::min(std::size(line), line.find(':'));
+            auto value = colon == std::size(line) ? colon : line.find_first_not_of(" ", colon + 1);
+
+            headers.insert_or_assign(line.substr(0, colon), line.substr(value, line.size() - value - 1));
+        }
+    }
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+void ClientResponse::print(std::ostream& stream) const
+{
+    stream << version << " " << status << "\r\n";
+    for (auto const& head: headers) {
+        stream << head.first << ": " << head.second << "\r\n";
+    }
+    stream << "\r\n";
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+std::size_t ClientResponse::getContentSize() const
+{
+    auto find = headers.find("content-length");
+    if (find != std::end(headers)) {
+        //std::cerr << "Found Size: " << find->second << " : " << std::stoi(find->second) << "\n";
+        return std::stoi(find->second);
+    }
+    return 0;
+}

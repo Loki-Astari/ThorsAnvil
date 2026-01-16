@@ -1,0 +1,93 @@
+#include <ThorsLogging/ThorsLogging.h>
+
+namespace ThorsAnvil::Nisse::Server
+{
+
+NISSE_HEADER_ONLY_INCLUDE
+JobQueue::JobQueue(std::size_t workerCount)
+    : finished{false}
+{
+    try
+    {
+        for (std::size_t loop = 0; loop < workerCount; ++loop) {
+            workers.emplace_back(&JobQueue::processWork, this);
+        }
+    }
+    catch (...)
+    {
+        stop();
+        throw;
+    }
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+JobQueue::~JobQueue()
+{
+    stop();
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+void JobQueue::addJob(Work&& action)
+{
+    std::unique_lock    lock(workMutex);
+    workQueue.emplace(action);
+    workCV.notify_one();
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+void JobQueue::markFinished()
+{
+    std::unique_lock    lock(workMutex);
+    finished = true;
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+void JobQueue::stop()
+{
+    markFinished();
+    workCV.notify_all();
+    for (auto& w: workers) {
+        w.join();
+    }
+    workers.clear();
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+std::optional<Work> JobQueue::getNextJob()
+{
+    std::unique_lock    lock(workMutex);
+    workCV.wait(lock, [&](){return !workQueue.empty() || finished;});
+
+    if (workQueue.empty() || finished) {
+        return {};
+    }
+
+    Work work = std::move(workQueue.front());
+    workQueue.pop();
+    return work;
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+void JobQueue::processWork()
+{
+    while (!finished)
+    {
+        std::optional<Work> work   = getNextJob();
+        try
+        {
+            if (work.has_value()) {
+                (*work)();
+            }
+        }
+        catch (std::exception const& e)
+        {
+            ThorsLogWarning("ThorsAnvil::Nissa::Server::JobQueue", "processWork", "Work Exception: ",  e.what());
+        }
+        catch (...)
+        {
+            ThorsLogWarning("ThorsAnvil::Nissa::Server::JobQueue", "processWork", "Work Exception: Unknown");
+        }
+    }
+}
+}
+

@@ -1,0 +1,110 @@
+#include "ThorsLogging/ThorsLogging.h"
+#include <tuple>
+#include <algorithm>
+#include <stdexcept>
+
+using namespace ThorsAnvil::Nisse::HTTP;
+
+NISSE_HEADER_ONLY_INCLUDE
+std::string ClientRequest::getHost(std::string const& url)
+{
+    auto find = url.find("://");
+    if (find == std::string::npos) {
+        find = 0;
+    }
+    else {
+        find += 3;
+    }
+    auto path = std::min(std::size(url), url.find('/', find));
+    auto port = url.find(':', find);
+    auto end  = std::min(path, port);
+    return url.substr(find, (end - find));
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+std::string_view ClientRequest::getRequest(std::string const& url)
+{
+    auto find = url.find("://");
+    if (find == std::string::npos) {
+        find = 0;
+    }
+    else {
+        find += 3;
+    }
+    auto path = std::min(std::size(url), url.find('/', find));
+    return {std::begin(url) + path, std::end(url)};
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+ClientRequest::ClientRequest(std::ostream& baseStream, std::string url, Method method, Version version)
+    : method(method)
+    , version(version)
+    , url(std::move(url))
+    , baseStream(baseStream)
+    , headerSent(false)
+{}
+
+NISSE_HEADER_ONLY_INCLUDE
+ClientRequest::~ClientRequest()
+{
+    flushRequest();
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+void ClientRequest::flushHeaderIfNeeded()
+{
+    if (!headerSent)
+    {
+        ThorsLogTrack("ThorsAnvil::Nisse::HTTP::ClientRequest", "flushHeaderIfNeeded", "Sending header: ", method, " ", url, " ", version);
+        baseStream << method << " " << getRequest(url) << " " << version << "\r\n"
+                   << "Host: " << getHost(url) << "\r\n";
+
+        headerSent = true;
+    }
+}
+
+namespace ThorsAnvil::Nisse::HTTP
+{
+    // Forward declare as it currently is not in header file.
+    // TODO FIX
+    NISSE_HEADER_ONLY_INCLUDE
+    std::ostream& operator<<(std::ostream& stream, Header const& header);
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+void ClientRequest::addHeaders(Header const& headers)
+{
+    if (stream.rdbuf() != nullptr) {
+        ThorsLogAndThrowWarning(std::runtime_error, "ThorsAnvil::Nisse::HTTP::ClientRequest", "addHeaders", "Headers can not be sent after the body has been started");
+    }
+
+    flushHeaderIfNeeded();
+    baseStream << headers;
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+std::ostream& ClientRequest::body(BodyEncoding bodyEncoding)
+{
+    ThorsLogTrack("ThorsAnvil::Nisse::HTTP::ClientRequest", "body", "Adding body");
+    if (version > Version::HTTP1_1 && std::holds_alternative<Encoding>(bodyEncoding) && std::get<Encoding>(bodyEncoding) == Encoding::Chunked) {
+        ThorsLogFatal("ThorsAnvil::Nisse::HTTP::ClientRequest", "body", "Invalid encoding requested. Chunked encoding not supported in HTTP 2 or 3");
+    }
+    flushHeaderIfNeeded();
+    ThorsLogTrack("ThorsAnvil::Nisse::HTTP::ClientRequest", "body", "adding body to stream");
+    baseStream << bodyEncoding
+               << "\r\n";
+               // << std::flush; // Do we need to flush?
+
+    stream.addBuffer(StreamBufOutput{baseStream, bodyEncoding});
+    return stream;
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+void ClientRequest::flushRequest()
+{
+    if (stream.rdbuf() == nullptr) {
+        body(0);
+    }
+    stream << std::flush;
+
+}

@@ -1,0 +1,128 @@
+#include <map>
+#include <variant>
+
+using namespace ThorsAnvil::Nisse::HTTP;
+
+namespace ThorsAnvil::Nisse::HTTP
+{
+NISSE_HEADER_ONLY_INCLUDE
+std::ostream& operator<<(std::ostream& stream, Version const& v)
+{
+    static const std::map<Version, std::string> versionMap = {{Version::HTTP1_0, "HTTP/1.0"}, {Version::HTTP1_1, "HTTP/1.1"}, {Version::HTTP2, "HTTP/2"}, {Version::HTTP3, "HTTP/3"}};
+
+    auto find = versionMap.find(v);
+    if (find != versionMap.end()) {
+        stream << find->second;
+    }
+    return stream;
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+std::istream& operator>>(std::istream& stream, Version& v)
+{
+    static const std::map<std::string, Version> versionMap = {{"HTTP/1.0", Version::HTTP1_0}, {"HTTP/1.1", Version::HTTP1_1}, {"HTTP/2", Version::HTTP2}, {"HTTP/3", Version::HTTP3}};
+
+    std::string version;
+    if (stream >> version)
+    {
+        auto find = versionMap.find(version);
+        v = Version::Unknown;
+        if (find != versionMap.end()) {
+            v = find->second;
+        }
+    }
+    return stream;
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+std::ostream& operator<<(std::ostream& stream, Encoding const& /*encoding (Always chunked)*/)
+{
+    return stream << "chunked";
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+std::ostream& operator<<(std::ostream& stream, BodyEncoding const& bodyEncoding)
+{
+    struct BodyEncodingStream
+    {
+        std::ostream& stream;
+        BodyEncodingStream(std::ostream& stream)
+            : stream(stream)
+        {}
+        std::ostream& operator()(std::size_t contentLength)         {return stream << "content-length: " << contentLength << "\r\n";}
+        std::ostream& operator()(std::streamsize contentLength)     {return stream << "content-length: " << contentLength << "\r\n";}
+        std::ostream& operator()(Encoding encoding)                 {return stream << "transfer-encoding: " << encoding << "\r\n";}
+    };
+    return std::visit(BodyEncodingStream{stream}, bodyEncoding);
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+std::ostream& operator<<(std::ostream& stream, Method const& method)
+{
+    static char const* out[] = {"GET", "HEAD", "OPTIONS", "TRACE", "PUT", "DELETE", "POST", "PATCH", "CONNECT", "BAD"};
+    return stream << out[static_cast<int>(method)];
+}
+
+}
+
+using std::literals::string_literals::operator""s;
+using std::literals::string_view_literals::operator""sv;
+
+NISSE_HEADER_ONLY_INCLUDE
+StandardStatusCodeMap::StatusCodeMap const& StandardStatusCodeMap::getStandardCodes()
+{
+    static StatusCodeMap const standardCodes
+    {
+        {
+            {100, "Continue"sv}, {101, "Switching Protocols"sv}, {102, "Processing Deprecated"sv}, {103, "Early Hints"sv},
+
+            {200, "OK"sv}, {201, "Created"sv}, {202, "Accepted"sv}, {203, "Non-Authoritative Information"sv},
+            {204, "No Content"sv}, {205, "Reset Content"sv}, {206, "Partial Content"sv}, {207, "Multi-Status (WebDAV)"sv},
+            {208, "Already Reported (WebDAV)"sv}, {226, "IM Used (HTTP Delta encoding)"sv},
+
+            {300, "Multiple Choices"sv}, {301, "Moved Permanently"sv}, {302, "Found"sv}, {303, "See Other"sv},
+            {304, "Not Modified"sv}, {305, "Use Proxy Deprecated"sv}, {306, "unused"sv}, {307, "Temporary Redirect"sv},
+            {308, "Permanent Redirect"sv},
+
+            {400, "Bad Request"sv}, {401, "Unauthorized"sv}, {402, "Payment Required"sv}, {403, "Forbidden"sv},
+            {404, "Not Found"sv}, {405, "Method Not Allowed"sv}, {406, "Not Acceptable"sv},
+            {407, "Proxy Authentication Required"sv}, {408, "Request Timeout"sv}, {409, "Conflict"sv}, {410, "Gone"sv},
+            {411, "Length Required"sv}, {412, "Precondition Failed"sv}, {413, "Content Too Large"sv}, {414, "URI Too Long"sv},
+            {415, "Unsupported Media Type"sv}, {416, "Range Not Satisfiable"sv}, {417, "Expectation Failed"sv},
+            {418, "I'm a teapot"sv}, {421, "Misdirected Request"sv}, {422, "Unprocessable Content (WebDAV)"sv},
+            {423, "Locked (WebDAV)"sv}, {424, "Failed Dependency (WebDAV)"sv}, {425, "Too Early Experimental"sv},
+            {426, "Upgrade Required"sv}, {428, "Precondition Required"sv}, {429, "Too Many Requests"sv},
+            {431, "Request Header Fields Too Large"sv}, {451, "Unavailable For Legal Reasons"sv},
+
+            {500, "Internal Server Error"sv}, {501, "Not Implemented"sv}, {502, "Bad Gateway"sv},
+            {503, "Service Unavailable"sv}, {504, "Gateway Timeout"sv}, {505, "HTTP Version Not Supported"sv},
+            {506, "Variant Also Negotiates"sv}, {507, "Insufficient Storage (WebDAV)"sv}, {508, "Loop Detected (WebDAV)"sv},
+            {510, "Not Extended"sv}, {511, "Network Authentication Required"sv}
+        },
+        [](StatusCode const& lhs, StatusCode const& rhs){return lhs.code < rhs.code;}
+    };
+    return standardCodes;
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+StandardStatusCodeMap& StandardStatusCodeMap::getStandardStatusCodeMap()
+{
+    static StandardStatusCodeMap instance;
+    return instance;
+}
+
+NISSE_HEADER_ONLY_INCLUDE
+StatusCode const& StandardStatusCodeMap::operator[](int code)
+{
+    static StatusCode  unknown{500, "Internal Server Error"sv};
+
+    auto find = getStandardCodes().find({code, ""sv});
+    return find == getStandardCodes().end() ? unknown : *find;
+}
+
+
+NISSE_HEADER_ONLY_INCLUDE
+void StatusCode::print(std::ostream& stream) const
+{
+    stream << code << " " << message;
+}

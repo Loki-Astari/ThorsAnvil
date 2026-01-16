@@ -21,6 +21,7 @@ namespace ThorsAnvil::DB::Mongo
     class FindResult;
 
     class ListCollectionResult;
+    struct CollectionInfo;
 
     class ThorsMongo;
 
@@ -76,10 +77,9 @@ class CursorFirst: public Cursor
         }
 };
 
-template<typename R>
+template<typename R, typename T>
 class CursorIterator
 {
-    using T = typename R::ValueType;
     Nref<R>                 cursorData;
     std::size_t             index;
     bool                    input;
@@ -169,8 +169,10 @@ struct Range
             rangeData = std::exchange(move.rangeData, nullptr);
             return *this;
         }
-        CursorIterator<R> begin()   {return CursorIterator<R>{*rangeData, cursorhasData()};}
-        CursorIterator<R> end()     {return CursorIterator<R>{*rangeData, false};}
+        CursorIterator<R, T> begin()         {return CursorIterator<R, T>{*rangeData, cursorhasData()};}
+        CursorIterator<R, T> end()           {return CursorIterator<R, T>{*rangeData, false};}
+        CursorIterator<R, const T> begin()   const {return CursorIterator<R, const T>{*rangeData, cursorhasData()};}
+        CursorIterator<R, const T> end()     const {return CursorIterator<R, const T>{*rangeData, false};}
 
         bool isOk()                     const   {return static_cast<bool>(*rangeData);}
         std::string getHRErrorMessage() const   {return rangeData->getHRErrorMessage();}
@@ -225,13 +227,20 @@ class CursorData: public CmdReplyBase
         }
 
     private:
-        friend class CursorIterator<FindResult<T>>;
-        friend class CursorIterator<ListCollectionResult>;
+        friend class CursorIterator<FindResult<T>, T>;
+        friend class CursorIterator<FindResult<T>, const T>;
+        friend class CursorIterator<ListCollectionResult, CollectionInfo>;
+        friend class CursorIterator<ListCollectionResult, const CollectionInfo>;
         // These functions are for the CursorIterator.
         bool checkAvailable(std::size_t index);
         // increment: See ThorsMongo.h for definition.
         //               Need to placed after ThorsMongo class declaration.
         T& get(std::size_t pos)
+        {
+            std::size_t     index = pos - offset;
+            return index == static_cast<std::size_t>(-1) ? postSave[0] : cursor.firstBatch[index];
+        }
+        T const& get(std::size_t pos) const
         {
             std::size_t     index = pos - offset;
             return index == static_cast<std::size_t>(-1) ? postSave[0] : cursor.firstBatch[index];
