@@ -5,8 +5,8 @@ from conan.tools.gnu import AutotoolsDeps
 from conan.tools.gnu import AutotoolsToolchain
 
 class ThorsSerializerConan(ConanFile):
-    name = "thors-mongo"
-    version = "3.2.20"
+    name = "thors-anvil"
+    version = "9.0.01"
     license = "GPL-3.0"
     author = "Martin York Loki.Astari@gmail.com"
     url = "https://github.com/Loki-Astari/ThorsSerializer"

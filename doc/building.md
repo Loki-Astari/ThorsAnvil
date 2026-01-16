@@ -4,7 +4,7 @@
 ## From [Homebrew](https://brew.sh/)
 ```bash
 brew update
-brew install thors-mongo
+brew install thors-anvil
 ```
 ## From [GitHub](https://github.com/Loki-Astari/ThorsSerializer) Header only version
 

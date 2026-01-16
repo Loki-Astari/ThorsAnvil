@@ -535,7 +535,7 @@ To make this work the `Traits` class for pointers generates a default `alloc()` 
 ## From [Homebrew](https://brew.sh/)
 ```bash
 brew update
-brew install thors-mongo
+brew install thors-anvil
 ```
 
 #### What is installed:
