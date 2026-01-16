@@ -1,7 +1,7 @@
 #ifndef THORSANVIL_SERIALIZE_LOGGING_H
 #define THORSANVIL_SERIALIZE_LOGGING_H
 
-#include "JsonThor.h"
+#include "SerializeConfig.h"
 
 #define THORS_LOG_DATA_SERIAL                     ThorsAnvil::Serialize::PrinterConfig{ThorsAnvil::Serialize::OutputType::Stream}
 #define THORS_LOG_DATA(D)                         "|Data|", ThorsAnvil::Serialize::jsonExporter(D, THORS_LOG_DATA_SERIAL)

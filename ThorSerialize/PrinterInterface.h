@@ -2,11 +2,11 @@
 #define THORSANVIL_SERIALIZER_PRINTER_INTERFACE_H
 
 #include "SerializeConfig.h"
-#include "PrinterConfig.h"
 #include "StringOutput.h"
 #include "ThorsSerializerUtilTypes.h"
+
 #include <cstddef>
-#include <iostream>
+#include <ostream>
 #include <string>
 #include <string_view>
 #include <map>
@@ -17,16 +17,18 @@
 namespace ThorsAnvil::Serialize
 {
 
+struct PrinterConfig;
+
 class PrinterInterface
 {
     public:
-        PrinterConfig const  config;
+        PrinterConfig const&  config;
 
-        PrinterInterface(std::ostream& output, PrinterConfig config = PrinterConfig{})
+        PrinterInterface(std::ostream& output, PrinterConfig const& config)
             : config(config)
             , output(&output)
         {}
-        PrinterInterface(std::string& output, PrinterConfig config = PrinterConfig{})
+        PrinterInterface(std::string& output, PrinterConfig const& config)
             : config(config)
             , output(StringOutput{output, true /*!config.exactPreFlight*/})
         {}

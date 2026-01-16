@@ -264,10 +264,11 @@
  */
 
 #include "SerializeConfig.h"
+#include "ParserInterface.h"
 #include "ThorsSerializerUtil.h"
-#include "ThorsIOUtil/Utility.h"
-#include "ThorsLogging/ThorsLogging.h"
+
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <map>
 #include <functional>
@@ -276,7 +277,6 @@
 #include <type_traits>
 #include <stdexcept>
 #include <cstddef>
-#include <cstring>
 #include <numeric>
 #ifdef  HAVE_MagicEnumHeaderOnlyV1
 #include <magic_enum.hpp>
@@ -284,8 +284,11 @@
 #ifdef  HAVE_MagicEnumHeaderOnlyV2
 #include <magic_enum/magic_enum.hpp>
 #endif
-#include <map>
-#include <string>
+#include <ostream>
+#include <unordered_map>
+#include <initializer_list>
+#include <optional>
+#include <sstream>
 
 /*
  * Macros for counting the number of arguments

@@ -2,10 +2,11 @@
 #define THORSANVIL_SERIALIZER_STRING_OUTPUT_H
 
 #include "SerializeConfig.h"
-#include "PrinterConfig.h"
+
 #include <string>
 #include <charconv>
-#include <iostream>
+#include <cstddef>
+#include <algorithm>
 
 namespace ThorsAnvil::Serialize
 {

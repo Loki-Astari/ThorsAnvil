@@ -2,9 +2,13 @@
 #define THORSANVIL_SERIALIZER_STRING_INPUT_H
 
 #include "SerializeConfig.h"
+
 #include <string_view>
 #include <string>
 #include <charconv>
+#include <algorithm>
+#include <iostream>
+#include <cstddef>
 
 #if defined(NO_STD_SUPPORT_FROM_CHAR_DOUBLE) && (NO_STD_SUPPORT_FROM_CHAR_DOUBLE >= 1)
 #include "fast_float/fast_float.h"

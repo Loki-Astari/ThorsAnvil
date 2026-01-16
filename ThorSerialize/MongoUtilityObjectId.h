@@ -1,11 +1,15 @@
 #ifndef THORSANVIL_SERIALIZE_MONGO_UTILITY_OBJECT_ID_H
 #define THORSANVIL_SERIALIZE_MONGO_UTILITY_OBJECT_ID_H
 
+#include "SerializeConfig.h"
+
 #include <cstdint>
 #include <chrono>
 #include <tuple>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <cstdlib>
 
 namespace ThorsAnvil::Serialize
 {

@@ -19,10 +19,11 @@
  */
 
 #include "SerializeConfig.h"
-#include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"
+
 #include <iterator>
 #include <vector>
+#include <stdexcept>
 #include <cstdint>
 
 namespace ThorsAnvil::Serialize

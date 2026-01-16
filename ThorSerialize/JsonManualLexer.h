@@ -2,10 +2,13 @@
 #define THORSANVIL_SERIALIZER_JSON_MANUAL_LEXER_H
 
 #include "SerializeConfig.h"
-#include "Serialize.h"
-#include "ThorsIOUtil/Utility.h"
+#include "ParserInterface.h"
 #include "ThorsLogging/ThorsLogging.h"
-#include <istream>
+
+#include <string>
+#include <string_view>
+#include <cstddef>
+#include <stdexcept>
 
 namespace ThorsAnvil::Serialize
 {

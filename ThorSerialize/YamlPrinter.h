@@ -1,18 +1,24 @@
 #ifndef THORSANVIL_SERIALIZE_YAML_PRINTER_H
 #define THORSANVIL_SERIALIZE_YAML_PRINTER_H
 
-#include <cstddef>
-#include <functional>
-
 #include "SerializeConfig.h"
-#include "Serialize.h"
+#include "PrinterInterface.h"
+#include "PrinterConfig.h"
+
 #include <yaml.h>
+
+#include <cstddef>
+#include <ostream>
+#include <string>
+#include <string_view>
+#include <functional>
 #include <vector>
-#include <memory>
+#include <utility>
 
 namespace ThorsAnvil::Serialize
 {
 
+enum class TraitType;
 class YamlPrinter: public PrinterInterface
 {
     yaml_emitter_t    emitter;

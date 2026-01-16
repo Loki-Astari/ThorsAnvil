@@ -2,10 +2,12 @@
 #define THORSANVIL_SERIALIZER_THORS_SERIALIZER_UTIL_TYPES_H
 
 #include "SerializeConfig.h"
+
 #include <cstdint>
 #include <optional>
 #include <functional>
-#include <iostream>
+#include <istream>
+#include <cstddef>
 
 namespace ThorsAnvil::Serialize
 {

@@ -17,7 +17,9 @@
 #include "YamlPrinter.h"
 #include "Exporter.h"
 #include "Importer.h"
-#include "SerUtil.h"
+
+#include <ranges>
+#include <utility>
 
 namespace ThorsAnvil::Serialize
 {
@@ -36,16 +38,16 @@ struct Yaml
 // @return                          Object that can be passed to operator<< for serialization.
 template<typename T>
 requires(Traits<T>::type != TraitType::Invalid)
-Exporter<Yaml, T> yamlExporter(T const& value, PrinterConfig config = PrinterConfig{})
+Exporter<Yaml, T> yamlExporter(T const& value, PrinterConfig const& config = PrinterConfig{})
 {
-    return Exporter<Yaml, T>(value, std::move(config));
+    return Exporter<Yaml, T>(value, config);
 }
 
 template<std::ranges::range R>
 requires(Traits<R>::type == TraitType::Invalid)
-ExporterRange<Yaml, R> yamlExporter(R range, PrinterConfig config = PrinterConfig{})
+ExporterRange<Yaml, R> yamlExporter(R range, PrinterConfig const& config = PrinterConfig{})
 {
-    return ExporterRange<Yaml, R>(std::move(range), std::move(config));
+    return ExporterRange<Yaml, R>(std::move(range), config);
 }
 // @function-api
 // @param value                     The object to be de-serialized.
@@ -54,16 +56,16 @@ ExporterRange<Yaml, R> yamlExporter(R range, PrinterConfig config = PrinterConfi
 // @param config.catchExceptions    'false:    exceptions propogate.        'true':   parsing exceptions are stopped.
 // @return                          Object that can be passed to operator>> for de-serialization.
 template<typename T>
-Importer<Yaml, T> yamlImporter(T& value, ParserConfig config = ParserConfig{})
+Importer<Yaml, T> yamlImporter(T& value, ParserConfig const& config = ParserConfig{})
 {
     return Importer<Yaml, T>(value, config);
 }
 template<typename T, typename I>
-T yamlBuilder(I&& stream, ParserConfig config = ParserConfig{})
+T yamlBuilder(I&& stream, ParserConfig const& config = ParserConfig{})
 {
     // Note: Stream can be std::istream / std::string / std::string_view
     T value;
-    if (stream >> yamlImporter(value, std::move(config))) {
+    if (stream >> yamlImporter(value, config)) {
         return value;
     }
     return T{};

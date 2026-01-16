@@ -1,15 +1,15 @@
 #ifndef THORSANVIL_SERIALIZE_FORMAT_H
 #define THORSANVIL_SERIALIZE_FORMAT_H
 
-#include <cstddef>
+#include "SerializeConfig.h"
+#include "ThorSerialize/JsonThor.h"
+#include "ThorSerialize/BsonThor.h"
+#include "ThorSerialize/YamlThor.h"
 
 #include <format>
 #include <string>
 #include <sstream>
-
-#include "ThorSerialize/JsonThor.h"
-#include "ThorSerialize/BsonThor.h"
-#include "ThorSerialize/YamlThor.h"
+#include <cstddef>
 
 namespace TA
 {

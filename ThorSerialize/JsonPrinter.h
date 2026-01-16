@@ -6,12 +6,21 @@
  */
 
 #include "SerializeConfig.h"
-#include "Serialize.h"
+#include "PrinterConfig.h"
+#include "PrinterInterface.h"
+
+#include <ostream>
+#include <string>
+#include <string_view>
 #include <vector>
 #include <cmath>
+#include <cstddef>
+#include <charconv>
 
 namespace ThorsAnvil::Serialize
 {
+
+enum class TraitType;
 
 // TODO This needs better field names
 struct PrintState

@@ -19,14 +19,18 @@
  */
 
 #include "SerializeConfig.h"
-#include "Serialize.h"
+#include "ParserInterface.h"
 #include "BsonUtil.h"
-#include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"
+
 #include <istream>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <bit>
+#include <stdexcept>
+#include <cstddef>
+#include <cstdint>
 
 static_assert(
     std::endian::little == std::endian::native,
@@ -44,10 +48,12 @@ namespace MongoUtility
     BsonParser& operator>>(BsonParser& parser, MongoUtility::UTCDateTime& data);
 }
 
+struct BsonParserConfig;
 class BsonParser: public ParserInterface
 {
     friend BsonParser& MongoUtility::operator>>(BsonParser& parser, MongoUtility::UTCDateTime& data);
 
+    BsonContainer               parserInfo;
     std::vector<BsonContainer>  currentContainer;
     std::vector<std::size_t>    dataLeft;
     std::vector<std::size_t>    dataSize;
@@ -58,8 +64,8 @@ class BsonParser: public ParserInterface
 
 
     public:
-        BsonParser(std::istream& stream, ParserConfig config = ParserConfig{});
-        BsonParser(std::string_view const& stream, ParserConfig config = ParserConfig{});
+        BsonParser(std::istream& stream, BsonParserConfig const& config);
+        BsonParser(std::string_view const& stream, BsonParserConfig const& config);
         virtual FormatType formatType()                         override {return FormatType::Bson;}
         virtual ParserToken getNextToken()                      override;
         virtual std::string_view getKey()                       override;

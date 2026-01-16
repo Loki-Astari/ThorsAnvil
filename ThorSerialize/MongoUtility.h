@@ -2,18 +2,21 @@
 #define THORSANVIL_SERIALIZE_MONGO_UTILITY_H
 
 #include "SerializeConfig.h"
-#include "MongoUtilityObjectId.h"
-#include "BsonParser.h"
-#include "BsonPrinter.h"
-#include "Exporter.h"
-#include "Importer.h"
-#include "SerUtil.h"
 #include "CustomSerialization.h"
-#include "ThorsIOUtil/Utility.h"
+#include "Traits.h"
+#include "SerUtil.h"
 
-#include "BsonThor.h"
-#include "JsonThor.h"
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+#include <utility>
 #include <chrono>
+#include <tuple>
+#include <ctime>
+#include <cstddef>
+#include <cstdint>
+
 
 namespace ThorsAnvil::Serialize::MongoUtility
 {

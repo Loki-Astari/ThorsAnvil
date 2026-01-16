@@ -33,10 +33,16 @@
 
 #include "SerializeConfig.h"
 #include "Traits.h"
-#include "ThorsIOUtil/Utility.h"
-#include "ThorsLogging/ThorsLogging.h"
-#include <iostream>
+
+#include <string>
+#include <string_view>
+#include <tuple>
 #include <utility>
+#include <type_traits>
+#include <stdexcept>
+#include <cstdlib>
+#include <cstddef>
+
 
 // SharedInfo is declared in ThorsSerializerUtil.h
 // This is included via Traits.h above.

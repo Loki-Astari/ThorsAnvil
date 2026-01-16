@@ -11,14 +11,17 @@
  *      std::cin  >> jsonImporter(object); // converts Json to a C++ object from an input stream
  */
 
-#include "PrinterConfig.h"
 #include "SerializeConfig.h"
 #include "JsonParser.h"
 #include "JsonPrinter.h"
 #include "Exporter.h"
 #include "Importer.h"
-#include "SerUtil.h"
 #include "ThorsSerializerUtil.h"
+
+#include <iostream>
+#include <ranges>
+#include <utility>
+#include <cstddef>
 
 namespace ThorsAnvil::Serialize
 {
@@ -37,15 +40,15 @@ struct Json
 // @return                          Object that can be passed to operator<< for serialization.
 template<typename T>
 requires(Traits<T>::type != TraitType::Invalid)
-Exporter<Json, T> jsonExporter(T const& value, PrinterConfig config = PrinterConfig{})
+Exporter<Json, T> jsonExporter(T const& value, PrinterConfig const& config = PrinterConfig{})
 {
-    return Exporter<Json, T>(value, std::move(config));
+    return Exporter<Json, T>(value, config);
 }
 template<std::ranges::range R>
 requires(Traits<R>::type == TraitType::Invalid)
-ExporterRange<Json, R> jsonExporter(R range, PrinterConfig config = PrinterConfig{})
+ExporterRange<Json, R> jsonExporter(R range, PrinterConfig const& config = PrinterConfig{})
 {
-    return ExporterRange<Json, R>(std::move(range), std::move(config));
+    return ExporterRange<Json, R>(std::move(range), config);
 }
 
 /*
@@ -65,16 +68,16 @@ std::size_t jsonStreanSize(T const& value)
 // @param config.catchExceptions    'false:    exceptions propogate.        'true':   parsing exceptions are stopped.
 // @return                          Object that can be passed to operator>> for de-serialization.
 template<typename T>
-Importer<Json, T> jsonImporter(T& value, ParserConfig config = ParserConfig{})
+Importer<Json, T> jsonImporter(T& value, ParserConfig const& config = ParserConfig{})
 {
     return Importer<Json, T>(value, config);
 }
 template<typename T, typename I>
-T jsonBuilder(I&& stream, ParserConfig config = ParserConfig{})
+T jsonBuilder(I&& stream, ParserConfig const& config = ParserConfig{})
 {
     // Note: Stream can be std::istream / std::string / std::string_view
     T value;
-    if (stream >> jsonImporter(value, std::move(config))) {
+    if (stream >> jsonImporter(value, config)) {
         return value;
     }
     return T{};

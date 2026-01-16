@@ -1,13 +1,4 @@
 
-#include <chrono>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <tuple>
-#ifndef __WINNT
-#include <arpa/inet.h>
-#endif
-
 namespace ThorsAnvil::Serialize::MongoUtility
 {
 

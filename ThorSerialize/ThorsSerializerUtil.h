@@ -2,29 +2,21 @@
 #define THORSANVIL_SERIALIZER_THORSSERIALIZERUTIL_H
 
 #include "SerializeConfig.h"
-#include "ThorsSerializerUtilTypes.h"
 #include "PolymorphicMarker.h"
 #include "PrinterConfig.h"
-#include "ParserConfig.h"
 #include "PrinterInterface.h"
-#include "ParserInterface.h"
-#include "StringOutput.h"
-#include "StringInput.h"
-#include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"
+
 #include <stdexcept>
 #include <type_traits>
 #include <string>
-#include <map>
-#include <any>
-#include <iostream>
+#include <string_view>
+#include <sstream>
 #include <iomanip>
 #include <cstddef>
 #include <algorithm>
-#include <functional>
-#include <optional>
-#include <memory>
-#include <variant>
+#include <utility>
+#include <tuple>
 
 namespace ThorsAnvil::Serialize
 {

@@ -18,10 +18,12 @@
  */
 
 #include "SerializeConfig.h"
-#include "Serialize.h"
+#include "ParserInterface.h"
 #include "JsonManualLexer.h"
+
 #include <istream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace ThorsAnvil::Serialize
@@ -41,8 +43,8 @@ class JsonParser: public ParserInterface
     std::string_view getRawString();
 
     public:
-        JsonParser(std::istream& stream, ParserConfig config = ParserConfig{});
-        JsonParser(std::string_view const& stream, ParserConfig config = ParserConfig{});
+        JsonParser(std::istream& stream, ParserConfig const& config = ParserConfig{});
+        JsonParser(std::string_view const& stream, ParserConfig const& config = ParserConfig{});
         virtual FormatType       formatType()                   override {return FormatType::Json;}
         virtual ParserToken      getNextToken()                 override;
         virtual std::string_view getKey()                       override;

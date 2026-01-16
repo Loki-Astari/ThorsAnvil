@@ -6,20 +6,30 @@
  */
 
 #include "SerializeConfig.h"
+#include "ThorsSerializerUtil.h"
 #include "Serialize.h"
-#include "ThorsLogging/ThorsLogging.h"
-#include "BsonPrinterConfig.h"
+
+#include <string>
+#include <ostream>
+#include <ranges>
+#include <functional>
+#include <exception>
+#include <utility>
+#include <cstddef>
+#include <type_traits>
 
 namespace ThorsAnvil::Serialize
 {
 
-template<typename Format, typename Config = PrinterConfig>
+struct BsonPrinterConfig;
+
+template<typename Format, typename Config, typename ConfigStore>
 class ExporterBase
 {
-    Config         config;
+    ConfigStore  config;
     public:
-        ExporterBase(Config&& config)
-            : config(std::move(config))
+        ExporterBase(Config const& config)
+            : config(config)
         {}
         virtual void doInserter(PrinterInterface& printer) const = 0;
         template<typename F>
@@ -44,7 +54,7 @@ class ExporterBase
             {
                 ThorsCatchMessage("ThorsAnvil::Serialize::Exporter", "operator<<", e.what());
                 printer.setFail();
-                if (!config.catchExceptions)
+                if (!printer.config.catchExceptions)
                 {
                     ThorsRethrowMessage("ThorsAnvil::Serialize::Exporter", "operator<<", e.what());
                     throw;
@@ -54,7 +64,7 @@ class ExporterBase
             {
                 ThorsCatchMessage("ThorsAnvil::Serialize::Exporter", "operator<<", "UNKNOWN");
                 printer.setFail();
-                if (!config.catchUnknownExceptions)
+                if (!printer.config.catchUnknownExceptions)
                 {
                     // Don't set this to true if you are using boost-coroutines.
                     // As this may prevent the force_unwind exception propagating.
@@ -76,13 +86,13 @@ class ExporterBase
         }
 };
 
-template<typename Format, typename T, typename Config = PrinterConfig>
-class Exporter: public ExporterBase<Format, Config>
+template<typename Format, typename T, typename Config = PrinterConfig, typename ConfigStore = std::reference_wrapper<const Config>>
+class Exporter: public ExporterBase<Format, Config, ConfigStore>
 {
     T const&        value;
     public:
-        Exporter(T const& value, Config&& config)
-            : ExporterBase<Format, Config>(std::move(config))
+        Exporter(T const& value, Config const& config)
+            : ExporterBase<Format, Config, ConfigStore>(config)
             , value(value)
         {}
         virtual void doInserter(PrinterInterface& printer) const
@@ -92,13 +102,13 @@ class Exporter: public ExporterBase<Format, Config>
         }
 };
 
-template<typename Format, std::ranges::range R, typename Config = PrinterConfig>
-class ExporterRange: public ExporterBase<Format, Config>
+template<typename Format, std::ranges::range R, typename Config = PrinterConfig, typename ConfigStore = std::reference_wrapper<const Config>>
+class ExporterRange: public ExporterBase<Format, Config, ConfigStore>
 {
     mutable R           range;
     public:
-        ExporterRange(R&& range, Config&& config)
-            : ExporterBase<Format, Config>(std::move(config))
+        ExporterRange(R&& range, Config const& config)
+            : ExporterBase<Format, Config, ConfigStore>(config)
             , range(std::move(range))
         {}
         virtual void doInserter(PrinterInterface& printer) const override
@@ -116,12 +126,12 @@ class ExporterRange: public ExporterBase<Format, Config>
 
 template<typename Format, std::ranges::sized_range R>
 requires (Traits<R>::type == TraitType::Invalid)
-class ExporterRangeBson: public ExporterBase<Format, BsonPrinterConfig>
+class ExporterRangeBson: public ExporterBase<Format, BsonPrinterConfig, BsonPrinterConfig>
 {
     mutable R       range;
     public:
-        ExporterRangeBson(R&& range, BsonPrinterConfig&& config)
-            : ExporterBase<Format, BsonPrinterConfig>(std::move(config))
+        ExporterRangeBson(R&& range, BsonPrinterConfig const& config)
+            : ExporterBase<Format, BsonPrinterConfig, BsonPrinterConfig>(config)
             , range(std::move(range))
         {}
         virtual void doInserter(PrinterInterface& printer) const override

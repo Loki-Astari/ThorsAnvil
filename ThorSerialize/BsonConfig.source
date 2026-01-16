@@ -1,0 +1,19 @@
+
+
+namespace ThorsAnvil::Serialize
+{
+
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+BsonPrinterConfig::BsonPrinterConfig(PrinterConfig const& config, BsonContainer parserInfo, IdStore idStore)
+    : config(config)
+    , parserInfo(parserInfo)
+    , idStore(idStore)
+{}
+
+THORS_SERIALIZER_HEADER_ONLY_INCLUDE
+BsonParserConfig::BsonParserConfig(ParserConfig const& config, BsonContainer parserInfo)
+    : config(config)
+    , parserInfo(parserInfo)
+{}
+}
+

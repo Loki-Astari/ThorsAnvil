@@ -5,16 +5,18 @@
 #include "ThorsSerializerUtilTypes.h"
 #include "ParserConfig.h"
 #include "StringInput.h"
+
 #include <cstddef>
-#include <variant>
 #include <string>
 #include <string_view>
-#include <iostream>
+#include <istream>
 #include <map>
 #include <any>
 #include <memory>
 #include <concepts>
 #include <locale>
+#include <iterator>
+#include <stdexcept>
 
 namespace ThorsAnvil::Serialize
 {
@@ -128,14 +130,14 @@ struct PeekNextNonSpaceValue
 class ParserInterface
 {
     public:
-        ParserConfig const config;
+        ParserConfig const& config;
 
-        ParserInterface(std::string_view const& str, ParserConfig  config = ParserConfig{})
+        ParserInterface(std::string_view const& str, ParserConfig const& config)
             : config(config)
             , input(str)
             , pushBack(ParserToken::Error)
         {}
-        ParserInterface(std::istream& stream, ParserConfig  config = ParserConfig{})
+        ParserInterface(std::istream& stream, ParserConfig const& config)
             : config(config)
             , input(&stream)
             , pushBack(ParserToken::Error)

@@ -2,6 +2,7 @@
 #define THORSANVIL_SERIALIZER_POLYMORPHIC_MARKER_H
 
 #include "SerializeConfig.h"
+
 #include <string>
 
 namespace ThorsAnvil::Serialize::Private

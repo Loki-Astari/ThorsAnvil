@@ -3,15 +3,22 @@
 
 #include "SerUtil.h"
 #include "ThorsSerializerUtil.h"
-#include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"
-#include <algorithm>
+
 #include <sstream>
 #include <type_traits>
+#include <string>
+#include <string_view>
 #include <map>
 #include <set>
+#include <tuple>
+#include <utility>
+#include <memory>
+#include <exception>
+#include <stdexcept>
 #include <variant>
 #include <unordered_map>
+#include <cstddef>
 
 
 namespace ThorsAnvil::Serialize

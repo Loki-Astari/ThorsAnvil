@@ -79,7 +79,7 @@ class Inserter: public MongoActionWriteInterface
             {
                 // Need to modify the config.
                 // So we get the expanded size to handle the _id field we are inserting.
-                return ThorsAnvil::Serialize::bsonGetPrintSize(*this, {{}, result.inserted});
+                return ThorsAnvil::Serialize::bsonGetPrintSize(*this, {}, result.inserted);
             }
         }
         virtual void writeBson(std::ostream& stream, PrinterConfig const& config) const override
@@ -97,7 +97,7 @@ class Inserter: public MongoActionWriteInterface
             {
                 // There are no ID in the objet.
                 // Ask the serializer to generate and add to the outgoing object.
-                stream << ThorsAnvil::Serialize::bsonExporter(*this, {config, result.inserted});
+                stream << ThorsAnvil::Serialize::bsonExporter(*this, config, result.inserted);
             }
         }
 };

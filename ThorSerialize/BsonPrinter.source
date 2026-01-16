@@ -1,23 +1,24 @@
+
+#include "ThorsSerializerUtil.h"
 #include "MongoUtility.h"
-#include "ThorsIOUtil/Utility.h"
 #include "ThorsLogging/ThorsLogging.h"
-#include <iomanip>
-#include <algorithm>
 
 namespace ThorsAnvil::Serialize
 {
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-BsonPrinter::BsonPrinter(std::ostream& output, BsonPrinterConfig config)
-    : PrinterInterface(output, config)
+BsonPrinter::BsonPrinter(std::ostream& output, BsonPrinterConfig const& config)
+    : PrinterInterface(output, config.config)
     , idStore(config.idStore)
+    , parserInfo(config.parserInfo)
     , projection(false)
 {}
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-BsonPrinter::BsonPrinter(std::string& output, BsonPrinterConfig config)
-    : PrinterInterface(output, config)
+BsonPrinter::BsonPrinter(std::string& output, BsonPrinterConfig const& config)
+    : PrinterInterface(output, config.config)
     , idStore(config.idStore)
+    , parserInfo(config.parserInfo)
     , projection(false)
 {}
 
@@ -160,7 +161,7 @@ void BsonPrinter::openDoc()
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonPrinter::closeDoc()
 {
-    if (config.parserInfo == static_cast<long>(BsonContainer::Value))
+    if (parserInfo == BsonContainer::Value)
     {
         // The Map and Array close themselves.
         // But values need to be closed here.

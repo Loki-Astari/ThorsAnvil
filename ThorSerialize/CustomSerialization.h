@@ -2,7 +2,8 @@
 #define THORSANVIL_SERIALIZATION_CUSTOM_SERIALIZATION_H
 
 #include "SerializeConfig.h"
-#include <cstdlib>
+
+#include <cstddef>
 
 namespace ThorsAnvil::Serialize
 {

@@ -2,12 +2,11 @@
 #define THORSANVIL_SERIALIZE_SER_UTIL_H
 
 #include "SerializeConfig.h"
+#include "ParserInterface.h"
 #include "Traits.h"
 #include "Serialize.h"
-#include <utility>
+
 #include <string>
-#include "ThorsIOUtil/Utility.h"
-#include "ThorsLogging/ThorsLogging.h"
 #include <map>
 #include <unordered_map>
 #include <set>
@@ -23,6 +22,11 @@
 #include <functional>
 #include <optional>
 #include <variant>
+#include <cstddef>
+#include <type_traits>
+#include <stdexcept>
+#include <utility>
+#include <sstream>
 
 /*
  * Container Types:
@@ -1019,5 +1023,6 @@ class Traits<std::variant<Args...>>
 };
 
 }
+
 
 #endif

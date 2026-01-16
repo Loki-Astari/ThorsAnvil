@@ -2,8 +2,6 @@
 #define THORSANVIL_SERIALIZE_JSON_LEXEMES_H
 
 #include "SerializeConfig.h"
-#include "Serialize.h"
-#include <string>
 
 namespace ThorsAnvil::Serialize
 {
