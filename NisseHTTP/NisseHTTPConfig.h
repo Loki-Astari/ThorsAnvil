@@ -102,10 +102,10 @@
 
 
 /* Enable to use header only libraries */
-#define NISSE_HEADER_ONLY 0
+#define NISSE_HEADER_ONLY 1
 
 /* For header only convert to inline */
-#define NISSE_HEADER_ONLY_INCLUDE /**/
+#define NISSE_HEADER_ONLY_INCLUDE inline
 
 
 #endif
