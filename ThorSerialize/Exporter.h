@@ -9,6 +9,7 @@
 #include "ThorsSerializerUtil.h"
 #include "Serialize.h"
 
+#include <concepts>
 #include <string>
 #include <ostream>
 #include <ranges>
@@ -105,11 +106,11 @@ class Exporter: public ExporterBase<Format, Config, ConfigStore>
 template<typename Format, std::ranges::range R, typename Config = PrinterConfig, typename ConfigStore = std::reference_wrapper<const Config>>
 class ExporterRange: public ExporterBase<Format, Config, ConfigStore>
 {
-    mutable R           range;
+    R const&        range;
     public:
-        ExporterRange(R&& range, Config const& config)
+        ExporterRange(R const& range, Config const& config)
             : ExporterBase<Format, Config, ConfigStore>(config)
-            , range(std::move(range))
+            , range(range)
         {}
         virtual void doInserter(PrinterInterface& printer) const override
         {
@@ -128,11 +129,11 @@ template<typename Format, std::ranges::sized_range R>
 requires (Traits<R>::type == TraitType::Invalid)
 class ExporterRangeBson: public ExporterBase<Format, BsonPrinterConfig, BsonPrinterConfig>
 {
-    mutable R       range;
+    R const&        range;
     public:
-        ExporterRangeBson(R&& range, BsonPrinterConfig const& config)
+        ExporterRangeBson(R const& range, BsonPrinterConfig const& config)
             : ExporterBase<Format, BsonPrinterConfig, BsonPrinterConfig>(config)
-            , range(std::move(range))
+            , range(range)
         {}
         virtual void doInserter(PrinterInterface& printer) const override
         {
