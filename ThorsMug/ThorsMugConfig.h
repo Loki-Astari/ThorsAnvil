@@ -61,11 +61,20 @@
 /* We have found package Thors Serializer */
 #define HAVE_THORSSERIALIZER 1
 
+/* We have found ThorSerializeHeaderOnly package */
+/* #undef HAVE_ThorSerializeHeaderOnly */
+
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #define LT_OBJDIR ".libs/"
+
+/* Check for older build tools and use simpler code with old tools */
+#define NO_STD_SUPPORT_FROM_CHAR_DOUBLE 1
+
+/* Check for older build tools and use simpler code with old tools */
+/* #undef NO_STD_SUPPORT_TO_CHAR_DOUBLE */
 
 /* Name of package */
 #define PACKAGE "thorsmug"

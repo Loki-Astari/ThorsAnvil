@@ -120,10 +120,10 @@
 
 
 /* Enable to use header only libraries */
-#define THORSMUG_HEADER_ONLY 0
+#define THORSMUG_HEADER_ONLY 1
 
 /* For header only convert to inline */
-#define THORSMUG_HEADER_ONLY_INCLUDE /**/
+#define THORSMUG_HEADER_ONLY_INCLUDE inline
 
 
 #endif
