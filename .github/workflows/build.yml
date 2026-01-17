@@ -48,15 +48,6 @@ jobs:
                 submodules: recursive
                 token: ${{ secrets.GITHUB_TOKEN }}
             - run: ./configure --enable-dark-mode --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
-            - run: |
-                cat Makefile.config
-                cat third/ThorsStorage/Makefile.config
-                cat third/ThorsStorage/src/ThorsStorage/Makefile
-            - run: |
-                cat third/Nisse/src/NisseHTTP/NisseHTTPConfig.h
-                cat third/Nisse/src/NisseServer/NisseConfig.h
-                cat third/Mug/src/ThorsMug/ThorsMugConfig.h
-                cat third/ThorsSerializer/src/Serialize/SerializeConfig.h
             - run: make
             - run: sudo make install
     Build_on_Windows:
