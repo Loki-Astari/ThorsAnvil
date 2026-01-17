@@ -86,7 +86,7 @@ Some dependencies you will need to install manually for header-only builds.
     libSnappy   https://github.com/google/snappy
     libZ        https://www.zlib.net/
     
-Note: The header-only version does not include Mug/Nisse/ThorsSlack.
+Note: The header-only version does not include Mug
 
 ## Building With Visual Studio
 
