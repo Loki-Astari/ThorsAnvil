@@ -2,9 +2,9 @@
 #define THORSANVIL_SERIALIZE_FORMAT_H
 
 #include "SerializeConfig.h"
-#include "ThorSerialize/JsonThor.h"
-#include "ThorSerialize/BsonThor.h"
-#include "ThorSerialize/YamlThor.h"
+#include "JsonThor.h"
+#include "BsonThor.h"
+#include "YamlThor.h"
 
 #include <format>
 #include <string>

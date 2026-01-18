@@ -245,29 +245,6 @@ struct TraitsInfo<T, M, TraitType::AnyBlock>
     using SerializeMember       = SerializeMemberValue<T, M, TraitType::AnyBlock>;
 };
 
-/* ------------ ParserInterface ------------------------- */
-inline ParserToken ParserInterface::getToken()
-{
-    if (pushBack != ParserToken::Error)
-    {
-        return std::exchange(pushBack, ParserToken::Error);
-    }
-    return this->getNextToken();
-}
-
-inline void ParserInterface::pushBackToken(ParserToken token)
-{
-#if defined(VALIDATE_EXTRA_PUSH_BACK_TOKEN)
-    if (pushBack != ParserToken::Error)
-    {
-        ThorsLogAndThrowError(std::runtime_error,
-                              "ThorsAnvil::Serialize::ParserInterface",
-                              "pushBackToken",
-                              "Push only allows for single push back. More than one token has been pushed back between reads.");
-    }
-#endif
-    pushBack    = token;
-}
 /* ------------ DeSerializer ------------------------- */
 
 inline DeSerializer::DeSerializer(ParserInterface& parser, bool root)
