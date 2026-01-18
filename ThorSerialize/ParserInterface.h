@@ -130,7 +130,7 @@ struct PeekNextNonSpaceValue
 class ParserInterface
 {
     public:
-        ParserConfig const& config;
+        ParserConfig        config;
 
         ParserInterface(std::string_view const& str, ParserConfig const& config)
             : config(config)

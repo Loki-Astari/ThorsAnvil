@@ -3,6 +3,7 @@
 
 #include "SerializeConfig.h"
 #include "StringOutput.h"
+#include "PrinterConfig.h"
 #include "ThorsSerializerUtilTypes.h"
 
 #include <cstddef>
@@ -22,7 +23,7 @@ struct PrinterConfig;
 class PrinterInterface
 {
     public:
-        PrinterConfig const&  config;
+        PrinterConfig       config;
 
         PrinterInterface(std::ostream& output, PrinterConfig const& config)
             : config(config)
