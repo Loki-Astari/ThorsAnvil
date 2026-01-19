@@ -16,7 +16,7 @@ namespace ThorsAnvil::Nisse::HTTP
 {
 
 enum class Version {HTTP1_0, HTTP1_1, HTTP2, HTTP3, Unknown};
-enum class Method  {GET, HEAD, OPTIONS, TRACE, PUT, DELETE, POST, PATCH, CONNECT, Other};
+enum class Method  {GET, HEAD, OPTIONS, TRACE, PUT, DELETER, POST, PATCH, CONNECT, Other};
 enum class All     {Method};
 enum class Encoding{Chunked};
 

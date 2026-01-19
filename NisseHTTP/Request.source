@@ -151,7 +151,7 @@ Method Request::findMethod(std::string_view method)
                                                                     {"OPTIONS", Method::OPTIONS},
                                                                     {"TRACE",   Method::TRACE},
                                                                     {"PUT",     Method::PUT},
-                                                                    {"DELETE",  Method::DELETE},
+                                                                    {"DELETE",  Method::DELETER},
                                                                     {"POST",    Method::POST},
                                                                     {"PATCH",   Method::PATCH},
                                                                     {"CONNECT", Method::CONNECT}
