@@ -701,6 +701,8 @@ ac_ct_CC
 CFLAGS
 CC
 LIBTOOL
+BoostCoRoutine_ROOT_LIB
+BoostCoRoutine_ROOT_DIR
 BOOST_ROOT_LIB
 BOOST_ROOT_DIR
 BOOST_LDFLAGS
@@ -839,6 +841,7 @@ with_slackSecret
 with_slackChannel
 with_boost
 with_boost_libdir
+with_boost_coroutine_root
 enable_shared
 enable_static
 enable_pic
@@ -1585,18 +1588,19 @@ Optional Packages:
                           The default tool name is mongosh. But this can be
                           overridden with this flag
 
-  --with-botToken=<token> Slack authentication token. Used to authenticate
-                          with Slack when running tests
-
-  --with-userToken=<token>
+  --with-slack-botToken=<token>
                           Slack authentication token. Used to authenticate
                           with Slack when running tests
 
-  --with-slackSecret=<secret>
-                          Slack secret. Used to hash requests and thus
-                          validate incomming requests from slack
+  --with-slack-userToken=<token>
+                          Slack authentication token. Used to authenticate
+                          with Slack when running tests
 
-  --with-slackChannel=<channel>
+  --with-slack-secret=<secret>
+                          Slack secret. Used to hash requests and thus
+                          validate incoming requests from slack
+
+  --with-slack-channel=<channel>
                           Slack channel to use for testing.
 
   --with-boost[=ARG]      use Boost library from a standard location
@@ -1608,6 +1612,10 @@ Optional Packages:
                           this parameter only if default library detection
                           fails and you know exactly where your boost
                           libraries are located.
+  --with-boost-coroutine-root=<location>
+                          Define the root directory of package Boost
+                          CoRoutines
+
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
                           compiler's sysroot if not specified).
@@ -6155,6 +6163,15 @@ fi
 
 
 
+    if test "x${UNAME}" = "xMSYS_NT" || test "x${UNAME}" = "xMINGW64_NT"
+then :
+  threadEvent=ws2_32
+else case e in #(
+  e) threadEvent=event_pthreads
+     ;;
+esac
+fi
+
 
 
 # Check whether --with-event-root was given.
@@ -6256,8 +6273,8 @@ printf "%s\n" "#define HAVE_EVENT 1" >>confdefs.h
 
 
 fi
-    echo "Setting: event_ROOT_LIB TO event"
-    event_ROOT_LIB="event"
+    echo "Setting: event_ROOT_LIB TO event ${threadEvent}"
+    event_ROOT_LIB="event ${threadEvent}"
 
 
 
@@ -6315,8 +6332,8 @@ printf "%s\n" "#define HAVE_EVENT 1" >>confdefs.h
 
 
 fi
-    echo "Setting: event_ROOT_LIB TO event"
-    event_ROOT_LIB="event"
+    echo "Setting: event_ROOT_LIB TO event ${threadEvent}"
+    event_ROOT_LIB="event ${threadEvent}"
 
 
 
@@ -6594,93 +6611,99 @@ fi
 
 DISABLE_SLACKTEST=0
 
-if test "x$enable_slacktest" == "xno"
+
+if test "x$enable_slacktest" == "xyes"
 then :
 
-    subconfigure="${subconfigure} --disable-slacktest";
-    DISABLE_SLACKTEST=1
-
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: SLACK Test Already Enabled" >&5
+printf "%s\n" "$as_me: SLACK Test Already Enabled" >&6;}
+    subconfigure="${subconfigure} --enable-slacktest"
 
 else case e in #(
   e)
-if test "x${with_botToken}" == "x"
+    if test "x$enable_slacktest" == "xno"
+then :
+
+        subconfigure="${subconfigure} --disable-slacktest"
+        DISABLE_SLACKTEST=1
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: SLACK Test Disable" >&5
+printf "%s\n" "$as_me: SLACK Test Disable" >&6;}
+
+else case e in #(
+  e)
+    if test "x${with_slack_botToken}" == "x"
 then :
   as_fn_error $? "No Bot token defined. Can not run the slack tests. Please look at tutorials on how to generate a slack Bot Token." "$LINENO" 5
 
 fi
-if test "x${with_userToken}" == "x"
+    if test "x${with_slack_userToken}" == "x"
 then :
   as_fn_error $? "No User token defined. Can not run the slack tests. Please look at tutorials on how to generate a slack User Token." "$LINENO" 5
 
 fi
-if test "x${with_slackSecret}" == "x"
+    if test "x${with_slack_secret}" == "x"
 then :
   as_fn_error $? "No slack secret defined. Can not run the slack tests. Please look at tutorials on how to generate a slack Bot Secret." "$LINENO" 5
 
 fi
-if test "x${with_slackChannel}" == "x"
+    if test "x${with_slack_channel}" == "x"
 then :
   as_fn_error $? "No slack channel defined. Can not run the slack tests. Please look at tutorials on how to generate a slack Bot Secret." "$LINENO" 5
 
 fi
- ;;
+     ;;
 esac
 fi
-if test "x${with_botToken}" != "x"
-then :
-  subconfigure="${subconfigure} --with-botToken=${with_botToken}"
-fi
-if test "x${with_userToken}" != "x"
-then :
-  subconfigure="${subconfigure} --with-userToken=${with_userToken}"
-fi
-if test "x${with_slackSecret}" != "x"
-then :
-  subconfigure="${subconfigure} --with-slackSecret=${with_slackSecret}"
-fi
-if test "x${with_slackChannel}" != "x"
-then :
-  subconfigure="${subconfigure} --with-slackChannel=${with_slackChannel}"
-fi
 
-if test "x$enable_slacktest" != "xno"
-then :
+    # Note:
+    # Don't do this as it passes secrets around.
+    # These will end up in log files that will be pulled by a bad person
+    # XAS_IF([test "x${with_slack_botToken}" != "x"],    [subconfigure="${subconfigure} --with-slack-botToken=${with_slack_botToken}"])
+    # XAS_IF([test "x${with_slack_userToken}" != "x"],   [subconfigure="${subconfigure} --with-slack-userToken=${with_slack_userToken}"])
+    # XAS_IF([test "x${with_slack_secret}" != "x"],      [subconfigure="${subconfigure} --with-slack-secret=${with_slack_secret}"])
+    # XAS_IF([test "x${with_slack_channel}" != "x"],     [subconfigure="${subconfigure} --with-slack-channel=${with_slack_channel}"])
 
-data=$(curl \
-   --header "authorization: Bearer ${with_botToken}" \
-✗  --header "content-type: application/json; charset=utf-8" \
-│  --request GET \
-│  https://slack.com/api/auth.test 2> /dev/null)
+    data=$(curl \
+       --header "authorization: Bearer ${with_slack_botToken}" \
+       --header "content-type: application/json; charset=utf-8" \
+       --request GET \
+       https://slack.com/api/auth.test 2> /dev/null)
 
-dataok=$(echo ${data} | jq -r .ok)
-if test "x${dataok}" != "xtrue"
+    dataok=$(echo ${data} | jq -r .ok)
+    if test "x${dataok}" != "xtrue"
 then :
 
-        as_fn_error $? "
-Failed to authenticate with slack please check your token
+            as_fn_error $? "
+    Failed to authenticate with slack please check your token
 
-Command used:
-    curl --header \"authorization: Bearer ${with_botToken}\" --header \"content-type: application/json; charset=utf-8\" --request GET https://slack.com/api/auth.test
+    Command used:
+        curl --header \"authorization: Bearer ${with_slack_botToken}\" --header \"content-type: application/json; charset=utf-8\" --request GET https://slack.com/api/auth.test
 
-Response:
-    ${data}
-        " "$LINENO" 5
+    Response:
+        ${data}
+            " "$LINENO" 5
 
 
 fi
 
 
-mkdir -p src/ThorsSlack/test/data
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: SLACK Build configuration" >&5
+printf "%s\n" "$as_me: SLACK Build configuration" >&6;}
+    mkdir -p src/ThorsSlack/test/data
 cat - <<ENVIRONMENT > src/ThorsSlack/test/data/environment.json
 {
-    "botToken": "${with_botToken}",
-    "userToken": "${with_userToken}",
-    "slackSecret": "${with_slackSecret}",
-    "slackChannel": "${with_slackChannel}"
+    "botToken": "${with_slack_botToken}",
+    "userToken": "${with_slack_userToken}",
+    "slackSecret": "${with_slack_secret}",
+    "slackChannel": "${with_slack_channel}"
 }
 ENVIRONMENT
 
+    subconfigure="${subconfigure} --enable-slacktest"
 
+ ;;
+esac
 fi
 
 
@@ -7128,6 +7151,216 @@ fi
 
     BOOST_ROOT_DIR=${_AX_BOOST_BASE_boost_path}
 
+
+
+
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: UNAME: ${UNAME}" >&5
+printf "%s\n" "$as_me: UNAME: ${UNAME}" >&6;}
+    if test "x${UNAME}" = "xMSYS_NT" || test "x${UNAME}" = "xMINGW64_NT"
+then :
+  boostExt=-mt
+else case e in #(
+  e) boostExt=
+     ;;
+esac
+fi
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: boostExt: ${boostExt}" >&5
+printf "%s\n" "$as_me: boostExt: ${boostExt}" >&6;}
+
+
+
+# Check whether --with-boost-coroutine-root was given.
+if test ${with_boost_coroutine_root+y}
+then :
+  withval=$with_boost_coroutine_root;
+fi
+
+
+    if test "xBoostCoRoutine" != "x"
+then :
+
+
+    if [ "x" == "x12" ] || [ "x" == "x10" ]; then
+
+        grep -q 'BoostCoRoutine_ROOT_DIR=@BoostCoRoutine_ROOT_DIR@' Makefile.config.in
+        result=$?
+        if test "x${result}" != "x0"
+then :
+
+                as_fn_error $? "
+                    Expecting BoostCoRoutine_ROOT_DIR to be defined in Makefile.config.in
+                    You should probably add this line to Makefile.config.in
+
+                        BoostCoRoutine_ROOT_DIR=@BoostCoRoutine_ROOT_DIR@
+                " "$LINENO" 5
+
+
+fi
+    fi
+
+    if [ "x" == "x12" ] || [ "x" == "x11" ]; then
+
+        grep -q 'BoostCoRoutine_ROOT_LIB=@BoostCoRoutine_ROOT_LIB@' Makefile.config.in
+        result=$?
+        if test "x${result}" != "x0"
+then :
+
+                as_fn_error $? "
+                    Expecting BoostCoRoutine_ROOT_LIB to be defined in Makefile.config.in
+                    You should probably add this line to Makefile.config.in
+
+                        BoostCoRoutine_ROOT_LIB=@BoostCoRoutine_ROOT_LIB@
+                " "$LINENO" 5
+
+
+fi
+    fi
+
+    if [ "x" == "x13" ]; then
+        grep -q 'BoostCoRoutineHeaderOnly_ROOT_DIR=@BoostCoRoutineHeaderOnly_ROOT_DIR@' Makefile.config.in
+        result=$?
+        if test "x${result}" != "x0"
+then :
+
+                as_fn_error $? "
+                    Expecting BoostCoRoutineHeaderOnly_ROOT_DIR to be defined in Makefile.config.in
+                    You should probably add this line to Makefile.config.in
+
+                        BoostCoRoutineHeaderOnly_ROOT_DIR=@BoostCoRoutineHeaderOnly_ROOT_DIR@
+                " "$LINENO" 5
+
+
+fi
+    fi
+
+
+fi
+
+    LIBRARY_DIR="-L ${with_boost_coroutine_root}/lib"
+    if test "x${with_boost_coroutine_root}" == "x"
+then :
+  LIBRARY_DIR="-L ${DefaultLinkDir}/lib"
+
+fi
+
+    if test "x${boost_coroutine_header_only_defined}" == "x"
+then :
+
+            ORIG_LDFLAGS="${LDFLAGS}"
+            LDFLAGS="$LDFLAGS ${LIBRARY_DIR}"
+
+            echo "Building: NotThor"
+            echo "Mark:     $BUILDING_NotThor"
+            echo "Checking"
+            if test "x$BUILDING_NotThor" == "x1"
+then :
+
+
+    if test "x${with_boost_coroutine_root}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_BoostCoRoutine 1" >>confdefs.h
+
+            BoostCoRoutine_ROOT_DIR=${with_boost_coroutine_root}
+
+            subconfigure="${subconfigure} --with-boost-coroutine-root=${with_boost_coroutine_root}"
+
+
+fi
+    echo "Setting: BoostCoRoutine_ROOT_LIB TO boost_coroutine${boostExt} boost_context${boostExt}"
+    BoostCoRoutine_ROOT_LIB="boost_coroutine${boostExt} boost_context${boostExt}"
+
+
+
+else case e in #(
+  e)
+                    as_ac_Lib=`printf "%s\n" "ac_cv_lib_boost_coroutine${boostExt}""__ZN5boost10coroutines18coroutine_categoryEv" | sed "$as_sed_sh"`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for _ZN5boost10coroutines18coroutine_categoryEv in -lboost_coroutine${boostExt}" >&5
+printf %s "checking for _ZN5boost10coroutines18coroutine_categoryEv in -lboost_coroutine${boostExt}... " >&6; }
+if eval test \${$as_ac_Lib+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_check_lib_save_LIBS=$LIBS
+LIBS="-lboost_coroutine${boostExt}  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+namespace conftest {
+  extern "C" int _ZN5boost10coroutines18coroutine_categoryEv ();
+}
+int
+main (void)
+{
+return conftest::_ZN5boost10coroutines18coroutine_categoryEv ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"
+then :
+  eval "$as_ac_Lib=yes"
+else case e in #(
+  e) eval "$as_ac_Lib=no" ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS ;;
+esac
+fi
+eval ac_res=\$$as_ac_Lib
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"
+then :
+
+
+    if test "x${with_boost_coroutine_root}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_BoostCoRoutine 1" >>confdefs.h
+
+            BoostCoRoutine_ROOT_DIR=${with_boost_coroutine_root}
+
+            subconfigure="${subconfigure} --with-boost-coroutine-root=${with_boost_coroutine_root}"
+
+
+fi
+    echo "Setting: BoostCoRoutine_ROOT_LIB TO boost_coroutine${boostExt} boost_context${boostExt}"
+    BoostCoRoutine_ROOT_LIB="boost_coroutine${boostExt} boost_context${boostExt}"
+
+
+
+else case e in #(
+  e)
+                            echo "FAIL: Using: >${with_boost_coroutine_root}<"
+                            as_fn_error $? "
+Error: Could not find boost_coroutine
+
+You can solve this by installing the boost libraries
+
+
+
+    " "$LINENO" 5
+                            echo "FAIL DONE"
+
+                     ;;
+esac
+fi
+
+
+             ;;
+esac
+fi
+            echo "Checking DONE"
+
+            LDFLAGS="${ORIG_LDFLAGS}"
+
+
+fi
 
 
 
@@ -20726,7 +20959,7 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
-subconfigure="${subconfigure} --with-thorserialize-root=$(pwd)/build --with-nisse-root=$(pwd)/build --disable-slacktest"
+subconfigure="${subconfigure} --with-thorserialize-root=$(pwd)/build --with-nisse-root=$(pwd)/build"
 
 
 

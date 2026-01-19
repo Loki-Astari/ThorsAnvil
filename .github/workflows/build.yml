@@ -26,7 +26,13 @@ jobs:
               with:
                 submodules: recursive
                 token: ${{ secrets.GITHUB_TOKEN }}
-            - run: ./configure --disable-vera --disable-colour --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
+            - name: Config
+              env:
+                  with_slack_botToken: ${{ secrets.with_slack_botToken }}
+                  with_slack_userToken: ${{ secrets.with_slack_userToken }}
+                  with_slack_secret: ${{ secrets.with_slack_secret }}
+                  with_slack_channel: ${{ secrets.with_slack_channel }}
+              run: ./configure --disable-vera --disable-colour --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
             - run: make
             - run: make install
     Build_on_Linux:
@@ -44,7 +50,13 @@ jobs:
               with:
                 submodules: recursive
                 token: ${{ secrets.GITHUB_TOKEN }}
-            - run: ./configure --disable-vera --enable-dark-mode --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
+            - name: Config
+              env:
+                  with_slack_botToken: ${{ secrets.with_slack_botToken }}
+                  with_slack_userToken: ${{ secrets.with_slack_userToken }}
+                  with_slack_secret: ${{ secrets.with_slack_secret }}
+                  with_slack_channel: ${{ secrets.with_slack_channel }}
+              run: ./configure --disable-vera --enable-dark-mode --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
             - run: make
             - run: sudo make install
     Build_on_Windows:
@@ -66,6 +78,7 @@ jobs:
                     gperf
                     coreutils
                     vim
+                    mingw-w64-x86_64-jq
                     mingw-w64-x86_64-gcc
                     mingw-w64-x86_64-gdb
                     mingw-w64-x86_64-libyaml
@@ -89,7 +102,11 @@ jobs:
               shell: msys2 {0}
               env:
                      MSYS:  winsymlinks:nativestrict
-              run:  ./configure --disable-colour --disable-vera --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --with-yaml-root=/mingw64/ --disable-test-with-locked-file --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
+                     with_slack_botToken: ${{ secrets.with_slack_botToken }}
+                     with_slack_userToken: ${{ secrets.with_slack_userToken }}
+                     with_slack_secret: ${{ secrets.with_slack_secret }}
+                     with_slack_channel: ${{ secrets.with_slack_channel }}
+              run:  ./configure --disable-colour --disable-vera --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --with-yaml-root=/mingw64/ --disable-test-with-locked-file --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
             - name: Make
               shell: msys2 {0}
               run:   make
@@ -105,6 +122,12 @@ jobs:
               with:
                 submodules: recursive
                 token: ${{ secrets.GITHUB_TOKEN }}
-            - run: ./configure --disable-vera --disable-colour --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
+            - name: Config
+              env:
+                  with_slack_botToken: ${{ secrets.with_slack_botToken }}
+                  with_slack_userToken: ${{ secrets.with_slack_userToken }}
+                  with_slack_secret: ${{ secrets.with_slack_secret }}
+                  with_slack_channel: ${{ secrets.with_slack_channel }}
+              run: ./configure --disable-vera --disable-colour --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
             - run: make header-only
 

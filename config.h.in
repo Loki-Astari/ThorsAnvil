@@ -12,6 +12,9 @@
 /* define if the Boost library is available */
 #undef HAVE_BOOST
 
+/* We have found package Boost CoRoutines */
+#undef HAVE_BoostCoRoutine
+
 /* We have found package CRYPTO */
 #undef HAVE_CRYPTO
 

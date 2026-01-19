@@ -26,10 +26,11 @@ AX_THOR_CHECK_USE_BOOST([1.70], [], [
         The minimum version we support is via boost 1.70 please upgrade your boost libraries to this (or later).
    ])
 ])
+AX_THOR_CHECK_USE_THORS_BOOSTCOROUTINE
 
 LT_INIT
 
-subconfigure="${subconfigure} --with-thorserialize-root=$(pwd)/build --with-nisse-root=$(pwd)/build --disable-slacktest"
+subconfigure="${subconfigure} --with-thorserialize-root=$(pwd)/build --with-nisse-root=$(pwd)/build"
 
 AX_THOR_FEATURE_HEADER_ONLY_VARIANT([THORS_SERIALIZER])
 AX_THOR_FUNC_TERM_BUILD([SERIALIZER], [localConfigSummary.h:config.h.in])
