@@ -19,16 +19,14 @@ jobs:
     Build_on_Mac:
         runs-on:    macos-latest
         steps:
-            - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install vera++
             - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install magic_enum
             - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install snappy
-            - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install libevent
             - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install boost
             - uses: actions/checkout@master
               with:
                 submodules: recursive
                 token: ${{ secrets.GITHUB_TOKEN }}
-            - run: ./configure --disable-colour --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
+            - run: ./configure --disable-vera --disable-colour --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
             - run: make
             - run: make install
     Build_on_Linux:
@@ -36,7 +34,6 @@ jobs:
         steps:
             - run: g++ --version
             - run: which g++
-            - run: sudo apt-get install vera++
             - run: sudo apt-get install libsnappy-dev
             - run: sudo apt-get install libevent-dev
             - run: sudo apt-get install libsnappy-dev
@@ -47,7 +44,7 @@ jobs:
               with:
                 submodules: recursive
                 token: ${{ secrets.GITHUB_TOKEN }}
-            - run: ./configure --enable-dark-mode --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
+            - run: ./configure --disable-vera --enable-dark-mode --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
             - run: make
             - run: sudo make install
     Build_on_Windows:
@@ -101,15 +98,13 @@ jobs:
         #- if:         github.ref == 'refs/heads/master'
         steps:
             - run: echo "Building Header Only"
-            - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install vera++
             - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install magic_enum
             - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install snappy
-            - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install libevent
             - run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install boost
             - uses: actions/checkout@master
               with:
                 submodules: recursive
                 token: ${{ secrets.GITHUB_TOKEN }}
-            - run: ./configure --disable-colour --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
+            - run: ./configure --disable-vera --disable-colour --disable-test-with-mongo-query --disable-Mongo-Service --disable-slacktest
             - run: make header-only
 
