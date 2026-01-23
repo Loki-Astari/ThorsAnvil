@@ -6574,7 +6574,7 @@ fi
 
 
 
-# Check whether --enable-slacktest was given.
+    # Check whether --enable-slacktest was given.
 if test ${enable_slacktest+y}
 then :
   enableval=$enable_slacktest;
@@ -6609,88 +6609,88 @@ then :
 fi
 
 
-DISABLE_SLACKTEST=0
+    DISABLE_SLACKTEST=0
 
 
-if test "x$enable_slacktest" == "xyes"
+    if test "x$enable_slacktest" == "xyes"
 then :
 
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: SLACK Test Already Enabled" >&5
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: SLACK Test Already Enabled" >&5
 printf "%s\n" "$as_me: SLACK Test Already Enabled" >&6;}
-    subconfigure="${subconfigure} --enable-slacktest"
+        subconfigure="${subconfigure} --enable-slacktest"
 
 else case e in #(
   e)
-    if test "x$enable_slacktest" == "xno"
+        if test "x$enable_slacktest" == "xno"
 then :
 
-        subconfigure="${subconfigure} --disable-slacktest"
-        DISABLE_SLACKTEST=1
+            subconfigure="${subconfigure} --disable-slacktest"
+            DISABLE_SLACKTEST=1
 
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: SLACK Test Disable" >&5
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: SLACK Test Disable" >&5
 printf "%s\n" "$as_me: SLACK Test Disable" >&6;}
 
 else case e in #(
   e)
-    if test "x${with_slack_botToken}" == "x"
+            if test "x${with_slack_botToken}" == "x"
 then :
   as_fn_error $? "No Bot token defined. Can not run the slack tests. Please look at tutorials on how to generate a slack Bot Token." "$LINENO" 5
 
 fi
-    if test "x${with_slack_userToken}" == "x"
+            if test "x${with_slack_userToken}" == "x"
 then :
   as_fn_error $? "No User token defined. Can not run the slack tests. Please look at tutorials on how to generate a slack User Token." "$LINENO" 5
 
 fi
-    if test "x${with_slack_secret}" == "x"
+            if test "x${with_slack_secret}" == "x"
 then :
   as_fn_error $? "No slack secret defined. Can not run the slack tests. Please look at tutorials on how to generate a slack Bot Secret." "$LINENO" 5
 
 fi
-    if test "x${with_slack_channel}" == "x"
+            if test "x${with_slack_channel}" == "x"
 then :
   as_fn_error $? "No slack channel defined. Can not run the slack tests. Please look at tutorials on how to generate a slack Bot Secret." "$LINENO" 5
 
 fi
-     ;;
-esac
-fi
 
-    # Note:
-    # Don't do this as it passes secrets around.
-    # These will end up in log files that will be pulled by a bad person
-    # XAS_IF([test "x${with_slack_botToken}" != "x"],    [subconfigure="${subconfigure} --with-slack-botToken=${with_slack_botToken}"])
-    # XAS_IF([test "x${with_slack_userToken}" != "x"],   [subconfigure="${subconfigure} --with-slack-userToken=${with_slack_userToken}"])
-    # XAS_IF([test "x${with_slack_secret}" != "x"],      [subconfigure="${subconfigure} --with-slack-secret=${with_slack_secret}"])
-    # XAS_IF([test "x${with_slack_channel}" != "x"],     [subconfigure="${subconfigure} --with-slack-channel=${with_slack_channel}"])
+            # Note:
+            # Don't do this as it passes secrets around.
+            # These will end up in log files that will be pulled by a bad person
+            # XAS_IF([test "x${with_slack_botToken}" != "x"],    [subconfigure="${subconfigure} --with-slack-botToken=${with_slack_botToken}"])
+            # XAS_IF([test "x${with_slack_userToken}" != "x"],   [subconfigure="${subconfigure} --with-slack-userToken=${with_slack_userToken}"])
+            # XAS_IF([test "x${with_slack_secret}" != "x"],      [subconfigure="${subconfigure} --with-slack-secret=${with_slack_secret}"])
+            # XAS_IF([test "x${with_slack_channel}" != "x"],     [subconfigure="${subconfigure} --with-slack-channel=${with_slack_channel}"])
 
-    data=$(curl \
-       --header "authorization: Bearer ${with_slack_botToken}" \
-       --header "content-type: application/json; charset=utf-8" \
-       --request GET \
-       https://slack.com/api/auth.test 2> /dev/null)
+            data=$(curl \
+               --header "authorization: Bearer ${with_slack_botToken}" \
+               --header "content-type: application/json; charset=utf-8" \
+               --request GET \
+               https://slack.com/api/auth.test 2> /dev/null)
 
-    dataok=$(echo ${data} | jq -r .ok)
-    if test "x${dataok}" != "xtrue"
+            dataok=$(echo ${data} | jq -r .ok)
+            if test "x${dataok}" != "xtrue"
 then :
 
-            as_fn_error $? "
-    Failed to authenticate with slack please check your token
+                    as_fn_error $? "
+            Failed to authenticate with slack please check your token
 
-    Command used:
-        curl --header \"authorization: Bearer ${with_slack_botToken}\" --header \"content-type: application/json; charset=utf-8\" --request GET https://slack.com/api/auth.test
+            Command used:
+                curl --header \"authorization: Bearer ${with_slack_botToken}\" --header \"content-type: application/json; charset=utf-8\" --request GET https://slack.com/api/auth.test
 
-    Response:
-        ${data}
-            " "$LINENO" 5
+            Response:
+                ${data}
+                    " "$LINENO" 5
 
 
 fi
 
 
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: SLACK Build configuration" >&5
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: SLACK Build configuration" >&5
 printf "%s\n" "$as_me: SLACK Build configuration" >&6;}
-    mkdir -p src/ThorsSlack/test/data
+            mkdir -p src/ThorsSlack/test/data
+
+# Note
+# Bad indentation because of here document
 cat - <<ENVIRONMENT > src/ThorsSlack/test/data/environment.json
 {
     "botToken": "${with_slack_botToken}",
@@ -6700,9 +6700,12 @@ cat - <<ENVIRONMENT > src/ThorsSlack/test/data/environment.json
 }
 ENVIRONMENT
 
-    subconfigure="${subconfigure} --enable-slacktest"
+            subconfigure="${subconfigure} --enable-slacktest"
 
- ;;
+         ;;
+esac
+fi
+     ;;
 esac
 fi
 
