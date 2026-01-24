@@ -1,4 +1,6 @@
 #include "HeaderResponse.h"
+#include "HeaderPassThrough.h"
+#include "HeaderStreamOperator.tpp"
 #include "ThorsLogging/ThorsLogging.h"
 #include <limits>
 #include <variant>
@@ -59,25 +61,6 @@ void Response::read(std::istream& stream)
     {
         statusCode = StandardStatusCodeMap::getStandardStatusCodeMap()[code];
     }
-}
-
-namespace ThorsAnvil::Nisse::HTTP
-{
-    NISSE_HEADER_ONLY_INCLUDE
-    std::ostream& operator<<(std::ostream& stream, Header const& header)
-    {
-        struct HeaderStream
-        {
-            std::ostream& stream;
-            HeaderStream(std::ostream& stream)
-                : stream(stream)
-            {}
-            std::ostream& operator()(HeaderResponse const& header)    {return stream << header;}
-            std::ostream& operator()(HeaderPassThrough const& header) {return stream << header;}
-        };
-        return std::visit(HeaderStream{stream}, header);
-    }
-
 }
 
 NISSE_HEADER_ONLY_INCLUDE

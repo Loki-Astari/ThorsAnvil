@@ -53,6 +53,7 @@ class StandardStatusCodeMap
 class HeaderResponse;
 class HeaderPassThrough;
 using Header = std::variant<std::reference_wrapper<HeaderResponse const>, std::reference_wrapper<HeaderPassThrough const>>;
+std::ostream& operator<<(std::ostream& stream, Header const& header);
 
 class RequestVariables
 {
