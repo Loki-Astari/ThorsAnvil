@@ -15,7 +15,6 @@ A C++ socket library that provides a unified, type-safe abstraction over files, 
 ## Quick Start
 
 ```cpp
-#include <ThorsSocket/Socket.h>
 #include <ThorsSocket/SocketStream.h>
 #include <iostream>
 
@@ -24,7 +23,7 @@ using namespace ThorsAnvil::ThorsSocket;
 int main()
 {
     // Connect to a server
-    SocketStream stream{Socket{SocketInfo{"example.com", 80}}};
+    SocketStream stream{SocketInfo{"example.com", 80}};
 
     // Use standard C++ stream operations
     stream << "GET / HTTP/1.1\r\nHost: example.com\r\n\r\n" << std::flush;
@@ -42,11 +41,62 @@ int main()
 
 | Header | Purpose |
 |--------|---------|
+| `ThorsSocket/SocketStream.h` | `SocketStream` -- `std::iostream` wrapper over a `Socket` |
 | `ThorsSocket/Socket.h` | `Socket` class (client-side I/O) |
 | `ThorsSocket/Server.h` | `Server` class (listening for connections) |
-| `ThorsSocket/SocketStream.h` | `SocketStream` -- `std::iostream` wrapper over a `Socket` |
-| `ThorsSocket/SocketUtil.h` | Enums, initialization structs, `IOData` |
-| `ThorsSocket/SecureSocketUtil.h` | SSL/TLS configuration types |
+
+---
+
+## SocketStream
+
+A `std::iostream` that wraps a `Socket`, allowing standard C++ stream operations over any connection type.
+
+### Creating a SocketStream
+
+```cpp
+// From a file
+SocketStream stream{FileInfo{"data.txt", FileMode::Read}};
+
+// From a pipe
+SocketStream stream{PipeInfo{}};
+
+// TCP connection
+SocketStream stream{SocketInfo{"hostname", 8080}};
+SocketStream stream{SocketInfo{"hostname", 8080}, Blocking::No};
+
+
+// TLS connection
+SSLctx ctx{SSLMethodType::Client};
+SocketStream stream{SSocketInfo{"hostname", 443, ctx}};
+SocketStream stream{SSocketInfo{"hostname", 443, ctx}, Blocking::No};
+
+```
+
+### Using with Standard C++ I/O
+
+```cpp
+SocketStream stream{SocketInfo{"api.example.com", 80}};
+
+// Write using operator<<
+stream << "GET /data HTTP/1.1\r\n"
+       << "Host: api.example.com\r\n\r\n"
+       << std::flush;
+
+// Read using standard stream operations
+std::string line;
+std::getline(stream, line);
+
+// Check connection state
+if (stream) {
+    // stream is still connected
+}
+```
+
+### Accessing the Underlying Socket
+
+```cpp
+Socket& sock = stream.getSocket();
+```
 
 ---
 
@@ -66,13 +116,14 @@ Socket socket{PipeInfo{}};
 
 // TCP connection
 Socket socket{SocketInfo{"hostname", 8080}};
+Socket socket{SocketInfo{"hostname", 8080}, Blocking::No};
+
 
 // TLS connection
 SSLctx ctx{SSLMethodType::Client};
-Socket socket{SSocketInfo{{"hostname", 443}, ctx, DeferAccept::No}};
+Socket socket{SSocketInfo{"hostname", 443, ctx}};
+Socket socket{SSocketInfo{"hostname", 443, ctx}, Blocking::No};
 
-// Non-blocking mode
-Socket socket{SocketInfo{"hostname", 8080}, Blocking::No};
 ```
 {% endraw %}
 
@@ -137,9 +188,6 @@ Server server{ServerInfo{8080}};
 CertificateInfo cert{"fullchain.pem", "privkey.pem"};
 SSLctx ctx{SSLMethodType::Server, cert};
 Server server{SServerInfo{8443, std::move(ctx)}};
-
-// Shorthand
-Server server{8080};
 ```
 
 ### Accepting Connections
@@ -147,56 +195,6 @@ Server server{8080};
 ```cpp
 // Block until a client connects
 Socket client = server.accept();
-
-// Accept with non-blocking client socket
-Socket client = server.accept(Blocking::No);
-
-// Defer SSL handshake (for event-driven servers)
-Socket client = server.accept(Blocking::No, DeferAccept::Yes);
-client.deferInit();  // complete handshake later
-```
-
----
-
-## SocketStream
-
-A `std::iostream` that wraps a `Socket`, allowing standard C++ stream operations over any connection type.
-
-### Creating a SocketStream
-
-```cpp
-// From a Socket
-SocketStream stream{std::move(socket)};
-
-// Directly from connection info
-SocketStream stream{SocketInfo{"hostname", 8080}};
-SocketStream stream{FileInfo{"data.txt", FileMode::Read}};
-```
-
-### Using with Standard C++ I/O
-
-```cpp
-SocketStream stream{SocketInfo{"api.example.com", 80}};
-
-// Write using operator<<
-stream << "GET /data HTTP/1.1\r\n"
-       << "Host: api.example.com\r\n\r\n"
-       << std::flush;
-
-// Read using standard stream operations
-std::string line;
-std::getline(stream, line);
-
-// Check connection state
-if (stream) {
-    // stream is still connected
-}
-```
-
-### Accessing the Underlying Socket
-
-```cpp
-Socket& sock = stream.getSocket();
 ```
 
 ---
@@ -297,6 +295,8 @@ enum class DeferAccept { No, Yes };
 
 ThorsSocket supports non-blocking I/O through yield callbacks. When a blocking operation would occur, the registered yield function is called, allowing integration with coroutine libraries or event loops:
 
+This is the mechanism used by NisseServer to provide transparent async I/O with synchronous-looking code.
+
 ```cpp
 Socket socket{SocketInfo{"host", 80}, Blocking::No};
 
@@ -314,8 +314,6 @@ socket.setWriteYield([]() -> bool {
 });
 ```
 
-This is the mechanism used by NisseServer to provide transparent async I/O with synchronous-looking code.
-
 ---
 
 ## Complete Example: TLS Client
@@ -332,17 +330,11 @@ using namespace ThorsAnvil::ThorsSocket;
 
 int main()
 {
-    // Create TLS context with system CA defaults
-    CertifcateAuthorityInfo ca;
-    ca.file.loadDefault = true;
-
-    SSLctx ctx{SSLMethodType::Client,
-               ProtocolInfo{Protocol::TLS_1_2, Protocol::TLS_1_3},
-               ca};
+    // Create TLS context
+    SSLctx ctx{SSLMethodType::Client};
 
     // Connect
-    SocketStream stream{Socket{
-        SSocketInfo{{"example.com", 443}, ctx, DeferAccept::No}}};
+    SocketStream stream{SSocketInfo{"example.com", 443, ctx}};
 
     // Send HTTP request
     stream << "GET / HTTP/1.1\r\n"
@@ -359,7 +351,7 @@ int main()
 ```
 {% endraw %}
 
-## Complete Example: TCP Server
+## Complete Example: TLS Server
 
 ```cpp
 #include <ThorsSocket/Server.h>
@@ -370,7 +362,15 @@ using namespace ThorsAnvil::ThorsSocket;
 
 int main()
 {
-    Server server{8080};
+    // Information about SSL Certificates
+    // https://lokiastari.com/posts/NisseV3
+    //
+    // Getting a free SSL Certificate for your site:
+    // https://letsencrypt.org/
+    //
+    CertificateInfo cert{"fullchain.pem", "privkey.pem"};
+    SSLctx ctx{SSLMethodType::Server, cert};
+    Server server{SServerInfo{8080, ctx}};
     std::cout << "Listening on port 8080\n";
 
     while (true) {
