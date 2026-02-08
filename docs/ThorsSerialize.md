@@ -68,7 +68,7 @@ struct Color
 ThorsAnvil_MakeTrait(Color, red, green, blue);
 ```
 
-If `Color` is in a namespace:
+If `Color` is in the namespace `Graphics`:
 
 ```cpp
 ThorsAnvil_MakeTrait(Graphics::Color, red, green, blue);
@@ -163,34 +163,55 @@ auto user = jsonBuilder<User>(std::string{R"({"name":"Alice","age":30})"});
 ### PrinterConfig (Export)
 
 ```cpp
-PrinterConfig config;
-config.setOutputType(OutputType::Config)      // pretty-printed
-      .setCatchExceptions(true);
+std::cout << jsonExporter(myObj, PrinterConfig{}
+                                    .setOutputType(OutputType::Stream)
+                                    .setPolymorphicMarker("TypeName")
+                                    .setCatchExceptions(true)
+                                    .setCatchUnknownExceptions(true)
+                                    .setExactPreFlightCalc(false)
+                                    .setTabSize(4)
+                                    .setBlockSize(8)
+                         );
 
-std::cout << jsonExporter(myObj, config);
 ```
 
 | Method | Default | Description |
 |--------|---------|-------------|
-| `setOutputType()` | `Default` | `Stream` = compressed, `Config` = pretty-printed |
-| `setPolymorphicMarker()` | `"__type"` | Key name for polymorphic type identification |
-| `setCatchExceptions()` | `true` | Catch `std::exception` and set failbit instead of propagating |
-| `setTabSize()` | 4 (JSON) / 2 (YAML) | Indent size |
+| setOutputType() | OutputType::Default | How to serialize an object.<br>OutputType::Config => User readable.<br>OutputType::Stream => Single line no space. |
+| setPolymorphicMarker() | "" | Polymorphic class type marker.<br>If &lt;Empty String&gt; &lt;Type&gt;::polyname() if it exists.<br> Default value is "__type". |
+| setCatchExceptions() | true | If true, catch exception derived from std::exception and set the bad bit of the stream. |
+| setCatchUnknownExceptions() | false | If true, catch any other exception and set the bad bit of the stream.<br><B>DO NOT</B>set this.<br>boost co-routine shut down exception will fail to propogate correctly. |
+| setExactPreFlightCalc() | false | If false, When exporting to a string we preflight the printing to calculate the size so there is only one allocation. |
+| setTabSize() | JSON => 4<br> YAML => 2 | Set the tab indent size. |
+| setBlockSize() | 0 | Set the indent from left side. |
 
 ### ParserConfig (Import)
 
 ```cpp
-ParserConfig config;
-config.setParseStrictness(ParseType::Strict);
+IgnoreCallBack  ignoreCB;
 
-std::cin >> jsonImporter(myObj, config);
+std::cin >> jsonImporter(myObj, ParserConfig{}
+                                    .setParseStrictness(OutputType::Stream)
+                                    .setPolymorphicMarker("TypeName")
+                                    .setCatchExceptions(true)
+                                    .setCatchUnknownExceptions(false)
+                                    .setValidateNoTrailingData(true)
+                                    .setNoBackslashConversion(false)
+                                    .setIdentifyDynamicClass([](){return "Alternative";})
+                                    .setIgnoreCallBack(std::move(ignoreCB))
+                        );
 ```
 
 | Method | Default | Description |
 |--------|---------|-------------|
-| `setParseStrictness()` | `Weak` | `Weak`: ignore unknown fields. `Strict`: unknown fields throw. `Exact`: unknown AND missing fields throw. |
-| `setPolymorphicMarker()` | `"__type"` | Key name for polymorphic type identification |
-| `setValidateNoTrailingData()` | `false` | Fail if non-whitespace data follows the parsed object |
+| setParseStrictness() | ParseType::Weak | ParseType::Weak => No checks.<br> ParseType::Strict => Error if unexpected field.<br>ParseType::Exact => Error if missing any fields or extra fields. |
+| setPolymorphicMarker() | "" | Polymorphic class type marker.<br>If &lt;Empty String&gt; &lt;Type&gt;::polyname() if it exists.<br> Default value is "__type". |
+| setCatchExceptions() | true | If true, catch exception derived from std::exception and set the bad bit of the stream. |
+| setCatchUnknownExceptions() | false | If true, catch any other exception and set the bad bit of the stream.<br><B>DO NOT</B>set this.<br>boost co-routine shut down exception will fail to propogate correctly. |
+| setValidateNoTrailingData() | false | If true, validate no JSON tokens after reading object. |
+| setNoBackslashConversion() | true | if true, convert backslash characters as per JSON spec, otherwise ignore. |
+| setIdentifyDynamicClass() | std::function&lt;std::string(DataInputStream&)&gt; | Identify polymorphic type using non standard technique. |
+| setIgnoreCallBack() | IgnoreCallBack | Send ignored data to object. |
 
 ---
 
