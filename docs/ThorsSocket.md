@@ -56,6 +56,7 @@ The primary class for reading from and writing to a connection.
 
 ### Creating a Socket
 
+{% raw %}
 ```cpp
 // From a file
 Socket socket{FileInfo{"data.txt", FileMode::Read}};
@@ -73,6 +74,7 @@ Socket socket{SSocketInfo{{"hostname", 443}, ctx, DeferAccept::No}};
 // Non-blocking mode
 Socket socket{SocketInfo{"hostname", 8080}, Blocking::No};
 ```
+{% endraw %}
 
 ### Reading and Writing
 
@@ -318,6 +320,7 @@ This is the mechanism used by NisseServer to provide transparent async I/O with 
 
 ## Complete Example: TLS Client
 
+{% raw %}
 ```cpp
 #include <ThorsSocket/Socket.h>
 #include <ThorsSocket/SocketStream.h>
@@ -354,6 +357,7 @@ int main()
     }
 }
 ```
+{% endraw %}
 
 ## Complete Example: TCP Server
 
