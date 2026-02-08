@@ -1,3 +1,9 @@
+[Home](index.html) | [Internal Documentation](internal/ThorsMug.html)
+
+**Libraries:** [Mug](Mug.html) · [ThorsMug](ThorsMug.html) · [ThorsSlack](ThorsSlack.html) · [NisseServer](NisseServer.html) · [NisseHTTP](NisseHTTP.html) · [ThorsSocket](ThorsSocket.html) · [ThorsCrypto](ThorsCrypto.html) · [ThorsSerializer](ThorsSerialize.html) · [ThorsLogging](ThorsLogging.html) · [ThorsIOUtil](ThorsIOUtil.html)
+
+---
+
 # ThorsMug API
 
 The plugin interface for the Mug server. Implement `MugPlugin` to create dynamically-loaded HTTP route handlers.

@@ -1,3 +1,9 @@
+[Home](index.html) | [Internal Documentation](internal/ThorsSerialize.html)
+
+**Libraries:** [Mug](Mug.html) · [ThorsMug](ThorsMug.html) · [ThorsSlack](ThorsSlack.html) · [NisseServer](NisseServer.html) · [NisseHTTP](NisseHTTP.html) · [ThorsSocket](ThorsSocket.html) · [ThorsCrypto](ThorsCrypto.html) · [ThorsSerializer](ThorsSerialize.html) · [ThorsLogging](ThorsLogging.html) · [ThorsIOUtil](ThorsIOUtil.html)
+
+---
+
 # ThorsSerializer API
 
 Declarative C++ serialization for JSON, YAML, and BSON. Instead of manually building a DOM or writing conversion code, declare which members of your C++ types should be serialized and the library generates everything at compile time.

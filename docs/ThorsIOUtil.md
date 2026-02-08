@@ -1,3 +1,9 @@
+[Home](index.html) | [Internal Documentation](internal/ThorsIOUtil.html)
+
+**Libraries:** [Mug](Mug.html) · [ThorsMug](ThorsMug.html) · [ThorsSlack](ThorsSlack.html) · [NisseServer](NisseServer.html) · [NisseHTTP](NisseHTTP.html) · [ThorsSocket](ThorsSocket.html) · [ThorsCrypto](ThorsCrypto.html) · [ThorsSerializer](ThorsSerialize.html) · [ThorsLogging](ThorsLogging.html) · [ThorsIOUtil](ThorsIOUtil.html)
+
+---
+
 # ThorsIOUtil API
 
 Type-safe `printf`-style formatting through `std::ostream`. Validates format specifiers against C++ argument types at runtime and serializes values using stream manipulators.

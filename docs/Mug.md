@@ -1,3 +1,9 @@
+[Home](index.html) | [Internal Documentation](internal/Mug.html)
+
+**Libraries:** [Mug](Mug.html) · [ThorsMug](ThorsMug.html) · [ThorsSlack](ThorsSlack.html) · [NisseServer](NisseServer.html) · [NisseHTTP](NisseHTTP.html) · [ThorsSocket](ThorsSocket.html) · [ThorsCrypto](ThorsCrypto.html) · [ThorsSerializer](ThorsSerialize.html) · [ThorsLogging](ThorsLogging.html) · [ThorsIOUtil](ThorsIOUtil.html)
+
+---
+
 # Mug API
 
 A configurable HTTP server application that dynamically loads shared-library plugins at runtime. Define your REST endpoints as plugins and Mug handles the server lifecycle, JSON configuration, TLS setup, and hot-reloading of plugins.

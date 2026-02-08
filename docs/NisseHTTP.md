@@ -1,3 +1,9 @@
+[Home](index.html) | [Internal Documentation](internal/NisseHTTP.html)
+
+**Libraries:** [Mug](Mug.html) · [ThorsMug](ThorsMug.html) · [ThorsSlack](ThorsSlack.html) · [NisseServer](NisseServer.html) · [NisseHTTP](NisseHTTP.html) · [ThorsSocket](ThorsSocket.html) · [ThorsCrypto](ThorsCrypto.html) · [ThorsSerializer](ThorsSerialize.html) · [ThorsLogging](ThorsLogging.html) · [ThorsIOUtil](ThorsIOUtil.html)
+
+---
+
 # NisseHTTP API
 
 HTTP/1.x layer built on NisseServer. Provides request parsing, response generation, URL routing with path captures, chunked transfer encoding, and client-side HTTP utilities.

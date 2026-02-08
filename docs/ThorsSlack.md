@@ -1,3 +1,9 @@
+[Home](index.html) | [Internal Documentation](internal/ThorsSlack.html)
+
+**Libraries:** [Mug](Mug.html) · [ThorsMug](ThorsMug.html) · [ThorsSlack](ThorsSlack.html) · [NisseServer](NisseServer.html) · [NisseHTTP](NisseHTTP.html) · [ThorsSocket](ThorsSocket.html) · [ThorsCrypto](ThorsCrypto.html) · [ThorsSerializer](ThorsSerialize.html) · [ThorsLogging](ThorsLogging.html) · [ThorsIOUtil](ThorsIOUtil.html)
+
+---
+
 # ThorsSlack API
 
 Type-safe C++ API for the Slack platform. Provides strongly-typed interfaces for the Slack REST API, webhooks, event callbacks, slash commands, and Block Kit -- with automatic JSON serialization via ThorsSerializer.

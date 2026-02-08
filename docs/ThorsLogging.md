@@ -1,3 +1,9 @@
+[Home](index.html) | [Internal Documentation](internal/ThorsLogging.html)
+
+**Libraries:** [Mug](Mug.html) · [ThorsMug](ThorsMug.html) · [ThorsSlack](ThorsSlack.html) · [NisseServer](NisseServer.html) · [NisseHTTP](NisseHTTP.html) · [ThorsSocket](ThorsSocket.html) · [ThorsCrypto](ThorsCrypto.html) · [ThorsSerializer](ThorsSerialize.html) · [ThorsLogging](ThorsLogging.html) · [ThorsIOUtil](ThorsIOUtil.html)
+
+---
+
 # ThorsLogging API
 
 Leveled logging macros for C++ with optional exception throwing. Wraps [loguru](https://github.com/emilk/loguru) in full builds or falls back to `std::cerr` in header-only mode.
