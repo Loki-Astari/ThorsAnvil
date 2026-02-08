@@ -39,34 +39,6 @@ echo "[1,2,3,4,5]" | ./a.out
 
 ---
 
-## Installation
-
-### Homebrew (Mac and Linux)
-
-```bash
-brew install thors-anvil
-```
-
-### Header-Only (from GitHub)
-
-```bash
-git clone --single-branch --branch header-only https://github.com/Loki-Astari/ThorsMongo.git
-```
-
-### From Source
-
-```bash
-git clone https://github.com/Loki-Astari/ThorsSerializer.git
-cd ThorsSerializer
-./configure
-make
-sudo make install
-```
-
-Requires a C++20 compatible compiler.
-
----
-
 ## Headers
 
 | Header | Purpose |
@@ -393,16 +365,3 @@ int main()
 | `ThorsAnvil_PolyMorphicSerializerWithOverride(Type)` | Polymorphic derived class |
 | `ThorsAnvil_PointerAllocator(Type, Allocator)` | Custom pointer allocation |
 
----
-
-## Build Instructions
-
-```bash
-# Basic compilation
-g++ -std=c++20 myfile.cpp -lThorSerialize -lThorsLogging
-
-# With YAML support
-g++ -std=c++20 myfile.cpp -lThorSerialize -lThorsLogging -lyaml
-
-# Windows: add /Zc:preprocessor for conforming preprocessor
-```

@@ -43,3 +43,47 @@ The main goal of these libraries is to remove the need to write boilerplate code
 
 10. **[ThorsIOUtil](ThorsIOUtil.html)** | [Internal Documentation](internal/ThorsIOUtil.html)
     Type-safe `printf`-style formatting through `std::ostream`. Validates format specifiers against C++ argument types at runtime.
+
+---
+
+## Installation
+
+Requires a C++20 compatible compiler.
+
+### Homebrew (Mac and Linux)
+
+```bash
+brew install thors-anvil
+```
+
+### Header-Only (from GitHub)
+
+```bash
+git clone --single-branch --branch header-only https://github.com/Loki-Astari/ThorsAnvil.git
+```
+
+Add the cloned directory to your include path.
+
+### From Source
+
+```bash
+git clone https://github.com/Loki-Astari/ThorsAnvil.git
+cd ThorsAnvil
+./configure
+make
+sudo make install
+```
+
+---
+
+## Build Instructions
+
+```bash
+# Basic compilation
+g++ -std=c++20 myfile.cpp -lThorSerialize -lThorsLogging
+
+# With YAML support
+g++ -std=c++20 myfile.cpp -lThorSerialize -lThorsLogging -lyaml
+
+# Windows: add /Zc:preprocessor for conforming preprocessor
+```
