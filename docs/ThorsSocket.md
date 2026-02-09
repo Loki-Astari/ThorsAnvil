@@ -14,8 +14,18 @@ A C++ socket library that provides a unified, type-safe abstraction over files, 
 
 ## Quick Start
 
+### Makefile
+```Makefile
+CXXFLAGS    = -std=c++20
+
+LDLIBS      = -lThorsLogging -lThorSerialize -lThorsSocket
+
+all:        ThorsSocketApp
+```
+### ThorsSocketApp.cpp
+
 ```cpp
-#include <ThorsSocket/SocketStream.h>
+#include "ThorsSocket/SocketStream.h"
 #include <iostream>
 
 using namespace ThorsAnvil::ThorsSocket;
@@ -320,9 +330,9 @@ socket.setWriteYield([]() -> bool {
 
 {% raw %}
 ```cpp
-#include <ThorsSocket/Socket.h>
-#include <ThorsSocket/SocketStream.h>
-#include <ThorsSocket/SecureSocketUtil.h>
+#include "ThorsSocket/Socket.h"
+#include "ThorsSocket/SocketStream.h"
+#include "ThorsSocket/SecureSocketUtil.h"
 #include <iostream>
 #include <string>
 
@@ -354,8 +364,8 @@ int main()
 ## Complete Example: TLS Server
 
 ```cpp
-#include <ThorsSocket/Server.h>
-#include <ThorsSocket/SocketStream.h>
+#include "ThorsSocket/Server.h"
+#include "ThorsSocket/SocketStream.h"
 #include <iostream>
 
 using namespace ThorsAnvil::ThorsSocket;

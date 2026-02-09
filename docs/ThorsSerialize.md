@@ -16,6 +16,16 @@ Declarative C++ serialization for JSON, YAML, and BSON. Instead of manually buil
 
 Serialize a `std::vector<int>` to/from JSON in under 10 lines:
 
+### Makefile
+```Makefile
+CXXFLAGS    = -std=c++20
+
+LDLIBS      = -lThorsLogging -lThorSerialize
+
+all:        ThorsSerApp
+```
+### ThorsSerApp.cpp
+
 ```cpp
 #include <iostream>
 #include <vector>

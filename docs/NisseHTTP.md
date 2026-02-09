@@ -14,10 +14,23 @@ HTTP/1.x layer built on NisseServer. Provides request parsing, response generati
 
 ## Quick Start
 
+
+### Makefile
+```Makefile
+CXXFLAGS        = -std=c++20
+
+LDLIBS          = -lThorsSocket -lNisse -lboost_coroutine -lboost_context -levent
+
+all:            MyHTTPServer
+```
+### MyHTTPServer.cpp
 ```cpp
 #include "NisseServer/NisseServer.h"
 #include "NisseHTTP/HTTPHandler.h"
-#include <ThorsSocket/Server.h>
+#include "NisseHTTP/Response.h"
+#include "NisseHTTP/Request.h"
+#include "NisseHTTP/PyntHTTPControl.h"
+#include "ThorsSocket/Server.h"
 
 namespace NisServer = ThorsAnvil::Nisse::Server;
 namespace NisHttp   = ThorsAnvil::Nisse::HTTP;
@@ -25,10 +38,12 @@ namespace TASock    = ThorsAnvil::ThorsSocket;
 
 class MyApp : public NisServer::NisseServer
 {
-    NisHttp::HTTPHandler http;
+    NisHttp::PyntHTTPControl    control;
+    NisHttp::HTTPHandler        http;
 
 public:
-    MyApp(int port)
+    MyApp(int port, int cPort)
+        : control(*this)
     {
         http.addPath(NisHttp::Method::GET, "/hello/{name}",
             [](NisHttp::Request const& req, NisHttp::Response& res) {
@@ -39,14 +54,31 @@ public:
             });
 
         listen(TASock::ServerInfo{port}, http);
+        listen(TASock::ServerInfo{cPort}, control);
     }
 };
 
 int main()
 {
-    MyApp server(8080);
+    MyApp server(8080, 9090);
     server.run();
 }
+```
+
+### Testing Server
+
+Bash client using line based protocol:
+
+```bash
+> make
+> ./MyHTTPServer &
+
+> curl 'localhost:8080/hello/Loki-Astari'
+# Expected Output
+# Hello, Loki-Astari
+
+# Stop server with:
+> curl 'localhost:9090?command=stopsoft'
 ```
 
 ---

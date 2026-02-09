@@ -8,16 +8,29 @@
 
 An event-driven, coroutine-based C++ server framework. Write synchronous-looking request handlers while the framework handles non-blocking async I/O, thread pools, and connection management behind the scenes.
 
+**Note**: This is for base level socket handling and does not provide any protocol specific handling. Please see NisseHTTP for HTTP specific protocol handling.
+
 **Namespace:** `ThorsAnvil::Nisse::Server`
 
 ---
 
 ## Quick Start
 
+### Makefile
+```Makefile
+CXXFLAGS        = -std=c++20
+
+LDLIBS          = -lThorsSocket -lNisse -lboost_coroutine -lboost_context -levent
+
+all:            MyServer
+```
+### MyServer.cpp
+
 ```cpp
 #include "NisseServer/NisseServer.h"
 #include "NisseServer/Pynt.h"
-#include <ThorsSocket/SocketStream.h>
+#include "NisseServer/PyntControl.h"
+#include "ThorsSocket/SocketStream.h"
 
 namespace NisServer = ThorsAnvil::Nisse::Server;
 namespace TASock    = ThorsAnvil::ThorsSocket;
@@ -30,20 +43,43 @@ public:
         NisServer::Context& context) override
     {
         std::string line;
-        std::getline(stream, line);           // reads asynchronously
-        stream << "Echo: " << line << "\n";   // writes asynchronously
-        return NisServer::PyntResult::More;   // keep connection open
+        std::getline(stream, line);                     // reads asynchronously
+        stream << "Echo: " << line << "\n";             // writes asynchronously
+        return NisServer::PyntResult::More;             // keep connection open
     }
 };
 
 int main()
 {
-    NisServer::NisseServer server;
+    NisServer::NisseServer server;                      // A basic server
+    NisServer::PyntControl control(server);             // Server simple control. Ability to stop server.
     EchoProtocol echo;
 
+    // Add Listeners:
     server.listen(TASock::ServerInfo{8080}, echo);
+    server.listen(TASock::ServerInfo{9090}, control);
+
+    // Start server
+    std::cout << "Listening on port: 8080\n";
     server.run();  // blocks until stopped
 }
+```
+
+### Testing Server
+
+Bash client using line based protocol:
+
+```bash
+> make
+> ./MyServer &
+
+# nc => netcat
+> echo "Your raw text here" | nc localhost 8080
+# Expected Output
+# Echo: Your raw text here
+
+# Stop server with:
+> echo "Stop" | nc localhost 9090
 ```
 
 Handler code reads as synchronous -- no callbacks, no futures, no explicit state machines. The framework uses `boost::coroutines2` to yield transparently when I/O would block.
@@ -178,44 +214,3 @@ server.listen(TASock::ServerInfo{9090}, control);
 Connect to port 9090 from anywhere to shut down the server.
 
 ---
-
-## Complete Example: Multi-Port Server
-
-```cpp
-#include "NisseServer/NisseServer.h"
-#include "NisseServer/PyntControl.h"
-#include "NisseHTTP/HTTPHandler.h"
-#include <ThorsSocket/Server.h>
-
-namespace NisServer = ThorsAnvil::Nisse::Server;
-namespace NisHttp   = ThorsAnvil::Nisse::HTTP;
-namespace TASock    = ThorsAnvil::ThorsSocket;
-
-class MyServer : public NisServer::NisseServer
-{
-    NisHttp::HTTPHandler    http;
-    NisServer::PyntControl  control;
-
-public:
-    MyServer(int port)
-        : control(*this)
-    {
-        http.addPath(NisHttp::Method::GET, "/hello/{name}",
-            [](NisHttp::Request const& req, NisHttp::Response& res) {
-                std::string name = req.variables()["name"];
-                std::string body = "Hello, " + name + "!";
-                res.body(body.size()) << body;
-                return true;
-            });
-
-        listen(TASock::ServerInfo{port}, http);
-        listen(TASock::ServerInfo{port + 2}, control);  // control port
-    }
-};
-
-int main()
-{
-    MyServer server(8080);
-    server.run();
-}
-```

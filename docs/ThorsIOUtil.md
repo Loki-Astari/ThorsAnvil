@@ -46,6 +46,17 @@ Creates a format object with **strict C++** type checking. Requires exact type m
 
 Stream the format object to any `std::ostream`:
 
+
+### Makefile
+```Makefile
+CXXFLAGS    = -std=c++20
+
+LDLIBS      = -lThorsLogging
+
+all:        IOUtilApp
+```
+### IOUtilApp.cpp
+
 ```cpp
 #include "ThorsIOUtil/Format.h"
 #include <iostream>

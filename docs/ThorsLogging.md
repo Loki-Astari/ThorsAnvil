@@ -148,12 +148,26 @@ In header-only mode, `THOR_LOGGING_DEFAULT_LOG_LEVEL` (default: `3`) controls th
 
 ## Complete Example
 
+### Makefile
+```Makefile
+CXXFLAGS    = -std=c++20
+
+LDLIBS      = -lThorsLogging
+
+all:        ThorsLogApp
+```
+### ThorsLogApp.cpp
+
 ```cpp
 #include "ThorsLogging/ThorsLogging.h"
 #include <stdexcept>
 
 class NetworkClient
 {
+    // Example fail
+    bool doConnect(std::string const& host, int port) {
+        return false;
+    }
 public:
     void connect(std::string const& host, int port)
     {
