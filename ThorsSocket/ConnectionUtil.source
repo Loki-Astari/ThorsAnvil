@@ -115,6 +115,21 @@ int thorShutdownSocket(int fd)
 
 #endif
 
+/*
+ * ::getaddrinfo wrapper function.
+ * The mock functionality does not support output parameters.
+ * This function wraps ::getaddrinfo() so that the "result" output parameter
+ * is returned as a result, thus allowing the use of this function in the
+ * mock code. See: ::getAddressInfo
+ */
+THORS_SOCKET_HEADER_ONLY_INCLUDE
+AddressResult getAddressInfo(char const* host, char const* service, AddressInfo const* hint)
+{
+    AddressInfo*    result = nullptr;
+    int status = ::getaddrinfo(host, service, hint, &result);
+    return {status, result};
+}
+
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 char const* getErrNoStrUnix(int error)
 {

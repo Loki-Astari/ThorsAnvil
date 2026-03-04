@@ -25,6 +25,23 @@ SSocketStandard::SSocketStandard(SSocketInfo const& ssocketInfo, int fd)
 }
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
+SSocketStandard::SSocketStandard(SSocketService const& ssocketInfo, int fd)
+    : ssl{nullptr}
+    , connectionFailed{false}
+    , deferAction{DeferAction::None}
+{
+    initSSocket(ssocketInfo.ctx, fd);
+    if (ssocketInfo.defer == DeferAccept::No)
+    {
+        YieldFunc nullYield = [](){return false;};
+        initSSocketClientConnect(nullYield, nullYield);
+    }
+    else {
+        deferAction = DeferAction::Connect;
+    }
+}
+
+THORS_SOCKET_HEADER_ONLY_INCLUDE
 SSocketStandard::SSocketStandard(OpenSSocketInfo const& ssocketInfo, int fd)
     : ssl{nullptr}
     , connectionFailed{false}
@@ -285,7 +302,7 @@ void SSocketStandard::initSSocketClientAccept(YieldFunc& rYield, YieldFunc& wYie
     do
     {
         // TODO
-        status = SSL_accept(ssl);
+        status = ::SSL_accept(ssl);
         if (status != 1)
         {
             error = ::SSL_get_error(ssl, status);
@@ -308,7 +325,7 @@ void SSocketStandard::initSSocketClientAccept(YieldFunc& rYield, YieldFunc& wYie
     {
         ::SSL_free(ssl);
         ssl = nullptr;
-        ThorsLogDebug(
+        ThorsLogAndThrowDebug(std::runtime_error,
             "ThorsAnvil::ThorsSocket::ConnectionType::SSocketStandard",
             "initSSocketClientAccept",
             " :Failed on SSL_accept() ",
@@ -321,7 +338,7 @@ void SSocketStandard::initSSocketClientAccept(YieldFunc& rYield, YieldFunc& wYie
     {
         ::SSL_free(ssl);
         ssl = nullptr;
-        ThorsLogDebug(
+        ThorsLogAndThrowDebug(std::runtime_error,
             "ThorsAnvil::ThorsSocket::ConnectionType::SSocketStandard",
             "initSSocketClientAccept",
             " :Failed on SSL_get_verify_result(): ",
@@ -396,6 +413,12 @@ void SSocketStandard::checkConnectionOK(int errorCode)
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 SSocketClient::SSocketClient(SSocketInfo const& ssocketInfo, Blocking blocking)
+    : SocketClient(ssocketInfo, blocking)
+    , secureSocketInfo(ssocketInfo, socketId(Mode::Read))
+{}
+
+THORS_SOCKET_HEADER_ONLY_INCLUDE
+SSocketClient::SSocketClient(SSocketService const& ssocketInfo, Blocking blocking)
     : SocketClient(ssocketInfo, blocking)
     , secureSocketInfo(ssocketInfo, socketId(Mode::Read))
 {}

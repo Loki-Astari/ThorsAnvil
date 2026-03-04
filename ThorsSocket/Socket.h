@@ -16,7 +16,7 @@ class ConnectionClient;
 enum class TestMarker {True};
 
 using YieldFunc     = std::function<bool()>;
-using SocketInit    = std::variant<FileInfo, PipeInfo, SocketInfo, SSocketInfo>;
+using SocketInit    = std::variant<FileInfo, PipeInfo, SocketInfo, SocketService, SSocketInfo, SSocketService>;
 
 class Server;
 class Socket
@@ -34,6 +34,8 @@ class Socket
         Socket(PipeInfo const& pipeInfo, Blocking blocking = Blocking::Yes)         : Socket{SocketInit{pipeInfo}, blocking}{}
         Socket(SocketInfo const& socketInfo, Blocking blocking = Blocking::Yes)     : Socket{SocketInit{socketInfo}, blocking}{}
         Socket(SSocketInfo const& ssocketInfo, Blocking blocking = Blocking::Yes)   : Socket{SocketInit{ssocketInfo}, blocking}{}
+        Socket(SocketService const& socketInfo, Blocking blocking = Blocking::Yes)  : Socket{SocketInit{socketInfo}, blocking}{}
+        Socket(SSocketService const& ssocketInfo, Blocking blocking = Blocking::Yes): Socket{SocketInit{ssocketInfo}, blocking}{}
         ~Socket();
 
         // Good for testing only.

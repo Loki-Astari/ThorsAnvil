@@ -131,13 +131,17 @@ Response:
 #endif
 
 // Response Objects
-struct PostMessageReply
+// Rant: For some reason windows defines a macro PostMessage
+//       This causes untold issues. So to just avoid this
+//       the name of this type breaks standard rules.
+//       I apologise.
+struct POSTMessageReply
 {
     bool                        ok      = false;
     std::string                 channel;
     std::string                 ts;
     Message                     message;
-    ThorsAnvil_VariantSerializer(ThorsAnvil::Slack::API::Chat::PostMessageReply);
+    ThorsAnvil_VariantSerializer(ThorsAnvil::Slack::API::Chat::POSTMessageReply);
 };
 
 struct PostEphemeralReply
@@ -166,12 +170,16 @@ struct UpdateReply
 };
 
 // Action Objects
-struct PostMessage
+// Rant: For some reason windows defines a macro PostMessage
+//       This causes untold issues. So to just avoid this
+//       the name of this type breaks standard rules.
+//       I apologise.
+struct POSTMessage
 {
     static constexpr char const* api = "https://slack.com/api/chat.postMessage";
     static constexpr Method method = Method::POST;
     static constexpr Scope  scope = Scope::Bot;
-    using Reply = PostMessageReply;
+    using Reply = POSTMessageReply;
 
     std::string                 channel;
     OptString                   text;
@@ -241,13 +249,13 @@ struct Update
 }
 
 // Response objects
-ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Chat::PostMessageReply, ok, channel, ts, message);
+ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Chat::POSTMessageReply, ok, channel, ts, message);
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Chat::PostEphemeralReply, ok, message_ts);
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Chat::DeleteReply, ok, channel, ts);
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Chat::UpdateReply, ok, channel, ts, text, message);
 
 // Action objects
-ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Chat::PostMessage, channel, text, blocks, icon_emoji, username, thread_ts);
+ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Chat::POSTMessage, channel, text, blocks, icon_emoji, username, thread_ts);
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Chat::PostEphemeral, channel, user, attachments, blocks, icon_emoji, icon_url, link_names, markdown_text, parse, text, thread_ts, username);
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Chat::Delete, channel, ts, as_user);
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Chat::Update, channel, ts, as_user, attachments, blocks, markdown_text, metadata, link_names, parse, text, reply_broadcast, file_ids);

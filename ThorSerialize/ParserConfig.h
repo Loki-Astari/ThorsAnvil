@@ -57,16 +57,15 @@ struct ParserConfig
     ParserConfig& setPolymorphicMarker(std::string const& p_polymorphicMarker)  {polymorphicMarker = p_polymorphicMarker;   return *this;}
     ParserConfig& setCatchExceptions(bool p_catchExceptions)                    {catchExceptions = p_catchExceptions;       return *this;}
     ParserConfig& setCatchUnknownExceptions(bool p_catchExceptions)             {catchUnknownExceptions = p_catchExceptions;return *this;}
-    ParserConfig& setUseOldSharedPtr()                                          {useOldSharedPtr = true;                    return *this;}
-    ParserConfig& setValidateNoTrailingData()                                   {validateNoTrailingData = true;             return *this;}
-    ParserConfig& setNoBackslashConversion()                                    {convertBackSlash = false;                  return *this;}
+    ParserConfig& setValidateNoTrailingData(bool validate = true)               {validateNoTrailingData = validate;         return *this;}
+    ParserConfig& setNoBackslashConversion(bool convBS = false)                 {convertBackSlash = convBS;                 return *this;}
     ParserConfig& setIdentifyDynamicClass(IdFunc func)                          {identifyDynamcClass = std::move(func);     return *this;}
+    ParserConfig& setIgnoreCallBack(IgnoreCallBack&& cb)                        {ignoreCallBack = std::move(cb);            return *this;}
     ParseType       parseStrictness         = ParseType::Weak;
     std::string     polymorphicMarker       = "";
     bool            catchExceptions         = true;
     bool            catchUnknownExceptions  = false;
     IgnoreCallBack  ignoreCallBack;
-    bool            useOldSharedPtr         = false;
     bool            validateNoTrailingData  = false;
     bool            convertBackSlash        = true;
     IdFunc          identifyDynamcClass     = [](DataInputStream&){return "";};

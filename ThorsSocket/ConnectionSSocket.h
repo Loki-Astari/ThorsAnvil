@@ -24,6 +24,7 @@ class SSocketStandard
         SSocketStandard(SSocketStandard&&)      = delete;
 
         SSocketStandard(SSocketInfo const& socketInfo, int fd);
+        SSocketStandard(SSocketService const& socketInfo, int fd);
         SSocketStandard(OpenSSocketInfo const& socketInfo, int fd);
         ~SSocketStandard();
 
@@ -51,6 +52,7 @@ class SSocketClient: public SocketClient
     public:
         // Normal Client.
         SSocketClient(SSocketInfo const& socketInfo, Blocking blocking);
+        SSocketClient(SSocketService const& socketInfo, Blocking blocking);
         // Server Side accept.
         SSocketClient(SSocketServer&, OpenSSocketInfo const& socketInfo, Blocking blocking);
         virtual ~SSocketClient();

@@ -34,6 +34,8 @@ class SocketStreamBuffer: public std::streambuf
         SocketStreamBuffer(FileInfo const& info);
         SocketStreamBuffer(SocketInfo const& info);
         SocketStreamBuffer(SSocketInfo const& info);
+        SocketStreamBuffer(SocketService const& info);
+        SocketStreamBuffer(SSocketService const& info);
         ~SocketStreamBuffer();
 
         // Don't allow copy

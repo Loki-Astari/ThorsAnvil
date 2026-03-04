@@ -1,6 +1,0 @@
-namespace ThorsAnvil
-{
-    namespace IOUtil
-    {
-    }
-}

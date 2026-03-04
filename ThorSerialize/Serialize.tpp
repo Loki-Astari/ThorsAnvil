@@ -557,11 +557,6 @@ class DeSerializationForBlock<TraitType::Pointer, std::shared_ptr<T>>
 
             parser.pushBackToken(tokenType);
 
-            if (parser.config.useOldSharedPtr)
-            {
-                tryParsePolyMorphicObject(parent, parser, object, 0);
-                return;
-            }
 
             SharedInfo<T> info;
             DeSerializationForBlock<Traits<SharedInfo<T>>::type, SharedInfo<T>> deserializer(parent, parser);
@@ -1123,11 +1118,6 @@ class SerializerForBlock<TraitType::Pointer, std::shared_ptr<T>>
                 return;
             }
 
-            if (printer.config.useOldSharedPtr)
-            {
-                tryPrintPolyMorphicObject(parent, printer, object, 0);
-                return;
-            }
 
             SharedInfo<T> info = printer.addShared(object);
             SerializerForBlock<Traits<SharedInfo<T>>::type, SharedInfo<T>>  block(parent, printer, info);

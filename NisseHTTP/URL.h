@@ -2,23 +2,38 @@
 #define THORSANVIL_NISSE_NISSEHTTP_URL_H
 
 #include "NisseHTTPConfig.h"
+#include <cstddef>
 #include <string>
 #include <string_view>
 
 namespace ThorsAnvil::Nisse::HTTP
 {
 
+struct ViewPoint
+{
+    std::size_t         start   = 0;
+    std::size_t         len     = 0;
+
+    std::string_view    getView(std::string const& s) const     {return {&s[start], len};}
+    std::size_t         size() const                            {return len;}
+
+    void remove_prefix(std::size_t s)                           {start += s; len -= s;}
+    void remove_suffix(std::size_t s)                           {len -= s;}
+
+    std::size_t         find(std::string const& base, char c)   {return base.find(c, start) - start;}
+};
+
 class URL
 {
     std::string         hrefValue;
-    std::string_view    protocolRef;
-    std::string_view    originRef;
-    std::string_view    hostRef;
-    std::string_view    portRef;
-    std::string_view    hostnameRef;
-    std::string_view    pathRef;
-    std::string_view    queryRef;
-    std::string_view    hashRef;
+    ViewPoint           protocolRef;
+    ViewPoint           originRef;
+    ViewPoint           hostRef;
+    ViewPoint           portRef;
+    ViewPoint           hostnameRef;
+    ViewPoint           pathRef;
+    ViewPoint           queryRef;
+    ViewPoint           hashRef;
 
     public:
         URL()   {}
@@ -32,15 +47,15 @@ class URL
         bool operator==(URL const& rhs)     const {return hrefValue == rhs.hrefValue;}
         bool operator!=(URL const& rhs)     const {return !(*this == rhs);}
 
-        std::string_view        href()      const {return hrefValue;}     // 'http://localhost:53/status?name=ryan#234'
-        std::string_view        protocol()  const {return protocolRef;}   // 'http:'
-        std::string_view        origin()    const {return originRef;}     // 'http://localhost:53'
-        std::string_view        host()      const {return hostRef;}       // 'localhost:53',
-        std::string_view        hostname()  const {return hostnameRef;}   // 'localhost',
-        std::string_view        port()      const {return portRef;}       // '53'
-        std::string_view        pathname()  const {return pathRef;}       // '/status',
-        std::string_view        query()     const {return queryRef;}      // '?name=ryan',
-        std::string_view        hash()      const {return hashRef;}       // '#234'
+        std::string_view        href()      const {return hrefValue;}                       // 'http://localhost:53/status?name=ryan#234'
+        std::string_view        protocol()  const {return protocolRef.getView(hrefValue);}  // 'http:'
+        std::string_view        origin()    const {return originRef.getView(hrefValue);}    // 'http://localhost:53'
+        std::string_view        host()      const {return hostRef.getView(hrefValue);}      // 'localhost:53',
+        std::string_view        hostname()  const {return hostnameRef.getView(hrefValue);}  // 'localhost',
+        std::string_view        port()      const {return portRef.getView(hrefValue);}      // '53'
+        std::string_view        pathname()  const {return pathRef.getView(hrefValue);}      // '/status',
+        std::string_view        query()     const {return queryRef.getView(hrefValue);}     // '?name=ryan',
+        std::string_view        hash()      const {return hashRef.getView(hrefValue);}      // '#234'
 
         std::string_view        param(std::string_view param);  // parm('name') => 'ryan'
 
@@ -48,14 +63,14 @@ class URL
         friend void swap(URL& lhs, URL& rhs) noexcept {lhs.swap(rhs);}
     private:
         static std::string buildHref(std::string_view prot, std::string_view host, std::string_view request);
-        std::string_view findProtocol(std::string const& src);
-        std::string_view findOrigin(std::string const& src);
-        std::string_view findHost(std::string const& src);
-        std::string_view findHostname(std::string const& src);
-        std::string_view findPort(std::string const& src);
-        std::string_view findPath(std::string const& src);
-        std::string_view findQuery(std::string const& src);
-        std::string_view findHash(std::string const& src);
+        ViewPoint findProtocol(std::string const& src);
+        ViewPoint findOrigin(std::string const& src);
+        ViewPoint findHost(std::string const& src);
+        ViewPoint findHostname(std::string const& src);
+        ViewPoint findPort(std::string const& src);
+        ViewPoint findPath(std::string const& src);
+        ViewPoint findQuery(std::string const& src);
+        ViewPoint findHash(std::string const& src);
 };
 
 }

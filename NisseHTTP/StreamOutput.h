@@ -19,6 +19,7 @@ class StreamBufOutput: public std::streambuf
         typedef traits::int_type            int_type;
         typedef traits::char_type           char_type;
     private:
+        // Note: Code Assumes that chunkBufferSize is not larger than #FFFF
         static std::streamsize constexpr chunkBufferSize = 1024;
         std::streamsize     remaining;
         std::streambuf*     buffer;

@@ -31,7 +31,7 @@ class PrinterInterface
         {}
         PrinterInterface(std::string& output, PrinterConfig const& config)
             : config(config)
-            , output(StringOutput{output, true /*!config.exactPreFlight*/})
+            , output(StringOutput{output, !config.exactPreFlight})
         {}
 
                 bool    preflightSize();

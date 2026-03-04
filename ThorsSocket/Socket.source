@@ -15,10 +15,12 @@ struct SocketConnectionBuilder
     SocketConnectionBuilder(Blocking blocking)
         : blocking(blocking)
     {}
-    std::unique_ptr<ConnectionClient> operator()(FileInfo const& fileInfo)      {return std::make_unique<ConnectionType::SimpleFile>(fileInfo, blocking);}
-    std::unique_ptr<ConnectionClient> operator()(PipeInfo const& pipeInfo)      {return std::make_unique<ConnectionType::Pipe>(pipeInfo, blocking);}
-    std::unique_ptr<ConnectionClient> operator()(SocketInfo const& socketInfo)  {return std::make_unique<ConnectionType::SocketClient>(socketInfo, blocking);}
-    std::unique_ptr<ConnectionClient> operator()(SSocketInfo const& ssocketInfo){return std::make_unique<ConnectionType::SSocketClient>(ssocketInfo, blocking);}
+    std::unique_ptr<ConnectionClient> operator()(FileInfo const& fileInfo)          {return std::make_unique<ConnectionType::SimpleFile>(fileInfo, blocking);}
+    std::unique_ptr<ConnectionClient> operator()(PipeInfo const& pipeInfo)          {return std::make_unique<ConnectionType::Pipe>(pipeInfo, blocking);}
+    std::unique_ptr<ConnectionClient> operator()(SocketInfo const& socketInfo)      {return std::make_unique<ConnectionType::SocketClient>(socketInfo, blocking);}
+    std::unique_ptr<ConnectionClient> operator()(SSocketInfo const& ssocketInfo)    {return std::make_unique<ConnectionType::SSocketClient>(ssocketInfo, blocking);}
+    std::unique_ptr<ConnectionClient> operator()(SocketService const& socketInfo)   {return std::make_unique<ConnectionType::SocketClient>(socketInfo, blocking);}
+    std::unique_ptr<ConnectionClient> operator()(SSocketService const& ssocketInfo) {return std::make_unique<ConnectionType::SSocketClient>(ssocketInfo, blocking);}
 };
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
@@ -246,6 +248,9 @@ void Socket::deferInit()
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 std::string_view Socket::protocol()
 {
+    if (!isConnected()) {
+        ThorsLogAndThrowDebug(std::runtime_error, "ThorsAnvil::ThorsSocket::Socket", "protocol", "Socket is in an invalid state");
+    }
     return connection->protocol();
 }
 }

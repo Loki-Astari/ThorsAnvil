@@ -1157,23 +1157,6 @@ struct GetAllocationType<std::unique_ptr<T>>
     using AllocType = T;
 };
 
-#ifdef  SCGRROT_SHARED_PTR_SUPPRT
-/*
- * This will work for shared pointers at a very basic level.
- *
- * But is conditionally included as it does not support one object used by multiple shared pointer
- * in the same object. Serializing and de-serializing will result in multiple versions of the
- * object in the new object.
- */
-template<typename T>
-struct GetAllocationType<std::shared_ptr<T>>
-{
-    using AllocType = T;
-};
-#endif
-
-/*
- */
 class PolyMorphicRegistry
 {
     static std::map<std::string, std::function<void*()>>& getContainer()

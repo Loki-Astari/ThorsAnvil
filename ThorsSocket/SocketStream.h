@@ -29,6 +29,8 @@ class BaseSocketStream: public std::iostream
         BaseSocketStream(FileInfo const& info);
         BaseSocketStream(SocketInfo const& info);
         BaseSocketStream(SSocketInfo const& info);
+        BaseSocketStream(SocketService const& info);
+        BaseSocketStream(SSocketService const& info);
 
         // Destructor
         ~BaseSocketStream()                                             = default;

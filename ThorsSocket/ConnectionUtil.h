@@ -38,7 +38,6 @@ char const* getErrMsgWin(int error);
 #include <sys/socket.h>
 #include <netdb.h>
 #include <sys/uio.h>
-#include <netdb.h>
 #include <errno.h>
 
 #define PAUSE_AND_WAIT(n)       sleep(n)
@@ -69,6 +68,10 @@ char const* getErrMsgUnix(int error);
 inline STACK_OF(X509_NAME)* sk_X509_NAME_new_null_wrapper()                            {return sk_X509_NAME_new_null();}
 inline void                 sk_X509_NAME_free_wrapper(STACK_OF(X509_NAME)* list)       {sk_X509_NAME_free(list);}
 inline void                 sk_X509_NAME_pop_free_wrapper(STACK_OF(X509_NAME)* list)   {sk_X509_NAME_pop_free(list, X509_NAME_free);}
+
+using AddressInfo   = struct ::addrinfo;
+using AddressResult = std::pair<int, AddressInfo*>;
+AddressResult getAddressInfo(char const* host, char const* service, AddressInfo const* hint);
 
 #if THORS_SOCKET_HEADER_ONLY
 #include "ConnectionUtil.source"

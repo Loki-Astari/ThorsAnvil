@@ -30,9 +30,9 @@ struct Pbkdf2
         for (int loop = 1; loop < iter; ++loop)
         {
             prf.hash(password, tmp.view(), tmp);
-            for (std::size_t loop = 0; loop < digestSize; ++loop)
+            for (std::size_t digestLoop = 0; digestLoop < digestSize; ++digestLoop)
             {
-                digest[loop] = digest[loop] ^ tmp[loop];
+                digest[digestLoop] = digest[digestLoop] ^ tmp[digestLoop];
             }
         }
     }

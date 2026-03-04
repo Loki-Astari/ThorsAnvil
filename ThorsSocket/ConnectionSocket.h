@@ -20,6 +20,7 @@ class SocketStandard
     public:
         SocketStandard(ServerInfo const& socketInfo, Blocking blocking);
         SocketStandard(SocketInfo const& socketInfo, Blocking blocking);
+        SocketStandard(SocketService const& socketInfo, Blocking blocking);
         SocketStandard(OpenSocketInfo const& socketInfo, Blocking blocking);
         virtual ~SocketStandard();
 
@@ -34,6 +35,7 @@ class SocketStandard
         void setUpBlocking(Blocking blocking);
         void setUpServerSocket(ServerInfo const& socketInfo);
         void setUpClientSocket(SocketInfo const& socketInfo);
+        void setUpClientSocket(SocketService const& socketInfo);
 };
 
 class SocketServer;
@@ -47,6 +49,7 @@ class SocketClient: public ConnectionType::FileDescriptor
     public:
         // Normal Client.
         SocketClient(SocketInfo const& socketInfo, Blocking blocking);
+        SocketClient(SocketService const& socketInfo, Blocking blocking);
         // Server Side accept.
         SocketClient(SocketServer&, OpenSocketInfo const& socketInfo, Blocking blocking);
         virtual ~SocketClient();

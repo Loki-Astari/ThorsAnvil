@@ -73,6 +73,9 @@ struct ScramUtil
         static std::random_device       device;
         static std::mt19937             generator(device());
         static UniformDist              dist(0, 0xFFFFFFFF);
+        static std::mutex               lock;
+
+        std::lock_guard<std::mutex>     guard(lock);
 
         std::string result;
         for (int loop = 0; loop < 4; ++loop)

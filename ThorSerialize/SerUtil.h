@@ -948,9 +948,6 @@ class Traits<std::shared_ptr<T>>
             if (object == nullptr) {
                 return printer.getSizeNull();
             }
-            if (printer.config.useOldSharedPtr) {
-                return Traits<std::remove_cv_t<T>>::getPrintSize(printer, *object, true);
-            }
 
             SharedInfo<T>      info = printer.addShared(object);
             return Traits<SharedInfo<T>>::getPrintSize(printer, info, true);

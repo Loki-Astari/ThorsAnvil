@@ -322,7 +322,7 @@ class Formatter
             {
                 if (dynamicSize == Dynamic::None)
                 {
-                    typename NormalizeChar<A>::Type arg = argInput;
+                    typename NormalizeChar<A>::Type const& arg = argInput;
                     using Actual       = typename SignConversionOption<A>::Actual;
                     using Alternative  = typename SignConversionOption<A>::Alternative;
 

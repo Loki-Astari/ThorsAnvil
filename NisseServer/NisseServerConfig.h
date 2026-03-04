@@ -13,6 +13,9 @@
 /* define if the Boost library is available */
 #define HAVE_BOOST /**/
 
+/* We have found package Boost CoRoutines */
+/* #undef HAVE_BoostCoRoutine */
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
 

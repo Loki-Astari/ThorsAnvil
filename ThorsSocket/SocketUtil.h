@@ -49,6 +49,12 @@ struct SocketInfo
     int                 port;
 };
 
+struct SocketService
+{
+    std::string_view    host;
+    std::string_view    service;
+};
+
 struct ServerInfo
 {
     int                 port;
@@ -60,6 +66,12 @@ struct OpenSocketInfo
 };
 
 struct SSocketInfo: public SocketInfo
+{
+    SSLctx const&       ctx;
+    DeferAccept         defer;
+};
+
+struct SSocketService: public SocketService
 {
     SSLctx const&       ctx;
     DeferAccept         defer;
