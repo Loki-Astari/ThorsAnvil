@@ -8,7 +8,7 @@
 
 Type-safe C++ API for the Slack platform. Provides strongly-typed interfaces for the Slack REST API, webhooks, event callbacks, slash commands, and Block Kit -- with automatic JSON serialization via ThorsSerializer.
 
-**Namespace:** `ThorsAnvil::ThorsMug` (within the Mug repository)
+**Namespace:** `ThorsAnvil::Slack` (within the Mug repository)
 
 ---
 

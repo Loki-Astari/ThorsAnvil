@@ -1,5 +1,4 @@
-s ThorsAnvil
-r
+# ThorsAnvil
 
 A set of modern C++20 libraries for writing interactive Web-Services.
 
