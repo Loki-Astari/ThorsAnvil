@@ -4,9 +4,9 @@ namespace ThorsAnvil::DB::Mongo::Internal
 {
 
 THORS_MONGO_HEADER_ONLY_INCLUDE
-MessageId& getMessageId()
+std::atomic<MessageId>& getMessageId()
 {
-    static MessageId nextMessageId = 0;
+    static std::atomic<MessageId> nextMessageId = 0;
     return nextMessageId;
 }
 

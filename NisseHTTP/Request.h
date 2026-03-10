@@ -42,7 +42,7 @@ class Request
         HeaderRequest const&    headers()       const   {return head;}
         HeaderRequest const&    trailers()      const   {return tail;}
         HeaderResponse const&   failHeader()    const   {return failResponse;}
-        bool                    isValidRequest()const   {return failResponse.empty();}
+        bool                    isValidRequest()const   {return !input.fail() && failResponse.empty();}
 
         RequestVariables const& variables()     const   {return var;}
         RequestVariables&       variables()             {return var;}

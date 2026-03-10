@@ -1,19 +1,9 @@
 #include <utility>
 #include <variant>
 #include <algorithm>
+#include <cstdint>
 
 using namespace ThorsAnvil::Nisse::HTTP;
-
-NISSE_HEADER_ONLY_INCLUDE
-StreamBufInput::StreamBufInput(Complete&& complete)
-    : remaining{0}
-    , processed{0}
-    , buffer{nullptr}
-    , chunked{false}
-    , firstChunk{false}
-    , complete{std::move(complete)}
-    , chunkBuffer{}
-{}
 
 NISSE_HEADER_ONLY_INCLUDE
 StreamBufInput::StreamBufInput(std::istream& stream, BodyEncoding encoding, Complete&& complete)
@@ -46,7 +36,7 @@ StreamBufInput::StreamBufInput(StreamBufInput&& move) noexcept
     , buffer{std::exchange(move.buffer, nullptr)}
     , chunked{std::exchange(move.chunked, false)}
     , firstChunk{std::exchange(move.firstChunk, false)}
-    , complete{std::exchange(move.complete, [](){})}
+    , complete{std::exchange(move.complete, [](std::ios_base::iostate){})}
     , chunkBuffer{std::move(move.chunkBuffer)}
 {}
 
@@ -58,7 +48,7 @@ StreamBufInput& StreamBufInput::operator=(StreamBufInput&& move) noexcept
     buffer      = nullptr;
     chunked     = false;
     firstChunk  = false;
-    complete    = [](){};
+    complete    = [](std::ios_base::iostate){};
     chunkBuffer.resize(0);
 
     swap(move);
@@ -258,7 +248,7 @@ void StreamBufInput::getNextChunk()
 {
     if (!chunked)
     {
-        complete();
+        complete(std::ios::goodbit);
         return;
     }
     if (firstChunk) {
@@ -267,28 +257,55 @@ void StreamBufInput::getNextChunk()
     else
     {
         // Each chunk terminated by '\r\n'
-        buffer->sbumpc();
-        buffer->sbumpc();
+        int c1 = buffer->sbumpc();
+        int c2 = buffer->sbumpc();
+        if (c1 != '\r' || c2 != '\n') {
+            // There is an issue.
+            // So close down the stream.
+            chunked = false;
+            complete(std::ios::badbit);
+            return;
+        }
     }
 
     int next;
+    std::int32_t chunkSize = 0;
     while ((next = buffer->sbumpc()) != traits::eof())
     {
         if (next == '\r')
         {
-            next = buffer->sbumpc();    // Check it is '\n'
+            int c2 = buffer->sbumpc();
+            if (c2 != '\n') {
+                // There is an issue.
+                // So close down the stream.
+                chunked = false;
+                complete(std::ios::badbit);
+                return;
+            }
             break;
         }
         next = (next >= 'a' && next <= 'f') ? next - 'a' + 10
              : (next >= 'A' && next <= 'F') ? next - 'A' + 10
              : (next >= '0' && next <= '9') ? next - '0'
-             : 0;
+             : -1;
 
-        remaining = (remaining * 16) + next;
+        if (next == -1) {
+            // Not a valid hex digit.
+            // There is an issue.
+            // So close down the stream.
+            chunked = false;
+            complete(std::ios::badbit);
+            return;
+        }
+        // Complete
+        chunkSize = (chunkSize * 16) + next;
     }
-    if (remaining == 0)
+    if (chunkSize == 0)
     {
         chunked = false;
-        complete();
+        complete(std::ios::goodbit);
+    }
+    else {
+        remaining = chunkSize;
     }
 }

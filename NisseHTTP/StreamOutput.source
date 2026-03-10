@@ -108,10 +108,25 @@ void StreamBufOutput::dumpBuffer()
         }
     }
     else {
-        while (remaining > 0) {
-            std::streamsize next = std::min(static_cast<std::streamsize>(chunkBuffer.size()), remaining);
-            buffer->sputn(chunkBuffer.data(), next);
-            remaining -= next;
+        /*
+         * A non chunked buffer is a fixed size buffer.
+         * We have sent the size as part of the header information already. To be
+         * a good client we do need to send exactly the expected number of bytes.
+         *
+         * Therefore dumpBuffer() will dump extra bytes to the stream until we reach
+         * the number of bytes required.
+         *
+         * Note: This is probably a programming bug (as you should be able to calculate
+         *       the exact buffer size and set it correctly.
+         */
+        if (remaining > 0) {
+
+            ThorsLogError("StreamBufOutput", "dumpBuffer", "Content-Length too large. Sending raw data to compensate");
+	        while (remaining > 0) {
+                std::streamsize next = std::min(static_cast<std::streamsize>(chunkBuffer.size()), remaining);
+                buffer->sputn(chunkBuffer.data(), next);
+                remaining -= next;
+            }
         }
     }
     buffer->pubsync();

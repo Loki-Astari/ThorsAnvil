@@ -12,9 +12,15 @@ PyntHTTPControl::PyntHTTPControl(ThorsAnvil::Nisse::Server::NisseServer& server)
 NISSE_HEADER_ONLY_INCLUDE
 void PyntHTTPControl::processRequest(Request& request, Response& response)
 {
+    /* TODO */
+    // Should we only allow control requests to come from localhost?
+    // I think this is a good default.
+    // But we should allow an unsafe mode or request not on the local machine with authentication.
+    // Unsafe mode is simpler to do
+    // Authentication is a harder nut. Do we need it?
     std::string_view            query = request.getUrl().query();
     std::string_view::size_type find  = query.find("command=");
-    if (!(find != std::string_view::npos && (query[find-1] == '?' || query[find-1] == '&'))) {
+    if (!(find != std::string_view::npos && find > 0 && (query[find-1] == '?' || query[find-1] == '&'))) {
         ThorsLogInfo("ThorsAnvil::Nisse::HTTP::PyntHTTPControl", "handleRequest", "No Command Found");
         response.setStatus(400);
         return;

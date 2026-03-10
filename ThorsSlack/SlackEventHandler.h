@@ -200,21 +200,15 @@ void SlackEventHandler::handleEvent(Request const& request, Response& response)
 inline
 bool SlackEventHandler::validateRequest(Request const& request)
 {
-#if 0
-    /*
-     * TODO:
-     * =====
-     * Validate that the request is timely.
-     * and that it is correctly signed.
-     * See: https://docs.slack.dev/authentication/verifying-requests-from-slack
-     */
-#endif
     std::string const&  sig = request.variables()["x-slack-signature"];
     std::string const&  timestampStr = request.variables()["x-slack-request-timestamp"];
-    auto                timestamp = std::stoll(timestampStr);
+    std::int32_t        timestamp;
+    auto                first = &timestampStr[0];
+    auto                last = first + timestampStr.size();
+    auto                convertResult = std::from_chars(first, last, timestamp);
     auto                versionEnd = std::min(std::size(sig), sig.find('='));
 
-    if (std::abs(std::time(nullptr) - timestamp) > (60 * 5)) {
+    if ((convertResult.ec == std::errc::invalid_argument) || (convertResult.ptr != last) || std::abs(std::time(nullptr) - timestamp) > (60 * 5)) {
         return false;
     }
 

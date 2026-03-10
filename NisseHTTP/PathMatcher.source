@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <memory>
+#include <cctype>
 
 using namespace ThorsAnvil::Nisse::HTTP;
 
@@ -18,12 +19,14 @@ std::string PathMatcher::decode(std::string_view matched)
         char n = matched[loop];
         if ((n == '%') && (loop+2) < matched.size())
         {
-            char c1 = matched[loop + 1];
+            unsigned char c1 = std::toupper(matched[loop + 1]);
             int  v1 = (c1 >= '0' && c1 <= '9') ? c1 - '0' : c1 - 'A' + 10;
-            char c2 = matched[loop + 2];
+            unsigned char c2 = std::toupper(matched[loop + 2]);
             int  v2 = (c2 >= '0' && c2 <= '9') ? c2 - '0' : c2 - 'A' + 10;
-            n = ((v1 % 16) << 4) | (v2 %16);
-            loop += 2;
+            if (v1 <= 0xF && v2 <= 0xF) {
+                n = (v1 << 4) | v2;
+                loop += 2;
+            }
         }
         result += n;
     }
@@ -107,6 +110,12 @@ void PathMatcher::addPath(MethodChoice method, std::string pathMatch, Action act
 }
 
 NISSE_HEADER_ONLY_INCLUDE
+void PathMatcher::removePrefix(std::string_view& v, std::size_t size)
+{
+    v.remove_prefix(std::min(size, std::size(v)));
+}
+
+NISSE_HEADER_ONLY_INCLUDE
 bool PathMatcher::checkPathMatch(MatchInfo const& pathMatchInfo, std::string_view path, Request& request, Response& response)
 {
     // If it is not holding a `Method` it is holding All::Method.
@@ -117,7 +126,7 @@ bool PathMatcher::checkPathMatch(MatchInfo const& pathMatchInfo, std::string_vie
     Match   result;
 
     std::string_view    prefix = path.substr(0, pathMatchInfo.matchSections[0].size());
-    path.remove_prefix(pathMatchInfo.matchSections[0].size());
+    removePrefix(path, pathMatchInfo.matchSections[0].size());
 
     if (pathMatchInfo.matchSections[0] != prefix) {
         return false;
@@ -132,8 +141,8 @@ bool PathMatcher::checkPathMatch(MatchInfo const& pathMatchInfo, std::string_vie
         }
         result.emplace(pathMatchInfo.names[loop - 1], decode(path.substr(0, find)));
 
-        path.remove_prefix(find);
-        path.remove_prefix(pathMatchInfo.matchSections[loop].size());
+        removePrefix(path, find);
+        removePrefix(path, pathMatchInfo.matchSections[loop].size());
     }
 
     if (!path.empty()) {

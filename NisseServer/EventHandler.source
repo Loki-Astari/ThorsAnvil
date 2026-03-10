@@ -1,6 +1,8 @@
 #include "JobQueue.h"
 #include "Store.h"
 
+#include  <exception>
+
 /*
  * C Callback functions.
  * Simply decide the data into EventHandler and call the C++ functions.
@@ -163,12 +165,23 @@ void EventHandler::remTimer(int timerId)
 NISSE_HEADER_ONLY_INCLUDE
 void EventHandler::eventAction(int fd, EventType type)
 {
-    ThorsLogTrace("ThorsAnvil::Nisse::Server::EventHandler", "eventAction", "Event callback", fd);
-    StoreData& info = store.getStoreData(fd);
-    std::visit(ApplyEvent{*this, fd, type},  info);
-    /* The std::visit ApplyEvent object to call the appropriate of
-     * handleServerEvent/ handleStreamEvent/ handleLinkStreamEvent/ handlePipeStreamEvent
-     */
+    try {
+        ThorsLogTrace("ThorsAnvil::Nisse::Server::EventHandler", "eventAction", "Event callback", fd);
+        // getStoreData() potentially may throw.
+        // That is why we have a try catch block here.
+        // We don't want to allow exceptions to propagate back to the libEvent loop.
+        StoreData& info = store.getStoreData(fd);
+        std::visit(ApplyEvent{*this, fd, type},  info);
+        /* The std::visit ApplyEvent object to call the appropriate of
+         * handleServerEvent/ handleStreamEvent/ handleLinkStreamEvent/ handlePipeStreamEvent
+         */
+    }
+    catch(std::exception const& e) {
+        ThorsLogTrace("ThorsAnvil::Nisse::Server::EventHandler", "eventAction", "Unknown fd", fd, " Excetpion: ", e.what());
+    }
+    catch(...) {
+        ThorsLogTrace("ThorsAnvil::Nisse::Server::EventHandler", "eventAction", "Unknown fd", fd, " Exception: Unknown");
+    }
 }
 
 

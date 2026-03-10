@@ -317,9 +317,11 @@ auto tryGetSizeFromSerializeType(PrinterInterface&, T const&, long) -> std::size
     // Please look at test/ExceptionTest.h for a simple example.
 }
 
-inline void escapeString(PrinterInterface& printer, std::string_view const& value)
+template<typename T>
+inline void escapeString(T& printer, std::string_view const& value)
 {
     using namespace std::string_literals;
+    using namespace std::string_view_literals;
 
     static auto isEscape = [](char c)
     {
@@ -340,37 +342,37 @@ inline void escapeString(PrinterInterface& printer, std::string_view const& valu
             printer.write(&*begin, (next - begin));
             if (*next == '"')
             {
-                printer.write(R"(\")"s);
+                printer.write(R"(\")"sv);
                 ++next;
             }
             else if (*next == '\\')
             {
-                printer.write(R"(\\)"s);
+                printer.write(R"(\\)"sv);
                 ++next;
             }
             else if (*next == 0x08)
             {
-                printer.write(R"(\b)"s);
+                printer.write(R"(\b)"sv);
                 ++next;
             }
             else if (*next == 0x0C)
             {
-                printer.write(R"(\f)"s);
+                printer.write(R"(\f)"sv);
                 ++next;
             }
             else if (*next == 0x0A)
             {
-                printer.write(R"(\n)"s);
+                printer.write(R"(\n)"sv);
                 ++next;
             }
             else if (*next == 0x0D)
             {
-                printer.write(R"(\r)"s);
+                printer.write(R"(\r)"sv);
                 ++next;
             }
             else if (*next == 0x09)
             {
-                printer.write(R"(\t)"s);
+                printer.write(R"(\t)"sv);
                 ++next;
             }
             else

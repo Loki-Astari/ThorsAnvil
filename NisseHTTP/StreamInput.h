@@ -15,7 +15,7 @@ namespace ThorsAnvil::Nisse::HTTP
 class StreamBufInput: public std::streambuf
 {
     public:
-        using Complete = std::function<void()>;
+        using Complete = std::function<void(std::ios_base::iostate)>;
         typedef std::streambuf::traits_type traits;
         typedef traits::int_type            int_type;
         typedef traits::char_type           char_type;
@@ -31,8 +31,7 @@ class StreamBufInput: public std::streambuf
         Complete            complete;
         std::vector<char>   chunkBuffer;
     public:
-        StreamBufInput(Complete&& complete = [](){});
-        StreamBufInput(std::istream& stream, BodyEncoding encoding, Complete&& complete = [](){});
+        StreamBufInput(std::istream& stream, BodyEncoding encoding, Complete&& complete);
         StreamBufInput(StreamBufInput&& move)                   noexcept;
         StreamBufInput& operator=(StreamBufInput&& move)        noexcept;
         StreamBufInput(StreamBufInput const&)                   = delete;
@@ -65,11 +64,11 @@ class StreamInput: public std::istream
     public:
         StreamInput()
             : std::istream(nullptr)
-            , buffer()
+            , buffer(*this, 0, [&](std::ios_base::iostate state){setstate(state);})
         {}
         StreamInput(std::istream& stream, BodyEncoding encoding)
             : std::istream(nullptr)
-            , buffer(stream, encoding)
+            , buffer(stream, encoding, [&](std::ios_base::iostate state){setstate(state);})
         {
             rdbuf(&buffer);
         }

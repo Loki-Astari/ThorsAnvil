@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <string>
+#include <atomic>
 
 #define THORMONGO_BUILD_FIELD_NAME_(TC, TypeName, IG, FN)           #FN "."
 #define LAST_THORMONGO_BUILD_FIELD_NAME_(TC, TypeName, IG, FN)      #FN
@@ -89,7 +90,7 @@ using UTCDateTime   = ThorsAnvil::Serialize::MongoUtility::UTCDateTime;
 
 namespace Internal
 {
-    MessageId& getMessageId();
+    std::atomic<MessageId>& getMessageId();
     MessageId getNextMessageId();
 }
 

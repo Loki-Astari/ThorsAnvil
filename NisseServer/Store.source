@@ -43,14 +43,22 @@ template void Store::requestChange<StateUpdateRestoreWrite>(StateUpdateRestoreWr
 NISSE_HEADER_ONLY_INCLUDE
 void Store::processUpdateRequest()
 {
-    std::unique_lock        lock(updateMutex);
+    std::vector<StateUpdate>    localUpdate;
+    {
+        // Get the updates into a local vector.
+        // So we can do the update without holding onto the lock.
+        std::unique_lock            lock(updateMutex);
+        localUpdate.swap(updates);
+    }
+
+    // Apply the updates
+    // Allowing other threads to add their updates to "update"
     ApplyUpdate             updater{*this};
-    for (auto& update: updates)
+    for (auto& update: localUpdate)
     {
         std::visit(updater, update);
         /* This visit calls one of the operators below based on the type of the request */
     }
-    updates.clear();
 }
 
 NISSE_HEADER_ONLY_INCLUDE

@@ -88,6 +88,7 @@ class PathMatcher
         MatchBase   buildMatchInfo(MethodChoice method, std::string pathMatch);
         bool        checkPathMatch(MatchInfo const& pathMatchInfo, std::string_view path, Request& request, Response& response);
         std::string decode(std::string_view matched);
+        void        removePrefix(std::string_view& v, std::size_t size);
 };
 
 }

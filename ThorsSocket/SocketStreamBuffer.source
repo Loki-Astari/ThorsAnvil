@@ -12,7 +12,9 @@ SocketStreamBuffer::SocketStreamBuffer()
     , outputBuffer(0)
     , inCount(0)
     , outCount(0)
-{}
+{
+    setg(inputBuffer.data(), inputBuffer.data(), inputBuffer.data());
+}
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 SocketStreamBuffer::SocketStreamBuffer(Socket&& socket)

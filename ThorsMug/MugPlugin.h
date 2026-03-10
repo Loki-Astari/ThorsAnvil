@@ -56,6 +56,14 @@ class MugPluginSimple: public MugPlugin
         virtual std::vector<Action> getAction() = 0;
 };
 
+/*
+ * This function is what is exported from the DLL.
+ * This is to maintain the "C" only interface.
+ *
+ * We return a "Non Owned" pointer to MugPlugin object.
+ * The DLLib class will call this function to retrive the pointer.
+ * It (DLLib) will call "start()"/"stop()" with each load/unload cycle.
+ */
 extern "C"
 {
     typedef ThorsAnvil::ThorsMug::MugPlugin*(*MugFunc)(char const* config);

@@ -1,3 +1,4 @@
+#include <cstdint>
 
 #include "ThorsSerializerUtil.h"
 #include "MongoUtility.h"
@@ -233,11 +234,22 @@ void BsonPrinter::writeBool(bool value)
     write(&outVal, 1);
 }
 
+struct PrinterSize
+{
+    std::int32_t    size = 0;
+    void write(std::string_view const& view)    {size += std::size(view);}
+    void write(std::string const& str)          {size += std::size(str);}
+    void write(char const*, std::size_t s)      {size += s;}
+};
+
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void BsonPrinter::writeString(std::string_view const& value)
 {
-    writeKey('\x02', 4 + value.size() + 1);
-    writeSize<4, std::int32_t>(static_cast<std::int32_t>(value.size() + 1));
+    PrinterSize     sizer;
+    escapeString(sizer, value);
+
+    writeKey('\x02', 4 + sizer.size + 1);
+    writeSize<4, std::int32_t>(sizer.size + 1);
     escapeString(*this, value);
     write("", 1);
 }

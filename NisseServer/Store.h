@@ -167,12 +167,10 @@ class Store
     std::map<int, StoreData>    data;
     std::vector<StateUpdate>    updates;
     std::mutex                  updateMutex;
-    int                         openStreamCount = 0;
+    std::atomic<int>            openStreamCount = 0;
 
     public:
         StoreData&      getStoreData(int fd);
-        template<typename T>
-        T&              getData(int fd)    {return std::get<T>(getStoreData(fd));}
         int             getOpenConnections() const {return openStreamCount;}
         void            processUpdateRequest();
 
