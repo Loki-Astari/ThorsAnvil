@@ -165,7 +165,8 @@ void EventHandler::remTimer(int timerId)
 NISSE_HEADER_ONLY_INCLUDE
 void EventHandler::eventAction(int fd, EventType type)
 {
-    try {
+    try
+    {
         ThorsLogTrace("ThorsAnvil::Nisse::Server::EventHandler", "eventAction", "Event callback", fd);
         // getStoreData() potentially may throw.
         // That is why we have a try catch block here.
@@ -176,10 +177,12 @@ void EventHandler::eventAction(int fd, EventType type)
          * handleServerEvent/ handleStreamEvent/ handleLinkStreamEvent/ handlePipeStreamEvent
          */
     }
-    catch(std::exception const& e) {
+    catch (std::exception const& e)
+    {
         ThorsLogTrace("ThorsAnvil::Nisse::Server::EventHandler", "eventAction", "Unknown fd", fd, " Excetpion: ", e.what());
     }
-    catch(...) {
+    catch (...)
+    {
         ThorsLogTrace("ThorsAnvil::Nisse::Server::EventHandler", "eventAction", "Unknown fd", fd, " Exception: Unknown");
     }
 }

@@ -122,7 +122,8 @@ void StreamBufOutput::dumpBuffer()
         if (remaining > 0) {
 
             ThorsLogError("StreamBufOutput", "dumpBuffer", "Content-Length too large. Sending raw data to compensate");
-	        while (remaining > 0) {
+            while (remaining > 0)
+            {
                 std::streamsize next = std::min(static_cast<std::streamsize>(chunkBuffer.size()), remaining);
                 buffer->sputn(chunkBuffer.data(), next);
                 remaining -= next;
