@@ -764,7 +764,6 @@ LDFLAGS
 CXXFLAGS
 CXX
 DARK_MODE
-COLOUR_STATE
 THOR_TARGETLIBS
 TestCMake
 VERATOOL
@@ -816,7 +815,6 @@ ac_user_opts='
 enable_option_checking
 enable_coverage
 enable_vera
-enable_colour
 enable_dark_mode
 with_standard_version
 enable_test_with_conan
@@ -1499,8 +1497,6 @@ Optional Features:
   --disable-coverage      Disable coverage tool checks
 
   --disable-vera          Disable vera. Disable Static analysis of source.
-
-  --disable-colour        Turns off text colouring in the makefile output
 
   --enable-dark-mode      If your background is black some text that was grey
                           is turned yellow
@@ -4020,28 +4016,13 @@ fi
 
 
 
-    COLOUR_STATE="ON"
     DARK_MODE=""
-    # Check whether --enable-colour was given.
-if test ${enable_colour+y}
-then :
-  enableval=$enable_colour;
-fi
-
     # Check whether --enable-dark-mode was given.
 if test ${enable_dark_mode+y}
 then :
   enableval=$enable_dark_mode;
 fi
 
-    if test "x$enable_colour" == "xno"
-then :
-
-            COLOUR_STATE="OFF"
-            subconfigure="${subconfigure} --disable-colour"
-
-
-fi
     if test "x$enable_dark-mode" != "xyes"
 then :
 
@@ -4050,8 +4031,6 @@ then :
 
 
 fi
-    COLOUR_STATE=${COLOUR_STATE}
-
     DARK_MODE=${DARK_MODE}
 
 
