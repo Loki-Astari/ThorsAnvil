@@ -4871,6 +4871,9 @@ then :
 fi
 
 
+    sedStrip='s/-.*//'
+    UNAME=`uname -s | sed "${sedStrip}"`
+
     if test "x$enable_submodule" == "xyes"
 then :
 
@@ -4947,8 +4950,6 @@ test -n "$UNZIP" || UNZIP=":"
     pushd build/third
     buildTool="make"
     buildConfig=""
-    sedStrip='s/-.*//'
-    UNAME=`uname -s | sed "${sedStrip}"`
     if  test "x${UNAME}" = "xMSYS_NT" || test "x${UNAME}" = "xMINGW64_NT"
 then :
 
