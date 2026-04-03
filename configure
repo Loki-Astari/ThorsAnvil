@@ -717,6 +717,7 @@ build_cpu
 build
 DISABLE_SLACKTEST
 THOR_DISABLE_TEST_WITH_PORT80_DISABLE
+THOR_DISABLE_TEST_WITH_INTEGRATION_DISABLE
 THOR_DISABLE_TEST_WITH_MONGO_QUERY_DISABLE
 THOR_DISABLE_TEST_WITH_LOCKED_FILES_DISABLE
 event_ROOT_LIB
@@ -829,6 +830,7 @@ with_zlib_root
 with_event_root
 enable_test_with_locked_file
 enable_test_with_mongo_query
+enable_test_with_integration
 enable_test_with_port80
 enable_Mongo_Service
 with_TestMongoHost
@@ -1523,6 +1525,13 @@ Optional Features:
                           protocols. This flags disables tests that use the
                           older wire protocol and only performs tests that use
                           the now standard OP_MSG protocol.
+
+  --disable-test-with-integration
+                          You can not do integration tests in all
+                          environments. All integration tests to be disabled.
+                          To tests that you may want to disable add: #if
+                          defined(THOR_DISABLE_TEST_WITH_INTEGRATION)
+                          GTEST_SKIP(); #endif
 
   --disable-test-with-port80
                           Some ISP disable outgoing port 80. Some unite tests
@@ -6516,6 +6525,38 @@ else case e in #(
   e)
 
 printf "%s\n" "#define THOR_DISABLE_TEST_WITH_MONGO_QUERY 0" >>confdefs.h
+
+
+
+     ;;
+esac
+fi
+
+
+
+
+
+    # Check whether --enable-test-with-integration was given.
+if test ${enable_test_with_integration+y}
+then :
+  enableval=$enable_test_with_integration;
+fi
+
+
+    if test "x${enable_test_with_integration}" == "xno"
+then :
+
+
+printf "%s\n" "#define THOR_DISABLE_TEST_WITH_INTEGRATION 1" >>confdefs.h
+
+            THOR_DISABLE_TEST_WITH_INTEGRATION_DISABLE=INTEGRATION
+
+            subconfigure="${subconfigure} --disable-test-with-integration";
+
+else case e in #(
+  e)
+
+printf "%s\n" "#define THOR_DISABLE_TEST_WITH_INTEGRATION 0" >>confdefs.h
 
 
 

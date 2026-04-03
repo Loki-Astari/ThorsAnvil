@@ -32,7 +32,7 @@ jobs:
                   with_slack_userToken: ${{ secrets.with_slack_userToken }}
                   with_slack_secret: ${{ secrets.with_slack_secret }}
                   with_slack_channel: ${{ secrets.with_slack_channel }}
-              run: ./configure --disable-vera --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
+              run: ./configure --disable-vera --disable-test-with-integration --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
             - name: Make
               env:
                   DISBALE_CONTROL_CODES: TRUE
@@ -62,7 +62,7 @@ jobs:
                   with_slack_userToken: ${{ secrets.with_slack_userToken }}
                   with_slack_secret: ${{ secrets.with_slack_secret }}
                   with_slack_channel: ${{ secrets.with_slack_channel }}
-              run: ./configure --disable-vera --enable-dark-mode --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
+              run: ./configure --disable-vera --disable-test-with-integration --enable-dark-mode --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
             - name: Make
               env:
                   DISBALE_CONTROL_CODES: TRUE
@@ -120,7 +120,7 @@ jobs:
                      with_slack_userToken: ${{ secrets.with_slack_userToken }}
                      with_slack_secret: ${{ secrets.with_slack_secret }}
                      with_slack_channel: ${{ secrets.with_slack_channel }}
-              run:  ./configure --disable-vera --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --with-yaml-root=/mingw64/ --disable-test-with-locked-file --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
+              run:  ./configure --disable-vera --disable-test-with-integration --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --with-yaml-root=/mingw64/ --disable-test-with-locked-file --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
             - name: Make
               shell: msys2 {0}
               env:
@@ -144,7 +144,7 @@ jobs:
                   with_slack_userToken: ${{ secrets.with_slack_userToken }}
                   with_slack_secret: ${{ secrets.with_slack_secret }}
                   with_slack_channel: ${{ secrets.with_slack_channel }}
-              run: ./configure --disable-vera --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
+              run: ./configure --disable-vera --disable-test-with-integration --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
             - name: Make
               env:
                      DISBALE_CONTROL_CODES: TRUE

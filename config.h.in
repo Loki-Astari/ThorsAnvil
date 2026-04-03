@@ -111,6 +111,9 @@
 /* Set up to build on Conan */
 #undef THOR_CONAN
 
+/* Disable integration tests */
+#undef THOR_DISABLE_TEST_WITH_INTEGRATION
+
 /* Disable test that require files to be locked */
 #undef THOR_DISABLE_TEST_WITH_LOCKED_FILES
 
