@@ -1,6 +1,6 @@
 
 THORSANVIL_ROOT				?= $(realpath ../)
-TARGET						= ThorsLogging fast_float Serialize ThorsCrypto ThorsStorage ThorsSocket ThorsMongo NisseServer NisseHTTP NisseLib ThorsMug ThorsSlack
+TARGET						= ThorsLogging fast_float Serialize ThorsCrypto ThorsStorage ThorsSocket ThorsMongo NisseServer NisseHTTP NisseLib ThorsMug ThorsSlack TestExtra.NotWin Mug.NotWin
 
 
 include $(THORSANVIL_ROOT)/build/tools/Project.Makefile
