@@ -28,3 +28,6 @@
 [submodule "third/ThorsMongo"]
 	path = third/ThorsMongo
 	url = ../../Loki-Astari/ThorsMongo.git
+[submodule "third/ThorsSlack"]
+	path = third/ThorsSlack
+	url = git@github.com:Loki-Astari/ThorsSlack.git
