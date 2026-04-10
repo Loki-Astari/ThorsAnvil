@@ -3,7 +3,7 @@
 
 # ThorsAnvil
 
-![ThorStream](img/thorsanvil.jpg)
+![ThorsAnvil](img/thorsanvil.jpg)
 
 A set of modern C++20 libraries for writing interactive Web-Services.
 
