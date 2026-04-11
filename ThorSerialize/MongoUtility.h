@@ -20,6 +20,49 @@
 
 namespace ThorsAnvil::Serialize::MongoUtility
 {
+    namespace Private
+    {
+        /* Used to preserve a streams format state */
+        /* Usage:
+         *     stream << StreamFormatterNoChange{} << std::hex << std::setprecision(23) << value;
+         *     // After the expression is complete the state of the stream is reverted to its original state.
+         */
+        class StreamFormatterNoChange
+        {
+            mutable std::ios*               stream;
+            mutable std::ios_base::fmtflags flags;
+            mutable std::streamsize         precision;
+            public:
+                StreamFormatterNoChange()
+                    : stream(nullptr)
+                {}
+                ~StreamFormatterNoChange()
+                {
+                    if (stream)
+                    {
+                        stream->flags(flags);
+                        stream->precision(precision);
+                    }
+                }
+                void saveStream(std::ios& s) const
+                {
+                    stream    = &s;
+                    flags     = s.flags();
+                    precision = s.precision();
+                }
+                friend std::ostream& operator<<(std::ostream& stream, StreamFormatterNoChange const& formatter)
+                {
+                    formatter.saveStream(stream);
+                    return stream;
+                }
+                friend std::istream& operator>>(std::istream& stream, StreamFormatterNoChange const& formatter)
+                {
+                    formatter.saveStream(stream);
+                    return stream;
+                }
+        };
+
+    }
 
 /*
  * BSON Elements
@@ -261,7 +304,7 @@ JsonPrinter& operator<<(JsonPrinter& printer, ObjectID const& data)
 inline
 std::ostream& operator<<(std::ostream& stream, ObjectID const& data)
 {
-    stream << ThorsAnvil::Utility::StreamFormatterNoChange{}
+    stream << Private::StreamFormatterNoChange{}
                      << std::hex << std::setfill('0')
                      << std::setw( 8) << data.timestamp
                      << std::setw(10) << data.random
@@ -306,7 +349,6 @@ inline std::size_t readNumberMaxLenFromStream(std::istream& stream, std::size_t 
 inline
 std::istream& operator>>(std::istream& stream, ObjectID& data)
 {
-    // return stream >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> data.timestamp >> x2 >> data.random >> x3 >> data.counter >> std::dec;
     data.timestamp = readNumberMaxLenFromStream(stream, 8, false);
     data.random    = readNumberMaxLenFromStream(stream, 10, true);
     data.counter   = readNumberMaxLenFromStream(stream, 6, true);
@@ -353,7 +395,7 @@ JsonParser& operator>>(JsonParser& parser, UTCDateTime& data)
 inline
 std::istream& operator>>(std::istream& stream, UTCDateTime& data)
 {
-    return stream >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> data.datetime;
+    return stream >> Private::StreamFormatterNoChange{} >> std::hex >> data.datetime;
 }
 
 inline
@@ -376,7 +418,7 @@ JsonPrinter& operator<<(JsonPrinter& printer, BsonTimeStamp const& data)
 inline
 std::ostream& operator<<(std::ostream& stream, BsonTimeStamp const& data)
 {
-    stream << ThorsAnvil::Utility::StreamFormatterNoChange{}
+    stream << Private::StreamFormatterNoChange{}
                      << "\""
                      << std::hex << std::setw(8) << std::setfill('0')
                      << data.timestamp << "-"
@@ -408,7 +450,7 @@ inline
 std::istream& operator>>(std::istream& stream, BsonTimeStamp& data)
 {
     char x1, x2, x3;
-    return stream >> ThorsAnvil::Utility::StreamFormatterNoChange{} >> std::hex >> x1 >> data.timestamp >> x2 >> data.increment >> x3;
+    return stream >> Private::StreamFormatterNoChange{} >> std::hex >> x1 >> data.timestamp >> x2 >> data.increment >> x3;
 }
 
 }

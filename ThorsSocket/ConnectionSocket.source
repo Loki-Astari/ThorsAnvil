@@ -4,7 +4,6 @@
 
 namespace ThorsAnvil::ThorsSocket::ConnectionType
 {
-using ::ThorsAnvil::ThorsSocket::IOData;
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 SocketStandard::SocketStandard(ServerInfo const& socketInfo, Blocking blocking)
@@ -155,11 +154,11 @@ void SocketStandard::setUpClientSocket(SocketService const& socketInfo)
     int             saveErrno   = status.first;
     AddressInfo*    result      = status.second;
 
-    if (saveErrno != 0) {
+    if (saveErrno != 0 || result == nullptr) {
         ThorsLogAndThrowDebug(
             std::runtime_error,
             "ThorsAnvil::ThorsSocket::ConnectionType::SocketStandard",
-            "setUpClientSocket2",
+            "setUpClientSocket",
             " :Failed on getaddrinfo.",
             " errno = ", saveErrno, " ", getErrNoStrSocket(saveErrno),
             " msg >", getErrMsgSocket(saveErrno), "<"
@@ -167,6 +166,10 @@ void SocketStandard::setUpClientSocket(SocketService const& socketInfo)
     }
 
     bool ok = false;
+    constexpr int connectionErrorMaxCount = 3;
+    int  connectionErrorCount = 0;
+    int  connectionError[connectionErrorMaxCount];
+
     for (AddressInfo* loop = result; loop != NULL; loop = loop->ai_next) {
         fd = ::socket(loop->ai_family, loop->ai_socktype, loop->ai_protocol);
         if (fd == thorInvalidFD()) {
@@ -176,16 +179,31 @@ void SocketStandard::setUpClientSocket(SocketService const& socketInfo)
             ok =  true;
             break;
         }
+        if (connectionErrorCount < connectionErrorMaxCount) {
+            connectionError[connectionErrorCount++] = errno;
+        }
         ::thorCloseSocket(fd);
         fd = thorInvalidFD();
     }
     ::freeaddrinfo(result);
     if (!ok) {
+        if (connectionErrorCount == 0) {
+            ThorsLogAndThrowDebug(
+                std::runtime_error,
+                "ThorsAnvil::ThorsSocket::ConnectionType::SocketStandard",
+                "setUpClientSocket",
+                " :Failed to create socket. Host: ", socketInfo.host, " Service: ", socketInfo.service);
+        }
+        std::stringstream  message;
+        for (int loop = 0; loop < connectionErrorCount; ++loop) {
+            message << "Errno: " << connectionError[loop] << " Msg: " << strerror(connectionError[loop]) << ". ";
+        }
         ThorsLogAndThrowDebug(
             std::runtime_error,
             "ThorsAnvil::ThorsSocket::ConnectionType::SocketStandard",
-            "setUpClientSocket2",
-            " :Failed to find valid socket to connect"
+            "setUpClientSocket",
+            " Socket opened to. Host: ", socketInfo.host, " Service: ", socketInfo.service,
+            " Failed to connect. Errors: ", message.str()
         );
     }
 }
@@ -297,6 +315,8 @@ void SocketClient::tryFlushBuffer()
 }
 
 #ifdef __WINNT__
+using ::ThorsAnvil::ThorsSocket::IOData;
+
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 IOData SocketClient::readFromStream(char* buffer, std::size_t size)
 {

@@ -3,6 +3,7 @@
 
 #include <string>
 #include "ThorsCryptoConfig.h"
+#include "cryptstring.h"
 #include "hash.h"
 
 // HMAC: Keyed-Hashing for Message Authentication RFC-2104
@@ -72,8 +73,8 @@ class HMacBuilder
 
         typename THash::DigestStore&    digest;
         THash           hasher;
-        std::string     ipad;
-        std::string     opad;
+        String          ipad;
+        String          opad;
 };
 
 template<typename THash>

@@ -154,6 +154,8 @@ constexpr bool is_optional = is_optional_impl<std::remove_cvref_t<T>>; // C++20 
 template<typename T>
 void buildQueryE(std::stringstream& stream, std::string& sep, std::string_view name, T const& val)
 {
+    // TODO
+    // Should probably URL-encode the name and value.
     if constexpr (is_optional<T>) {
         if (val.has_value()) {
             stream << sep << name << "=" << val.value();

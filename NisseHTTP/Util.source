@@ -65,7 +65,6 @@ std::ostream& operator<<(std::ostream& stream, Method const& method)
 
 }
 
-using std::literals::string_literals::operator""s;
 using std::literals::string_view_literals::operator""sv;
 
 NISSE_HEADER_ONLY_INCLUDE

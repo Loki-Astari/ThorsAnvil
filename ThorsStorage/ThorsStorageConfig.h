@@ -50,7 +50,7 @@
 #define HAVE_THORSSERIALIZER 1
 
 /* We have found ThorSerializeHeaderOnly package */
-#define HAVE_ThorSerializeHeaderOnly 1
+/* #undef HAVE_ThorSerializeHeaderOnly */
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1

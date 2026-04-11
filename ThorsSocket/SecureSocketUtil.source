@@ -3,6 +3,13 @@
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <openssl/x509.h>
+
+#include <memory>
+
+#ifdef __WINNT__
+#include <wincrypt.h>
+#endif
 
 
 extern "C"
@@ -65,12 +72,13 @@ int ProtocolInfo::convertProtocolToOpenSSL(Protocol protocol) const
         case TLS_1_2:    return TLS1_2_VERSION;
         case TLS_1_3:    return TLS1_3_VERSION;
     }
-    throw std::runtime_error("Fix");
+    ThorsLogAndThrowError(std::runtime_error, "ThorsAnvil::ThorsSocket::ProtocolInfo", "convertProtocolToOpenSSL", "Fix");
 }
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-void ProtocolInfo::apply(SSL_CTX* ctx) const
+void ProtocolInfo::apply(SSL_CTX* ctx, MarkArray& mark) const
 {
+    mark[markType] = true;
     //if (SSL_CTX_set_min_proto_version(ctx, convertProtocolToOpenSSL(minProtocol)) != 1)
     if (::SSL_CTX_ctrl(ctx, SSL_CTRL_SET_MIN_PROTO_VERSION, convertProtocolToOpenSSL(minProtocol), nullptr) != 1)
     {
@@ -111,8 +119,9 @@ void ProtocolInfo::apply(SSL* ssl) const
 }
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-void CipherInfo::apply(SSL_CTX* ctx) const
+void CipherInfo::apply(SSL_CTX* ctx, MarkArray& mark) const
 {
+    mark[markType] = true;
     /*Set the Cipher List*/
     if (::SSL_CTX_set_cipher_list(ctx, cipherList.c_str()) <= 0)
     {
@@ -182,8 +191,9 @@ CertificateInfo::CertificateInfo(std::string const& certificateFileName, std::st
 }
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-void CertificateInfo::apply(SSL_CTX* ctx) const
+void CertificateInfo::apply(SSL_CTX* ctx, MarkArray& mark) const
 {
+    mark[markType] = true;
     if (certificateFileName != "")
     {
         if (hasPasswordGetter)
@@ -193,13 +203,13 @@ void CertificateInfo::apply(SSL_CTX* ctx) const
             ::SSL_CTX_set_default_passwd_cb_userdata(ctx, static_cast<void*>(const_cast<CertificateInfo*>(this)));
         }
 
-        /*Set the certificate to be used.*/
-        if (::SSL_CTX_use_certificate_file(ctx, certificateFileName.c_str(), SSL_FILETYPE_PEM) <= 0)
+        /*Set the certificate (and any intermediates) to be used.*/
+        if (::SSL_CTX_use_certificate_chain_file(ctx, certificateFileName.c_str()) <= 0)
         {
             ThorsLogAndThrowDebug(std::runtime_error,
                                   "ThorsAnvil::ThorsSocket::CertificateInfo",
                                   "apply",
-                                  "SSL_CTX_use_certificate_file() failed: ", buildOpenSSLErrorMessage());
+                                  "SSL_CTX_use_certificate_chain_file() failed: ", buildOpenSSLErrorMessage());
         }
 
         /*Indicate the key file to be used*/
@@ -265,8 +275,9 @@ void CertificateInfo::apply(SSL* ssl) const
 
 template<AuthorityType A>
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-void CertifcateAuthorityDataInfo<A>::apply(SSL_CTX* ctx) const
+void CertifcateAuthorityDataInfo<A>::apply(SSL_CTX* ctx, MarkArray& mark) const
 {
+    mark[markType] = true;
     if (loadDefault)
     {
         int stat = setDefaultCertifcateAuthorityInfo(ctx);
@@ -294,15 +305,92 @@ void CertifcateAuthorityDataInfo<A>::apply(SSL_CTX* ctx) const
     }
 }
 
+#ifdef __WINNT__
+namespace Private
+{
+    THORS_SOCKET_HEADER_ONLY_INCLUDE
+    int loadWindowsCertificateStore(SSL_CTX* ctx)
+    {
+        X509_STORE* store = ::SSL_CTX_get_cert_store(ctx);
+        if (store == nullptr) {
+            return 0;
+        }
+        HCERTSTORE hCertStore = CertOpenSystemStoreA(0, "ROOT");
+        if (hCertStore == nullptr) {
+            return 0;
+        }
+        PCCERT_CONTEXT pCertContext = nullptr;
+        while ((pCertContext = CertEnumCertificatesInStore(hCertStore, pCertContext)) != nullptr)
+        {
+            const unsigned char* encoded = pCertContext->pbCertEncoded;
+            X509* x509 = ::d2i_X509(nullptr, &encoded, static_cast<long>(pCertContext->cbCertEncoded));
+            if (x509)
+            {
+                ::X509_STORE_add_cert(store, x509);
+                ::X509_free(x509);
+            }
+        }
+        CertCloseStore(hCertStore, 0);
+        return 1;
+    }
+    int loadWindowsCertificateFile(SSL_CTX* ctx)
+    {
+        // On Windows, SSL_CTX_set_default_verify_file may return 1 even when no cert
+        // file exists (it registers a lazy lookup path).  Instead, load the MSYS2 CA
+        // bundle directly — it ships with the ca-certificates package and contains all
+        // modern root CAs that SChannel would fetch lazily but OpenSSL cannot.
+        //
+        // Derive the MSYS2 root from OpenSSL's own compiled-in cert-file path:
+        //   e.g. "C:/msys64/mingw64/etc/ssl/cert.pem" -> root = "C:/msys64"
+        {
+            std::string certFilePath = ::X509_get_default_cert_file();
+            // Skip drive letter prefix (e.g. "C:/"), then find the next '/'
+            std::size_t start = (certFilePath.size() > 2 && certFilePath[1] == ':') ? 3 : 0;
+            std::size_t slash  = certFilePath.find('/', start);
+            if (slash != std::string::npos) {
+                std::string bundle = certFilePath.substr(0, slash) + "/usr/ssl/certs/ca-bundle.crt";
+                if (::SSL_CTX_load_verify_locations(ctx, bundle.c_str(), nullptr) == 1) {
+                    return 1;
+                }
+            }
+        }
+	return 0;
+    }
+}
+#endif
+
 template<>
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-int CertifcateAuthorityDataInfo<File>::setDefaultCertifcateAuthorityInfo(SSL_CTX* ctx)               const {return ::SSL_CTX_set_default_verify_file(ctx);}
+int CertifcateAuthorityDataInfo<File>::setDefaultCertifcateAuthorityInfo(SSL_CTX* ctx) const
+{
+#ifdef __WINNT__
+    if (Private::loadWindowsCertificateFile(ctx) == 1) {
+        return 1;
+    }
+    // Fallback: honour SSL_CERT_FILE env var if the user has set it explicitly
+#endif
+    return ::SSL_CTX_set_default_verify_file(ctx);
+}
 template<>
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-int CertifcateAuthorityDataInfo<Dir>::setDefaultCertifcateAuthorityInfo(SSL_CTX* ctx)                const {return ::SSL_CTX_set_default_verify_dir(ctx);}
+int CertifcateAuthorityDataInfo<Dir>::setDefaultCertifcateAuthorityInfo(SSL_CTX* ctx) const
+{
+#ifdef __WINNT__
+    return Private::loadWindowsCertificateStore(ctx);
+#else
+    return ::SSL_CTX_set_default_verify_dir(ctx);
+#endif
+}
 template<>
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-int CertifcateAuthorityDataInfo<Store>::setDefaultCertifcateAuthorityInfo(SSL_CTX* ctx)              const {return ::SSL_CTX_set_default_verify_store(ctx);}
+int CertifcateAuthorityDataInfo<Store>::setDefaultCertifcateAuthorityInfo(SSL_CTX* ctx) const
+{
+#ifdef __WINNT__
+    return ctx != nullptr ? 1 : 0;
+#else
+    return ::SSL_CTX_set_default_verify_store(ctx);
+#endif
+}
 
 template<>
 THORS_SOCKET_HEADER_ONLY_INCLUDE
@@ -324,14 +412,6 @@ template<>
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 std::string CertifcateAuthorityDataInfo<Store>::type() const {return "CA Store";}
 
-THORS_SOCKET_HEADER_ONLY_INCLUDE
-void CertifcateAuthorityInfo::apply(SSL_CTX* ctx) const
-{
-    file.apply(ctx);
-    dir.apply(ctx);
-    store.apply(ctx);
-}
-
 template<>
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 int ClientCAListDataInfo<File>::addCAToList(STACK_OF(X509_NAME)* certs, char const* item)   const {return ::SSL_add_file_cert_subjects_to_stack(certs, item);}
@@ -342,6 +422,13 @@ template<>
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 int ClientCAListDataInfo<Store>::addCAToList(STACK_OF(X509_NAME)* certs, char const* item)  const {return ::SSL_add_store_cert_subjects_to_stack(certs, item);}
 
+template
+void CertifcateAuthorityDataInfo<File>::apply(SSL_CTX* ctx, MarkArray& mark) const;
+template
+void CertifcateAuthorityDataInfo<Dir>::apply(SSL_CTX* ctx, MarkArray& mark) const;
+template
+void CertifcateAuthorityDataInfo<Store>::apply(SSL_CTX* ctx, MarkArray& mark) const;
+
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 STACK_OF(X509_NAME)* ClientCAListInfo::buildCAToList() const
 {
@@ -349,22 +436,25 @@ STACK_OF(X509_NAME)* ClientCAListInfo::buildCAToList() const
         return nullptr;
     }
 
+    using ThorX509Name = STACK_OF(X509_NAME);
+
     // This macro calls: OPENSSL_sk_new_null (which is mocked).
-    STACK_OF(X509_NAME)* list = ::sk_X509_NAME_new_null_wrapper();
+    auto X509Deleter = [](ThorX509Name* list) {::sk_X509_NAME_pop_free_wrapper(list);};
+    std::unique_ptr<ThorX509Name, decltype(X509Deleter)> list{::sk_X509_NAME_new_null_wrapper(), X509Deleter};
     if (list == nullptr)
     {
-        ::sk_X509_NAME_free_wrapper(list);
+        std::string errorMsg = buildOpenSSLErrorMessage();
+        ::sk_X509_NAME_free_wrapper(list.get());
         ThorsLogAndThrowDebug(std::runtime_error,
                               "ThorsAnvil::ThorsSocket::ClientCAListInfo",
                               "buildCAToList",
-                              "sk_X509_NAME_new_null() failed: ", buildOpenSSLErrorMessage());
+                              "sk_X509_NAME_new_null() failed: ", errorMsg);
     }
     for (auto const& item: file.items)
     {
-        int stat = file.addCAToList(list, item.c_str());
+        int stat = file.addCAToList(list.get(), item.c_str());
         if (stat != 1)
         {
-            ::sk_X509_NAME_pop_free_wrapper(list);
             ThorsLogAndThrowDebug(std::runtime_error,
                                   "ThorsAnvil::ThorsSocket::ClientCAListInfo",
                                   "addCAToList failed: >", item, "< ", buildOpenSSLErrorMessage());
@@ -372,10 +462,9 @@ STACK_OF(X509_NAME)* ClientCAListInfo::buildCAToList() const
     }
     for (auto const& item: dir.items)
     {
-        int stat = dir.addCAToList(list, item.c_str());
+        int stat = dir.addCAToList(list.get(), item.c_str());
         if (stat != 1)
         {
-            ::sk_X509_NAME_pop_free_wrapper(list);
             ThorsLogAndThrowDebug(std::runtime_error,
                                   "ThorsAnvil::ThorsSocket::ClientCAListnfo",
                                   "addCAToList failed: >", item, "< ", buildOpenSSLErrorMessage());
@@ -383,22 +472,23 @@ STACK_OF(X509_NAME)* ClientCAListInfo::buildCAToList() const
     }
     for (auto const& item: store.items)
     {
-        int stat = store.addCAToList(list, item.c_str());
+        int stat = store.addCAToList(list.get(), item.c_str());
         if (stat != 1)
         {
-            ::sk_X509_NAME_pop_free_wrapper(list);
             ThorsLogAndThrowDebug(std::runtime_error,
                                   "ThorsAnvil::ThorsSocket::ClientCAListInfo",
                                   "addCAToList failed: >", item, "< ", buildOpenSSLErrorMessage());
         }
     }
-    return list;
+    return list.release();
 }
 
 THORS_SOCKET_HEADER_ONLY_INCLUDE
-void ClientCAListInfo::apply(SSL_CTX* ctx) const
+void ClientCAListInfo::apply(SSL_CTX* ctx, MarkArray& mark) const
 {
-    if (verifyClientCA) {
+    mark[markType] = true;
+
+    if (verify) {
         ::SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT, nullptr);
     }
     STACK_OF(X509_NAME)* list = buildCAToList();
@@ -410,7 +500,7 @@ void ClientCAListInfo::apply(SSL_CTX* ctx) const
 THORS_SOCKET_HEADER_ONLY_INCLUDE
 void ClientCAListInfo::apply(SSL* ssl) const
 {
-    if (verifyClientCA) {
+    if (verify) {
         ::SSL_set_verify(ssl, SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT, nullptr);
     }
     STACK_OF(X509_NAME)* list = buildCAToList();

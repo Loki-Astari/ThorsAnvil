@@ -3,7 +3,6 @@
 
 #include <fcntl.h>
 #include <unistd.h>
-#include <iostream>
 
 
 namespace ThorsAnvil::ThorsSocket::ConnectionType

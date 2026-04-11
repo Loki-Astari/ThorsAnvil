@@ -17,6 +17,9 @@ namespace ThorsAnvil::Nisse::HTTP
 
 class Request
 {
+    static constexpr std::size_t    maxHeaderSize = 8192;
+    static constexpr std::size_t    maxTotalHeaderSize = maxHeaderSize * 8;
+
     Server::Context*    context;
     std::string         messageHeader;
     Version             version;

@@ -56,7 +56,7 @@
 #define HAVE_THORSSERIALIZER 1
 
 /* We have found ThorSerializeHeaderOnly package */
-#define HAVE_ThorSerializeHeaderOnly 1
+/* #undef HAVE_ThorSerializeHeaderOnly */
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
@@ -77,7 +77,7 @@
 #define PACKAGE "thorsmongo"
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "YourName+ThorsMongo@Email.com"
+#define PACKAGE_BUGREPORT "Loki.Astari+ThorsMongo@gmail.com.com"
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "ThorsMongo"

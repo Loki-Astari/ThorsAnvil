@@ -199,6 +199,8 @@ ConnectionBufferMongo::int_type ConnectionBufferMongo::underflow()
             if (check != 0)
             {
                 ThorsLogError("ThorsAnvil::DB::Mongo::ConnectionBufferMongo", "underflow", "Checksum does not match expected checksum");
+                // No other action apart from logging is needed here.
+                // The check value is put back on the stream to indicate an error for the next level up.
             }
         }
     }

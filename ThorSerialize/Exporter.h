@@ -8,6 +8,7 @@
 #include "SerializeConfig.h"
 #include "ThorsSerializerUtil.h"
 #include "Serialize.h"
+#include "SerUtil.h"
 
 #include <concepts>
 #include <string>

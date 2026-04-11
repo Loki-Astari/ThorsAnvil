@@ -3,15 +3,12 @@
 
 
 
-#ifndef  THORS_THORSMUG_CONFIG_H
-#define  THORS_THORSMUG_CONFIG_H
+#ifndef  THORS_THORSSLACK_CONFIG_H
+#define  THORS_THORSSLACK_CONFIG_H
 #ifndef  THORS_PACKAGE_INFO_CONFIG_H
 #define  THORS_PACKAGE_INFO_CONFIG_H
 
     
-
-/* "Extra flags used by dlopen" */
-#define DLOPEN_PLAT_FLAG 0
 
 /* define if the Boost library is available */
 #define HAVE_BOOST /**/
@@ -65,7 +62,7 @@
 #define HAVE_THORSSERIALIZER 1
 
 /* We have found ThorSerializeHeaderOnly package */
-#define HAVE_ThorSerializeHeaderOnly 1
+/* #undef HAVE_ThorSerializeHeaderOnly */
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
@@ -80,28 +77,25 @@
 /* #undef NO_STD_SUPPORT_TO_CHAR_DOUBLE */
 
 /* Name of package */
-#define PACKAGE "thorsmug"
+#define PACKAGE "thorsslack"
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "loki.Astari+ThorsMug@gmail.com"
+#define PACKAGE_BUGREPORT "Loki.Astari+ThorsSlack@gmail.com"
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "ThorsMug"
+#define PACKAGE_NAME "ThorsSlack"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "ThorsMug 0.1"
+#define PACKAGE_STRING "ThorsSlack 0.1"
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "thorsmug"
+#define PACKAGE_TARNAME "thorsslack"
 
 /* Define to the home page for this package. */
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
 #define PACKAGE_VERSION "0.1"
-
-/* "Extension used by shared libs" */
-#define SHARED_LIB_EXTENSION dylib
 
 /* Define to 1 if all of the C89 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
@@ -123,10 +117,10 @@
 
 
 /* Enable to use header only libraries */
-#define THORSMUG_HEADER_ONLY 1
+#define THORSSLACK_HEADER_ONLY 1
 
 /* For header only convert to inline */
-#define THORSMUG_HEADER_ONLY_INCLUDE inline
+#define THORSSLACK_HEADER_ONLY_INCLUDE inline
 
 
 #endif

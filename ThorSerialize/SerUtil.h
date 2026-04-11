@@ -145,7 +145,7 @@ class GetValueType<V, TraitType::Value>
             if (parser.getToken() != ThorsAnvil::Serialize::ParserToken::Value)
             {
                 ThorsLogAndThrowError(std::runtime_error,
-                                      "ThorsAnvil::Serializer::SerMap::GetValueType",
+                                      "ThorsAnvil::Serialize::SerMap::GetValueType",
                                       "GetValueType<Value>",
                                       "Expecting a normal value after the key");
             }

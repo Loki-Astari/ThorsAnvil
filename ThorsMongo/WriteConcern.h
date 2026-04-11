@@ -80,7 +80,7 @@ struct RequestAcknowledgmentSerializer
             char const* end = beg + rawValue.size();
             auto result = std::from_chars(beg, end, object.count);
             if (result.ptr != end) {
-                throw std::invalid_argument("Invalid Number");
+                ThorsLogAndThrowError(std::runtime_error, "ThorsAnvil::DB::Mongo::RequestAcknowledgmentSerializer", "readCustom", "Invalid Number");
             }
         }
     }

@@ -1,7 +1,6 @@
 #ifndef THORSANVIL_SERIALIZE_SERIALIZE_TPP
 #define THORSANVIL_SERIALIZE_SERIALIZE_TPP
 
-#include "SerUtil.h"
 #include "ThorsSerializerUtil.h"
 #include "ThorsLogging/ThorsLogging.h"
 

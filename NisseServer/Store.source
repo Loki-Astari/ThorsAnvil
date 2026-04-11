@@ -17,7 +17,7 @@ StoreData& Store::getStoreData(int fd)
     auto find = data.find(fd);
     if (find == data.end())
     {
-        throw std::runtime_error("Invalid Request: Exit applications");
+        ThorsLogFatal("ThorsAnvil::Nisse::Server::Store", "getStoreData", "Invalid Request: Exit applications");
     }
     return find->second;
 }

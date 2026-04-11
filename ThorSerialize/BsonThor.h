@@ -16,6 +16,7 @@
 #include "BsonPrinter.h"
 #include "Exporter.h"
 #include "Importer.h"
+#include "MongoUtility.h"
 
 #include <type_traits>
 #include <memory>

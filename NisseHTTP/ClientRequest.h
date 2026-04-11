@@ -30,6 +30,8 @@ class ClientRequest
         ClientRequest(std::ostream& baseStream, std::string url, Method method = Method::GET, Version version = Version::HTTP1_1);
         ~ClientRequest();
 
+        void addHeaders(HeaderResponse const& headers)        {addHeaders(Header{std::cref(headers)});}
+        void addHeaders(HeaderPassThrough const& headers)     {addHeaders(Header{std::cref(headers)});}
         void addHeaders(Header const& headers);
         std::ostream& body(BodyEncoding bodyEncoding);
 

@@ -405,7 +405,7 @@ void BsonParser::readBinary(std::string& dst)
     }
     ThorsLogAndThrowError(std::runtime_error,
                           "ThorsAnvil::Serialize::BsonParser",
-                          "readKBinary",
+                          "readBinary",
                           "Failed to read Binary Data");
 }
 

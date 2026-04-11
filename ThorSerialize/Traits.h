@@ -499,9 +499,9 @@
 #define LAST_THOR_DECLARE_MEMBER_TYPE(TC, DataType, Forward, Member)
 
 
-#define THOR_MERGE_LABEL_NAME(Pre, Post)        Pre ## Post
-#define THOR_UNIQUE_LABEL(Line)                 THOR_MERGE_LABEL_NAME(thorUniqueName, Line)
-#define THOR_UNIQUE_NAME                        THOR_UNIQUE_LABEL(__COUNTER__)
+#define THOR_MERGE_LABEL_NAME(Pre, P1, P2)        Pre ## P1 ## P2
+#define THOR_UNIQUE_LABEL(Count, Line)          THOR_MERGE_LABEL_NAME(thorUniqueName, Count, Line)
+#define THOR_UNIQUE_NAME                        THOR_UNIQUE_LABEL(__COUNTER__, __LINE__)
 
 // I have disabled the check: DO_ASSERT_WITH_TEMPLATE() where there are any template parameters.
 // I may put it back.
@@ -744,7 +744,7 @@ class Traits<DataType>                                                  \
             default:                                                    \
             {                                                           \
                 ThorsLogAndThrowError(std::runtime_error,               \
-                                      "ThorsAnivl::Seriaizlize::Traits<DataType>",   \
+                                      "ThorsAnvil::Serialize::Traits<DataType>",   \
                                       "getPrintSize",                   \
                                       "Should not get here");           \
             }                                                           \

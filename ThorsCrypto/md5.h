@@ -2,6 +2,7 @@
 #define THORSANIL_CRYPTO_MD5_H
 
 #include "ThorsCryptoConfig.h"
+#include "ThorsLogging/ThorsLogging.h"
 // Based on RFC 1321
 // https://www.ietf.org/rfc/rfc1321.txt
 // 1992
@@ -129,7 +130,7 @@ inline void MD5::add(std::uint8_t const* begin, std::uint8_t const* end)
 {
     if (complete)
     {
-        throw std::runtime_error("Can not add Data to a completed Hash");
+        ThorsLogAndThrowError(std::runtime_error, "ThorsAnvil::Crypto::MD5", "add", "Can not add Data to a completed Hash");
     }
     std::uint32_t size = std::distance(begin, end);
     msgSize += (size * 8);

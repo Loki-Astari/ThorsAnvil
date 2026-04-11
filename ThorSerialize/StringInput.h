@@ -48,6 +48,8 @@ struct StringInput
             if (find == std::string::npos) {
                 find = data.size();
             }
+            // Note: No need to check if find is npos here.
+            // Check is already done above.
             auto size = find - position;
 
             std::size_t start = dst.size();

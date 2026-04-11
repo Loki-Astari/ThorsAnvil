@@ -105,7 +105,7 @@ class JsonPrinter: public PrinterInterface
             if (val == 0) {
                 return 3; // 0.0
             }
-            static char buffer[100];
+            char buffer[100];
             auto result = std::to_chars(buffer, buffer + 100, val);
             return (result.ptr - buffer);
         }

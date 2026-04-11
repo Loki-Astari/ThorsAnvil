@@ -38,6 +38,9 @@ struct StringOutput
                 calcSize += size;
                 return true;
             }
+            // Note: No check done here as you are expected to have done the
+            // preFlight call to make sure you have the required size already
+            // allocated.
             current = std::copy(src, src + size, current);
             return true;
         }

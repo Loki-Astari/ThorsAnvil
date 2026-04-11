@@ -1,5 +1,7 @@
 #include <algorithm>
+#include <cstddef>
 #include <vector>
+#include <array>
 #include <map>
 #include <charconv>
 
@@ -80,7 +82,7 @@ std::string_view Request::readFirstLine(std::istream& stream)
     ThorsLogTrack("ThorsAnvil::Nisse::HTTP::Request", "readFirstLine", "Request: Method:", method, " Path:", path, " Protocol:", prot, " Version:", version);
     if (meth.size() == 0 || path.size() == 0 || pv.size() == 0 || version == Version::Unknown || method == Method::Other)
     {
-        ThorsLogTrack("ThorsAnvil::Nisse::PyntHTTP::Request", "readFirstLine", ": Bad Request: ", "Method: >", meth, "< Path: >", path, "< Proto: >", pv, "<");
+        ThorsLogTrack("ThorsAnvil::Nisse::HTTP::Request", "readFirstLine", ": Bad Request: ", "Method: >", meth, "< Path: >", path, "< Proto: >", pv, "<");
         failResponse.add("error", "Invalid HTTP Request");
         failResponse.add("method", meth);
         failResponse.add("path", path);
@@ -94,9 +96,16 @@ std::string_view Request::readFirstLine(std::istream& stream)
 NISSE_HEADER_ONLY_INCLUDE
 bool Request::readHeaders(HeaderRequest& dst, std::istream& stream)
 {
-    std::string line;
-    while (std::getline(stream, line))
+    std::size_t                     headerSize  = 0;
+    std::array<char, maxHeaderSize> lineBuffer;
+    while (stream.getline(lineBuffer.data(), maxHeaderSize))
     {
+        headerSize += stream.gcount();
+        if (headerSize > maxTotalHeaderSize) {
+            ThorsLogTrack("ThorsAnvil::Nisse::HTTP::Request", "readHeaders", ": exceeds header limit size");
+            return false;
+        }
+        std::string_view line{lineBuffer.data(), lineBuffer.data() + stream.gcount() - 1};
         if (line == "\r") {
             break;
         }
@@ -110,7 +119,7 @@ bool Request::readHeaders(HeaderRequest& dst, std::istream& stream)
         }
         dst.add({&line[0], &line[0] + split}, {&line[0] + split + 1, &line[0] + line.size() - 1});
     }
-    return true;
+    return stream.good();
 }
 
 NISSE_HEADER_ONLY_INCLUDE

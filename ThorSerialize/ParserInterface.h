@@ -5,6 +5,7 @@
 #include "ThorsSerializerUtilTypes.h"
 #include "ParserConfig.h"
 #include "StringInput.h"
+#include "ThorsLogging/ThorsLogging.h"
 
 #include <cstddef>
 #include <string>
@@ -32,7 +33,7 @@ struct ReadValue
             stream.get();
             peek = stream.peek();
             if (peek >= '1' && peek <= '9') {
-                throw std::runtime_error("Nubers can't start with leading zero");
+                ThorsLogAndThrowError(std::runtime_error, "ThorsAnvil::Serialize::ReadValue", "checkZero", "Nubers can't start with leading zero");
             }
             else {
                 stream.unget();

@@ -34,7 +34,7 @@ struct HasParent: std::false_type
 {};
 
 template <class T>
-struct HasParent<T, std::enable_if_t<(sizeof(typename Traits<std::remove_cv_t<T>>::Parent) >= 0)>>: std::true_type
+struct HasParent<T, std::void_t<typename Traits<std::remove_cv_t<T>>::Parent>>: std::true_type
 {};
 
 /*

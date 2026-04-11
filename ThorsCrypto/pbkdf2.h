@@ -2,6 +2,7 @@
 #define THORSANVIL_CRYPTO_PBKDF2_H
 
 #include "ThorsCryptoConfig.h"
+#include "cryptstring.h"
 #include "hmac.h"
 #include <string>
 
@@ -18,13 +19,14 @@ struct Pbkdf2
     static constexpr std::size_t digestSize = PRF::digestSize;
     using DigestStore    = typename PRF::DigestStore;
 
-    static void hash(std::string const& password, std::string const& salt, long iter, DigestStore& digest)
+    static void hash(std::string_view password, std::string_view salt, long iter, DigestStore& digest)
     {
-        using namespace std::string_literals;
         PRF             prf;
         DigestStore     tmp;
 
-        prf.hash(password, salt + "\x00\x00\x00\x01"s, tmp);
+        String          saltPadded(salt);
+        saltPadded.append("\x00\x00\x00\x01", 4);
+        prf.hash(password, saltPadded, tmp);
         std::copy(std::begin(tmp), std::end(tmp), std::begin(digest));
 
         for (int loop = 1; loop < iter; ++loop)

@@ -5,6 +5,7 @@
 #include "ConnectionSocket.h"
 
 #include <cstddef>
+#include <string_view>
 
 namespace ThorsAnvil::ThorsSocket::ConnectionType
 {
@@ -41,6 +42,7 @@ class SSocketStandard
 
     private:
         void initSSocket(SSLctx const& ctx, int fd);
+        void setSNIHostName(std::string_view host);
         void initSSocketClientConnect(YieldFunc& rYield, YieldFunc& wYield);
         void initSSocketClientAccept(YieldFunc& rYield, YieldFunc& wYield);
 };

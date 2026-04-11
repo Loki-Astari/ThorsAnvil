@@ -66,11 +66,13 @@ class EventHandler
         return nextTImerId;
     }
 
+    using AtomicBool = std::atomic<bool>;
+
     JobQueue&       jobQueue;
     Store&          store;
     EventBase       eventBase;
-    bool            finished;
-    bool            stopping;
+    AtomicBool      finished;
+    AtomicBool      stopping;
     InternalTimerAction     internalTimerAction;
     int                     internalTimerId;
 

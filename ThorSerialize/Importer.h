@@ -6,6 +6,8 @@
  */
 
 #include "SerializeConfig.h"
+#include "Serialize.h"
+#include "SerUtil.h"
 #include <istream>
 #include <string>
 #include <string_view>
@@ -16,6 +18,7 @@
 namespace ThorsAnvil::Serialize
 {
 
+struct ParserConfig;
 template<typename Format, typename T, typename Config = ParserConfig, typename ConfigStore = std::reference_wrapper<const Config>>
 class Importer
 {
@@ -55,7 +58,7 @@ class Importer
                     {
                         // If the stream is OK then there was junk on the stream.
                         // So we have effectively failed.
-                        ThorsLogAndThrowError(std::runtime_error, "ThorsAnvil::Serializer::Importer", "extract", "Validating no trailing data fail");
+                        ThorsLogAndThrowError(std::runtime_error, "ThorsAnvil::Serialize::Importer", "extract", "Validating no trailing data fail");
                     }
                 }
             }

@@ -134,7 +134,7 @@ std::string_view JsonManualLexer::getRawString()
                 if (next < 0x20)
                 {
                     ThorsLogAndThrowError(std::runtime_error,
-                                          "ThorsAnvil::Serializer::JsonManualLexer",
+                                          "ThorsAnvil::Serialize::JsonManualLexer",
                                           "getRawString",
                                           "Strings should not contain control characters.");
                 }
@@ -152,7 +152,7 @@ std::string_view JsonManualLexer::getRawString()
         default:
         {
             ThorsLogAndThrowError(std::runtime_error,
-                                  "ThorsAnvil::Serializer::JsonManualLexer",
+                                  "ThorsAnvil::Serialize::JsonManualLexer",
                                   "getRawString",
                                   "Don't know how to retrieve the RAW data from the JSON input");
         }
