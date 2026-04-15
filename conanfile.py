@@ -73,7 +73,6 @@ class ThorsAnvilConan(ConanFile):
         self.cpp_info.includedirs = [ "include",
                                       "include/ThorSerialize",
                                       "include/ThorsCrypto",
-                                      "include/ThorsIOUtil",
                                       "include/ThorsLogging",
                                       "include/ThorsMongo",
                                       "include/ThorsSocket",

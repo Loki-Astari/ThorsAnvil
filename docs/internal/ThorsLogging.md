@@ -24,7 +24,6 @@ ThorsLoggingConfig.h    <-- Generated build configuration
 ### Dependencies
 
 - **loguru** -- bundled as a git submodule under `third/loguru/`
-- **ThorsIOUtil** -- provides `ThorsAnvil::Utility::buildErrorMessage()` for formatting all log messages
 
 ---
 

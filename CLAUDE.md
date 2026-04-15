@@ -111,7 +111,7 @@ docs/                # Generated documentation
 
 ### Build Order (from `src/Makefile`)
 ```
-ThorsLogging → ThorsIOUtil → fast_float → Serialize → ThorsCrypto →
+ThorsLogging → fast_float → Serialize → ThorsCrypto →
 ThorsStorage → ThorsSocket → ThorsMongo → NisseServer → NisseHTTP →
 NisseLib → ThorsMug → ThorsSlack
 ```
@@ -128,7 +128,6 @@ NisseLib → ThorsMug → ThorsSlack
 | **ThorsSlack** | — | Type-safe Slack REST/webhook client |
 | **ThorsCrypto** | — | Base64, CRC, hashing (MD5/SHA-1/SHA-256), HMAC, PBKDF2, SCRAM |
 | **ThorsLogging** | `ThorsAnvil::Logging` | Leveled logging macros (`ThorsLogFatal` through `ThorsLogAll`) |
-| **ThorsIOUtil** | — | Type-safe printf-style formatting via `std::ostream` |
 | **ThorsStorage** | — | Columnar file storage with per-field files and index-based seeking |
 
 All code lives under `namespace ThorsAnvil` with component sub-namespaces.
