@@ -4,12 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [9.1.12] - 
-- Support CMakefiles for other projects.
-
-## [9.1.11] - 2026-04-11
-
-### Changed
+## [9.1.14] -
+- Improve build tools.
+- Add install scripts for CMake files.
+- Support CMake files for other projects.
 - License changed from GPL-3.0 to MIT
 - Updated Conan recipe with correct dependencies and package info
 

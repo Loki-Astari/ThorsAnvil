@@ -89,6 +89,63 @@ Some dependencies you will need to install manually for header-only builds.
     
 Note: The header-only version does not include Mug
 
+# Using ThorsAnvil In Your Project (CMake)
+
+Installing ThorsAnvil (via `make install` or `brew install thors-anvil`) also installs a CMake package config file to `<prefix>/lib/cmake/ThorsAnvil/`. This allows any CMake-based project to consume the libraries via `find_package`.
+
+## Quick Start
+
+In your `CMakeLists.txt`:
+
+```cmake
+cmake_minimum_required(VERSION 3.15)
+project(MyApp CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(ThorsAnvil REQUIRED)
+
+add_executable(myapp main.cpp)
+target_link_libraries(myapp PRIVATE ThorsAnvil::ThorSerialize)
+```
+
+If ThorsAnvil is installed to a non-standard prefix, point CMake at it:
+
+```bash
+cmake -B build -DCMAKE_PREFIX_PATH=/path/to/install/prefix
+```
+
+## Available Imported Targets
+
+Each target brings in the appropriate include directories and transitive dependencies automatically.
+
+| Target                          | Purpose                                                |
+|---------------------------------|--------------------------------------------------------|
+| `ThorsAnvil::ThorsLogging`      | Leveled logging macros                                 |
+| `ThorsAnvil::ThorSerialize`     | JSON / YAML / BSON serialization                       |
+| `ThorsAnvil::ThorsCrypto`       | Base64, CRC, MD5, SHA, HMAC, SCRAM (header-only)       |
+| `ThorsAnvil::ThorsSocket`       | Async IO (files / pipes / sockets / TLS) as iostream   |
+| `ThorsAnvil::ThorsStorage`      | Columnar file storage                                  |
+| `ThorsAnvil::ThorsMongo`        | Type-safe MongoDB wire protocol client                 |
+| `ThorsAnvil::Nisse`             | Coroutine-based async HTTP server                      |
+
+## Example
+
+```cmake
+find_package(ThorsAnvil REQUIRED)
+
+add_executable(webserver main.cpp)
+target_link_libraries(webserver
+    PRIVATE
+        ThorsAnvil::Nisse            # async HTTP server
+        ThorsAnvil::ThorSerialize    # JSON request/response bodies
+        ThorsAnvil::ThorsMongo       # MongoDB persistence
+)
+```
+
+External dependencies (`OpenSSL`, `libevent`, `boost`, `libyaml`, `snappy`, `zlib`) must also be available on the system — the package config pulls them in automatically where required.
+
 ## Building With Visual Studio
 
 To build on Windows, you will need to add the flag: [`/Zc:preprocessor`](https://learn.microsoft.com/en-us/cpp/build/reference/zc-preprocessor?view=msvc-170). These libraries make heavy use of VAR_ARG macros to generate code for you, so they require a conforming pre-processor. See [Macro Expansion of __VA_ARGS__ Bug in Visual Studio?](https://stackoverflow.com/questions/78605945/macro-expansion-of-va-args-bug-in-visual-studio) for details.
