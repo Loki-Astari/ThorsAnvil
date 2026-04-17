@@ -33,8 +33,8 @@ jobs:
                   with_slack_secret: ${{ secrets.with_slack_secret }}
                   with_slack_channel: ${{ secrets.with_slack_channel }}
               run: ./configure --disable-vera --disable-test-with-integration --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
-            - run: env DISBALE_CONTROL_CODES=TRUE make
-            - run: env DISBALE_CONTROL_CODES=TRUE make install
+            - run: env DISABLE_CONTROL_CODES=TRUE make
+            - run: env DISABLE_CONTROL_CODES=TRUE make install
     Build_on_Linux:
         runs-on:    ubuntu-22.04
         steps:
@@ -57,8 +57,8 @@ jobs:
                   with_slack_secret: ${{ secrets.with_slack_secret }}
                   with_slack_channel: ${{ secrets.with_slack_channel }}
               run: ./configure --disable-vera --disable-test-with-integration --enable-dark-mode --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
-            - run: env DISBALE_CONTROL_CODES=TRUE make
-            - run: env DISBALE_CONTROL_CODES=TRUE sudo make install
+            - run: env DISABLE_CONTROL_CODES=TRUE make
+            - run: env DISABLE_CONTROL_CODES=TRUE sudo make install
     Build_on_Windows:
         runs-on:    windows-latest
         steps:
@@ -111,7 +111,7 @@ jobs:
               run:  ./configure --disable-vera --disable-test-with-integration --with-magicenum-header-only-root=/tmp/magic_enum/include/magic_enum --with-yaml-root=/mingw64/ --disable-test-with-locked-file --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
             - name: Make
               shell: msys2 {0}
-              run: env DISBALE_CONTROL_CODES=TRUE make
+              run: env DISABLE_CONTROL_CODES=TRUE make
     Build_Header_Only_Version:
         runs-on:    macos-latest
         #- if:         github.ref == 'refs/heads/master'
@@ -131,5 +131,5 @@ jobs:
                   with_slack_secret: ${{ secrets.with_slack_secret }}
                   with_slack_channel: ${{ secrets.with_slack_channel }}
               run: ./configure --disable-vera --disable-test-with-integration --disable-test-with-mongo-query --disable-Mongo-Service --with-slack-botToken=${with_slack_botToken} --with-slack-userToken=${with_slack_userToken} --with-slack-secret=${with_slack_secret} --with-slack-channel=${with_slack_channel}
-            - run: env DISBALE_CONTROL_CODES=TRUE make header-only
+            - run: env DISABLE_CONTROL_CODES=TRUE make header-only
 
