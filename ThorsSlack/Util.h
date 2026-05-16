@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_SLACK_UTIL_H
 #define THORSANVIL_SLACK_UTIL_H
 
+#include "ThorsSlackConfig.h"
 #include <string>
 #include <memory>
 #include "SlackBlockKit.h"
