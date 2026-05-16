@@ -17,10 +17,12 @@ static const std::string emptyString;
 
 template<typename T>
 std::string const& getChannel(T const&)                                 {return emptyString;}
+THORSSLACK_HEADER_ONLY_INCLUDE
 std::string const& getChannel(HasStringChannel auto const& event)       {return event.channel;}
 
 template<typename T>
 std::optional<std::string> getTS(T const&)                              {return {};}
+THORSSLACK_HEADER_ONLY_INCLUDE
 std::optional<std::string> getTS(HasOptStringTS auto const& event)      {return event.ts;}
 
 template<typename T>
@@ -33,6 +35,7 @@ void App::handleEvent(ThorsAnvil::Slack::EventRequest<T> const& request)
     }
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 App::App(AppConfig const& config)
     : slot{config.slot}
     , client(config.botToken, config.userToken)
@@ -43,8 +46,13 @@ App::App(AppConfig const& config)
     addUserActionHandlers();
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void App::addSlashCommandHandlers()  {}
+
+THORSSLACK_HEADER_ONLY_INCLUDE
 void App::addUserActionHandlers()    {}
+
+THORSSLACK_HEADER_ONLY_INCLUDE
 void App::addEventHandlers()
 {
     eventHandlerMap[Event::Message::typeName()]                     = [&](ThorsAnvil::Slack::EventRequest<Event::Message> const& request)                      {handleEventMessage(request);};
@@ -139,6 +147,7 @@ void App::addEventHandlers()
     eventHandlerMap[Event::UserHuddleChanged::typeName()]           = [&](ThorsAnvil::Slack::EventRequest<Event::UserHuddleChanged> const& request)            {handleEvent(request);};
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 std::vector<ThorsAnvil::ThorsMug::Action> App::getAction()
 {
     return std::vector<ThorsAnvil::ThorsMug::Action>
@@ -167,26 +176,31 @@ std::vector<ThorsAnvil::ThorsMug::Action> App::getAction()
     };
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void App::message(Filter&& filter, MessageHandler&& handler)
 {
     messageHandlers.emplace_back(std::move(filter), std::move(handler));
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void App::message(std::string filter, MessageHandler&& handler)
 {
     message([filter = std::move(filter)](ThorsAnvil::Slack::Event::Message const& message){return message.text.find(filter) != std::string::npos;}, std::move(handler));
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void App::message(std::regex filter, MessageHandler&& handler)
 {
     message([filter = std::move(filter)](ThorsAnvil::Slack::Event::Message const& message){return std::regex_search(message.text, filter);}, std::move(handler));
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void App::message(MessageHandler&& handler)
 {
     message([](ThorsAnvil::Slack::Event::Message const&){return true;}, std::move(handler));
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void App::handleEventMessage(ThorsAnvil::Slack::EventRequest<ThorsAnvil::Slack::Event::Message> const& request)
 {
     Say     say{client, Where{.channel = request.event.channel.value_or("bad"), .ts = request.event.ts}};
@@ -197,6 +211,7 @@ void App::handleEventMessage(ThorsAnvil::Slack::EventRequest<ThorsAnvil::Slack::
     }
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void App::command(std::string const& command, SlashCommandHandler&& handler)
 {
     std::string index = (command.size() != 0 && command[0] == '/') ? command : (std::string("/") + command);
@@ -211,6 +226,7 @@ void App::command(std::string const& command, SlashCommandHandler&& handler)
     );
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void App::action(std::string const& actionId, ActionHandler&& handler)
 {
     actionHandlerMap.insert_or_assign(actionId, [h = std::move(handler)](ThorsAnvil::Slack::ActionHandlerRequest const& request)
@@ -222,6 +238,7 @@ void App::action(std::string const& actionId, ActionHandler&& handler)
     );
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void App::viewOpen(std::string const& triggerId, View const& view)
 {
     getClient().sendMessage(ThorsAnvil::Slack::API::Views::Open{view.getDisplayView(), triggerId, {}},
@@ -232,6 +249,7 @@ void App::viewOpen(std::string const& triggerId, View const& view)
                            );
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void App::viewPush(std::string const& triggerId, View const& view)
 {
     getClient().sendMessage(ThorsAnvil::Slack::API::Views::Push{view.getDisplayView(), triggerId, {}},
@@ -245,11 +263,13 @@ void App::viewPush(std::string const& triggerId, View const& view)
                            );
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void App::viewUpdate(std::string const& viewId, ThorsAnvil::Slack::API::Views::View display)
 {
     getClient().sendMessage(ThorsAnvil::Slack::API::Views::Update{std::move(display), viewId, {}, {}});
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 std::map<std::string, std::unique_ptr<App>>& App::getServerInfo()
 {
     static std::map<std::string, std::unique_ptr<App>>  apps;

@@ -8,15 +8,18 @@ namespace ThorsAnvil::Nisse::Bolt
 SlashAck::JsonHeader                    const SlashAck::jsonHeaders;
 ThorsAnvil::Serialize::PrinterConfig    const SlashAck::printerConfig{ThorsAnvil::Serialize::OutputType::Stream};
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 Ack::Ack(ThorsAnvil::Nisse::HTTP::Response& response)
     : response(response)
 {}
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void Ack::operator()() const
 {
     response.body(0);
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void Ack::operator()(int responseCode) const
 {
     response.setStatus(responseCode);
@@ -35,6 +38,7 @@ struct SlashAckReplyBlock
 };
 ThorsAnvil_MakeTrait(SlashAckReplyBlock, blocks);
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void SlashAck::operator()(int responseCode, std::string const& message) const
 {
     response.setStatus(responseCode);
@@ -43,6 +47,7 @@ void SlashAck::operator()(int responseCode, std::string const& message) const
         << ThorsAnvil::Serialize::jsonExporter(SlashAckReplyText{message}, printerConfig);
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void SlashAck::operator()(int responseCode, ThorsAnvil::Slack::BlockKit::Blocks const& message) const
 {
     response.setStatus(responseCode);
@@ -52,6 +57,7 @@ void SlashAck::operator()(int responseCode, ThorsAnvil::Slack::BlockKit::Blocks 
         << ThorsAnvil::Serialize::jsonExporter(SlashAckReplyBlock{message}, printerConfig);
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void SlashAck::operator()(std::string const& message) const
 {
     response.addHeaders(jsonHeaders);
@@ -59,6 +65,8 @@ void SlashAck::operator()(std::string const& message) const
     response.body(size)
         << ThorsAnvil::Serialize::jsonExporter(SlashAckReplyText{message}, printerConfig);
 }
+
+THORSSLACK_HEADER_ONLY_INCLUDE
 void SlashAck::operator()(ThorsAnvil::Slack::BlockKit::Blocks const& message) const
 {
     response.addHeaders(jsonHeaders);

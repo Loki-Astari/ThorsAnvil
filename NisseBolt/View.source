@@ -2,6 +2,7 @@
 namespace ThorsAnvil::Nisse::Bolt
 {
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 View::View(ThorsAnvil::Slack::API::Views::View display, ViewSubmitHandler&& submitHandler, ViewClosedHandler&& closeHandler)
     : display(std::move(display))
     , handlers{
@@ -24,6 +25,7 @@ View::View(ThorsAnvil::Slack::API::Views::View display, ViewSubmitHandler&& subm
     display.notify_on_close = true;
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 View::View(ThorsAnvil::Slack::API::Views::View display, ViewSubmitHandler&& submitHandler)
     : display(std::move(display))
     , handlers{
@@ -41,6 +43,7 @@ View::View(ThorsAnvil::Slack::API::Views::View display, ViewSubmitHandler&& subm
     display.notify_on_close = true;
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void View::action(std::string const& actionId, ActionHandler&& handler)
 {
     handlers.actionHandlerMap.insert_or_assign(actionId, [h = std::move(handler)](ThorsAnvil::Slack::ActionHandlerRequest const& request)
@@ -51,6 +54,7 @@ void View::action(std::string const& actionId, ActionHandler&& handler)
     });
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 ThorsAnvil::Slack::API::Views::View const& View::getDisplayView() const
 {
     return display;

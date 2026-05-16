@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_SLACK_API_BLOCKACTIONS_STATE_H
 #define THORSANVIL_SLACK_API_BLOCKACTIONS_STATE_H
 
+#include "ThorsSlackConfig.h"
 #include "API.h"
 #include "SlackBlockKit.h"
 #include "Util.h"

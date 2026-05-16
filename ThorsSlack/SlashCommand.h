@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_SLACK_SLASH_COMMAND_H
 #define THORSANVIL_SLACK_SLASH_COMMAND_H
 
+#include "ThorsSlackConfig.h"
 #include <string>
 #include <NisseHTTP/Request.h>
 

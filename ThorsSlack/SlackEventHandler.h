@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_SLACK_SLACKEVENTHANDLER_H
 #define THORSANVIL_SLACK_SLACKEVENTHANDLER_H
 
+#include "ThorsSlackConfig.h"
 #include "EventCallbackAppMentioned.h"
 #include "ThorSerialize/JsonThor.h"
 #include "ThorsSlackConfig.h"

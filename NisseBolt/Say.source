@@ -5,16 +5,19 @@
 namespace ThorsAnvil::Nisse::Bolt
 {
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 Say::Say(Slack::SlackClient& client, Where where)
     : client{client}
     , where{std::move(where)}
 {}
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void Say::operator()(std::string const& message) const
 {
     (*this)(message, where);
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void Say::operator()(std::string const& message, Where const& where) const
 {
     sendMessage(Slack::API::Chat::POSTMessage{
@@ -27,11 +30,13 @@ void Say::operator()(std::string const& message, Where const& where) const
                                              });
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void Say::operator()(Slack::BlockKit::Blocks const& blocks) const
 {
     (*this)(blocks, where);
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void Say::operator()(Slack::BlockKit::Blocks const& blocks, Where const& where) const
 {
     sendMessage(Slack::API::Chat::POSTMessage{
@@ -44,6 +49,7 @@ void Say::operator()(Slack::BlockKit::Blocks const& blocks, Where const& where) 
                                              });
 }
 
+THORSSLACK_HEADER_ONLY_INCLUDE
 void Say::sendMessage(Slack::API::Chat::POSTMessage message) const
 {
     client.sendMessage(std::move(message),
