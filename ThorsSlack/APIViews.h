@@ -2,11 +2,12 @@
 #define THORSANVIL_SLACK_API_VIEWS_H
 
 
-#include <string>
-#include "API.h"
 #include "ThorsSlackConfig.h"
-#include "APIBlockActions.h"
+#include "API.h"
+#include "APIViewsInfo.h"
+#include "APIBlockActionsState.h"
 #include "EventCallback.h"
+#include <string>
 
 namespace ThorsAnvil::Slack::API::Views
 {
@@ -82,10 +83,10 @@ struct View
 {
     // https://docs.slack.dev/reference/views/modal-views
     // std::string                        type;               // The type of view. Set to modal for modals.
-    BlockKit::ElTextPlain               title;              // The title that appears in the top-left of the modal. Must be a plain_text text element with a max length of 24 characters.
+    BlockKit::PlainText                 title;              // The title that appears in the top-left of the modal. Must be a plain_text text element with a max length of 24 characters.
     BlockKit::Blocks                    blocks;             // An array of blocks that defines the content of the view. Max of 100 blocks.
-    BlockKit::OptElTextPlain            close;              // A plain_text element that defines the text displayed in the close button at the bottom-right of the view. Max length of 24 characters.
-    BlockKit::OptElTextPlain            submit;             // A plain_text element that defines the text displayed in the submit button at the bottom-right of the view. submit is required when an input block is within the blocks array. Max length of 24 characters.
+    BlockKit::OptPlainText              close;              // A plain_text element that defines the text displayed in the close button at the bottom-right of the view. Max length of 24 characters.
+    BlockKit::OptPlainText              submit;             // A plain_text element that defines the text displayed in the submit button at the bottom-right of the view. submit is required when an input block is within the blocks array. Max length of 24 characters.
     OptString                           private_metadata;   // A string that will be sent to your app in view_submission and block_actions events. Max length of 3000 characters.
     OptString                           callback_id;        // An identifier to recognize interactions and submissions of this particular view. Don't use this to store sensitive information (use private_metadata instead). Max length of 255 characters.
     OptBool                             clear_on_close;     // When set to true, clicking on the close button will clear all views in a modal and close it. Defaults to false.
@@ -97,38 +98,11 @@ struct View
     ThorsAnvil_TypeFieldName(type);
 };
 
-using UPtrElTextPlain = std::unique_ptr<BlockKit::ElTextPlain>;
-using UPtrString      = std::unique_ptr<std::string>;
-
 struct ViewReply
 {
-    std::string                         id;
-    std::string                         team_id;
-    std::string                         type;
-    BlockKit::ElTextPlain               title;
-    BlockKit::Blocks                    blocks;
-    UPtrElTextPlain                     close;
-    UPtrElTextPlain                     submit;
-    std::string                         private_metadata;
-    std::string                         callback_id;
-    bool                                clear_on_close;
-    bool                                notify_on_close;
-    std::string                         external_id;
-    OptBool                             submit_disabled;
-    UPtrString                          previous_view_id;
-    SlackState                          state;
-    std::string                         hash;
-    std::string                         root_view_id;
-    std::string                         app_id;
-    std::string                         app_installed_team_id;
-    std::string                         bot_id;
-};
-
-
-struct OpenReply
-{
     bool                                ok;
-    ViewReply                           view;
+    ViewsInfo                           view;
+    ThorsAnvil_VariantSerializer(ThorsAnvil::Slack::API::Views::ViewReply);
 };
 
 struct Open
@@ -137,7 +111,7 @@ struct Open
     static constexpr char const* api = "https://slack.com/api/views.open";
     static constexpr Method method = Method::POST;
     static constexpr Scope  scope = Scope::Bot;
-    using Reply = OpenReply;
+    using Reply = ViewReply;
 
     View                                view;               // A view payload. This must be a JSON-encoded string.
     OptString                           trigger_id;         // Exchange a trigger to post to the user. Example: 12345.98765.abcd2358fdea
@@ -150,7 +124,7 @@ struct Publish
     static constexpr char const* api = "https://slack.com/api/views.publish";
     static constexpr Method method = Method::POST;
     static constexpr Scope  scope = Scope::Bot;
-    using Reply = API::OK;
+    using Reply = API::OK; // Probably ViewReply
 
     std::string                         user_id;            // id of the user you want publish a view to.
     View                                view;               // A view payload. This must be a JSON-encoded string.
@@ -163,7 +137,7 @@ struct Push
     static constexpr char const* api = "https://slack.com/api/views.push";
     static constexpr Method method = Method::POST;
     static constexpr Scope  scope = Scope::Bot;
-    using Reply = API::OK;
+    using Reply = ViewReply;
 
     View                                view;               // A view payload. This must be a JSON-encoded string.
     OptString                           trigger_id;         // Exchange a trigger to post to the user. Example: 12345.98765.abcd2358fdea
@@ -176,7 +150,7 @@ struct Update
     static constexpr char const* api = "https://slack.com/api/views.update";
     static constexpr Method method = Method::POST;
     static constexpr Scope  scope = Scope::Bot;
-    using Reply = API::OK;
+    using Reply = API::OK; // Probably ViewReply
 
     View                                view;               // A view object. This must be a JSON-encoded string.
     OptString                           view_id;            // A unique identifier of the view to be updated. Either view_id or external_id is required.
@@ -193,7 +167,7 @@ struct ViewSubmission
     std::string                         api_app_id;
     std::string                         token;
     std::string                         trigger_id;
-    ViewReply                           view;
+    ViewsInfo                           view;
     std::vector<std::string>            response_urls;
     bool                                is_enterprise_install;
     Event::Enterprise*                  enterprise;
@@ -201,11 +175,23 @@ struct ViewSubmission
     ThorsAnvil_VariantSerializerWithName(ThorsAnvil::Slack::BlockKit::ViewSubmission, view_submission);
     ThorsAnvil_TypeFieldName(type);
 };
+
+struct ViewClosed
+{
+    // std::string                         type;               // view_closed
+    SlackTeam                           team;
+    SlackUser                           user;
+    ViewsInfo                           view;
+    bool                                is_cleared;
+
+    ThorsAnvil_VariantSerializerWithName(ThorsAnvil::Slack::BlockKit::ViewSubmission, view_closed);
+    ThorsAnvil_TypeFieldName(type);
+};
+
 }
 
 // Response objects
-ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Views::ViewReply, id, team_id, type, title, blocks, close, submit, private_metadata, callback_id, clear_on_close, notify_on_close, external_id, submit_disabled, previous_view_id, state, hash, root_view_id, app_id, app_installed_team_id, bot_id);
-ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Views::OpenReply, ok, view);
+ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Views::ViewReply, ok, view);
 
 
 // Action objects
@@ -216,5 +202,6 @@ ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Views::Push, view, trigger_id, inte
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Views::Update, view, view_id, external_id, hash);
 
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Views::ViewSubmission, team, user, api_app_id, token, trigger_id, view, response_urls, is_enterprise_install, enterprise);
+ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Views::ViewClosed, team, user, view, is_cleared);
 
 #endif

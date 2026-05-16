@@ -5,13 +5,38 @@
 // Documentation: https://docs.slack.dev/reference/events/message.channels/
 
 #include "ThorsSlackConfig.h"
-#include "EventCallbackMessage.h"
-#include "EventCallbackReaction.h"
-#include "EventCallbackPin.h"
-#include "EventCallbackStar.h"
+
+#include "EventCallbackApp.h"
 #include "EventCallbackAppMentioned.h"
+#include "EventCallbackAssistantThread.h"
+#include "EventCallbackCallRejected.h"
+#include "EventCallbackChannel.h"
+#include "EventCallbackDnd.h"
+#include "EventCallbackEmail.h"
+#include "EventCallbackEmojiChanged.h"
+#include "EventCallbackEntityDetails.h"
+#include "EventCallbackFile.h"
+#include "EventCallbackFunctionExecuted.h"
+#include "EventCallbackGrid.h"
+#include "EventCallbackGroup.h"
+#include "EventCallbackIm.h"
+#include "EventCallbackInviteRequested.h"
+#include "EventCallbackLinkShared.h"
+#include "EventCallbackMember.h"
+#include "EventCallbackMessage.h"
+#include "EventCallbackMessageMetadata.h"
+#include "EventCallbackPin.h"
+#include "EventCallbackReaction.h"
+#include "EventCallbackSharedChannel.h"
+#include "EventCallbackStar.h"
+#include "EventCallbackSubteam.h"
+#include "EventCallbackTeam.h"
+#include "EventCallbackTokensRevoked.h"
+#include "EventCallbackUser.h"
+
 #include "ThorSerialize/Traits.h"
 #include "ThorSerialize/SerUtil.h"
+
 #include <string>
 #include <vector>
 #include <optional>
@@ -20,7 +45,34 @@
 namespace ThorsAnvil::Slack::Event
 {
 
-using CallbackMessage = std::variant<Message, ReactionAdded, ReactionRemoved, PinAdded, PinRemoved, StarAdded, StarRemoved, AppMentioned>;
+// using CallbackMessage = std::variant<Message, ReactionAdded, ReactionRemoved, PinAdded, PinRemoved, StarAdded, StarRemoved, AppMentioned>;
+using CallbackMessage = std::variant<   AppDeleted, AppHomeOpened, AppInstalled, AppRateLimited, AppRequested, AppUninstalledTeam, AppUninstalled, AppMentioned,
+                                        AssistantThreadContextChanged, AssistantThreadStarted,
+                                        CallRejected,
+                                        ChannelArchive, ChannelCreated, ChannelDeleted, ChannelHistoryChanged, ChannelIdChanged, ChannelLeft, ChannelPostingPermissions, ChannelRename, ChannelShared, ChannelUnshared,
+                                        DndUpdated, DndUpdatedUser,
+                                        EmailDomainChanged,
+                                        EmojiChanged,
+                                        EntityDetailsRequested,
+                                        FileChange, FileCommentAdded, FileCommentDeleted, FileCommentEdited, FileCreated, FileDeleted, FilePublic, FileShared, FileUnshared,
+                                        FunctionExecuted,
+                                        GridMigrationFinished, GridMigrationStarted,
+                                        GroupClose, GroupDeleted, GroupHistoryChanged, GroupLeft, GroupOpen, GroupRename,
+                                        ImClose, ImCreated, ImHistoryChanged, ImOpen,
+                                        InviteRequested,
+                                        LinkShared,
+                                        MemberJoinedChannel, MemberLeftChannel,
+                                        Message,
+                                        MessageMetadataPosted, MessageMetadataUpdated, MessageMetadataDeleted,
+                                        PinAdded, PinRemoved,
+                                        ReactionAdded, ReactionRemoved,
+                                        SharedChannelInviteAccepted, SharedChannelInviteApproved, SharedChannelInviteDeclined, SharedChannelInviteReceived, SharedChannelInviteRequested,
+                                        StarAdded, StarRemoved,
+                                        SubteamCreated, SubteamMembersChanged, SubteamSelfAdded, SubteamSelfRemoved, SubteamUpdated,
+                                        TeamAccessGranted, TeamAccessRevoked, TeamDomainChange, TeamJoin, TeamRename,
+                                        TokensRevoked,
+                                        UserChange, UserConnection, UserHuddleChanged
+                                    >;
 
 struct Enterprise
 {};

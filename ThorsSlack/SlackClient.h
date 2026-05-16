@@ -14,6 +14,7 @@
 #include "ThorSerialize/PrinterConfig.h"
 #include "ThorSerialize/Traits.h"
 #include "ThorSerialize/JsonThor.h"
+#include "ThorSerialize/Logging.h"
 
 #include <string>
 #include <string_view>
@@ -54,7 +55,7 @@ class SlackClient
     std::string             botId;
     private:
         template<typename T>
-        void sendMessageData(T const& message, SlackStream& stream)
+        void sendMessageData(T const& message, SlackStream& stream) const
         {
             if constexpr (T::method == API::Method::GET) {
                 std::string api = std::string{} + T::api + "?" + ThorsAnvil::Slack::API::buildQueryA(message);
@@ -81,7 +82,7 @@ class SlackClient
             }
         }
         template<typename T>
-        std::string getEventType(Nisse::StreamInput& input, bool& hit)
+        std::string getEventType(Nisse::StreamInput& input, bool& hit) const
         {
             if (hit) {
                 return "";
@@ -119,10 +120,11 @@ class SlackClient
         std::string const& getBotId()   {return botId;}
 
         template<typename T>
-        void  sendMessage(T const& message, SuccFunc<typename T::Reply>&& succ = [](typename T::Reply&&){}, FailFunc&& fail = [](API::Error&&){})
+        void  sendMessage(T const& message, SuccFunc<typename T::Reply>&& succ = [](typename T::Reply&&){}, FailFunc&& fail = [](API::Error&&){}) const
         {
             using ResultType = typename T::Reply;
             using OutputType = std::variant<API::Error, ResultType>;
+            ThorsLogTrackWithData(message, "ThorsAnvil::Slack::SlackClient", "sendMessage", "Sending Request");
 
             SlackStream             stream;
             sendMessageData(message, stream);
@@ -132,6 +134,7 @@ class SlackClient
             OutputType              reply;
             bool hit = false;
             input >> Ser::jsonImporter(reply, Ser::ParserConfig{}.setIdentifyDynamicClass([&](Ser::DataInputStream&){return getEventType<ResultType>(input, hit);}));
+            ThorsLogTrackWithData(reply, "ThorsAnvil::Slack::SlackClient", "sendMessage", "Response:");
 
             std::visit(VisitResult<ResultType>{std::move(succ), std::move(fail)}, reply);
         }
@@ -143,13 +146,13 @@ class SlackClient
         void  validateMessage(T const& message)
         {
             SlackStream             stream;
-            std::cerr << "Sending: " << ThorsAnvil::Serialize::jsonExporter(message) << "\n----------\n";
             sendMessageData(message, stream);
 
             Nisse::ClientResponse   response(stream);
             Nisse::StreamInput      input(stream, response.getContentSize());
             std::string line;
             while (std::getline(input, line)) {
+                // Don't remove this function is used for debugging.
                 std::cerr << "L: " << line << "\n";
             }
             std::cerr << "DONE\n\n";
@@ -158,7 +161,7 @@ class SlackClient
         bool  sendMessage(T const& message, typename T::Reply& result, bool dumpError = false)
         {
             bool good = true;
-            sendMessage(message, [&result](typename T::Reply&& value){result = std::move(value);}, [&dumpError,&good](API::Error&& value){good = false;if (dumpError){std::cerr << ThorsAnvil::Serialize::jsonExporter(value) << "\n";}});
+            sendMessage(message, [&result](typename T::Reply&& value){result = std::move(value);}, [&dumpError,&good](API::Error&& value){good = false;if (dumpError){/*DON'T remove*/std::cerr << ThorsAnvil::Serialize::jsonExporter(value) << "\n";}});
             return good;
         }
 };

@@ -151,15 +151,15 @@ void HTTPHandler::addPath(MethodChoice method, std::string const& path, HTTPActi
                         path,
                         [](PathMatcher::Data& data, Match const& matches, Request& request, Response& response)
                         {
-                            return data.parent->callUserACtion(data.path, data.action, data.val, matches, request, response);
+                            return data.parent->callUserAction(data.path, data.action, data.val, matches, request, response);
                         },
                         std::make_unique<PathMatcher::Data>(this, path, std::move(action), std::move(val)));
 }
 
 NISSE_HEADER_ONLY_INCLUDE
-bool HTTPHandler::callUserACtion(std::string const& path, HTTPAction& action, HTTPValidate& val, Match const& matches, Request& request, Response& response)
+bool HTTPHandler::callUserAction(std::string const& path, HTTPAction& action, HTTPValidate& val, Match const& matches, Request& request, Response& response)
 {
-    ThorsLogInfo("ThorsAnvil::Nisse::HTTP::HTTPHandler", "callUserACtion", "Called: ", path);
+    ThorsLogInfo("ThorsAnvil::Nisse::HTTP::HTTPHandler", "callUserAction", "Called: ", path);
     // Get the variable object
     RequestVariables&   var     = request.variables();
 
@@ -168,7 +168,7 @@ bool HTTPHandler::callUserACtion(std::string const& path, HTTPAction& action, HT
     addPathMatch(var, matches);
 
     if (!val(request)) {
-        ThorsLogInfo("ThorsAnvil::Nisse::HTTP::HTTPHandler", "callUserACtion", "Validation fail");
+        ThorsLogInfo("ThorsAnvil::Nisse::HTTP::HTTPHandler", "callUserAction", "Validation fail");
         response.setStatus(400);
         return true;
     }

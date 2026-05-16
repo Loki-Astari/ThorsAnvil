@@ -1,0 +1,61 @@
+#include "ThorSerialize/JsonThor.h"
+#include "ThorSerialize/Logging.h"
+#include "ThorsSlack/APIChatMessage.h"
+
+namespace ThorsAnvil::Nisse::Bolt
+{
+
+Say::Say(Slack::SlackClient& client, Where where)
+    : client{client}
+    , where{std::move(where)}
+{}
+
+void Say::operator()(std::string const& message) const
+{
+    (*this)(message, where);
+}
+
+void Say::operator()(std::string const& message, Where const& where) const
+{
+    sendMessage(Slack::API::Chat::POSTMessage{
+                                               .channel     = where.channel,
+                                               .text        = message,
+                                               //.blocks
+                                               .icon_emoji  = where.icon_emoji,
+                                               .username    = where.username,
+                                               .thread_ts   = where.ts
+                                             });
+}
+
+void Say::operator()(Slack::BlockKit::Blocks const& blocks) const
+{
+    (*this)(blocks, where);
+}
+
+void Say::operator()(Slack::BlockKit::Blocks const& blocks, Where const& where) const
+{
+    sendMessage(Slack::API::Chat::POSTMessage{
+                                               .channel     = where.channel,
+                                               //.text
+                                               .blocks      = blocks,
+                                               .icon_emoji  = where.icon_emoji,
+                                               .username    = where.username,
+                                               .thread_ts   = where.ts
+                                             });
+}
+
+void Say::sendMessage(Slack::API::Chat::POSTMessage message) const
+{
+    client.sendMessage(std::move(message),
+                        [](typename Slack::API::Chat::POSTMessage::Reply&& value)
+                        {
+                            ThorsLogInfoWithData(value, "ThorsAnvil::Nisse::Bolt::Say", "sendMessage", "Reply");
+                        },
+                        [&](Slack::API::Error&& error)
+                        {
+                            ThorsLogErrorWithData(error, "ThorsAnvil::Nisse::Bolt::Say", "sendMessage", "Failed");
+                        }
+                      );
+}
+}
+

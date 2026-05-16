@@ -62,6 +62,7 @@ struct AppMentioned
     BlockKit::Blocks    blocks;
     std::string         channel;
     std::string         event_ts;
+    static std::string const& typeName() {static std::string const name{"Event/AppMentioned"}; return name;}
     ThorsAnvil_VariantSerializerWithName(ThorsAnvil::Slack::Event::AppMentioned, app_mention);
     ThorsAnvil_TypeFieldName(type);
 };

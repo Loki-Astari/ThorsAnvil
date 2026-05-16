@@ -4,13 +4,20 @@
 #include "API.h"
 #include "SlackBlockKit.h"
 #include "APIBlockActionsState.h"
+#include "APIViews.h"
 #include <string>
 #include <map>
 #include <vector>
+#include <optional>
 
 namespace BK = ThorsAnvil::Slack::BlockKit;
 
 // https://docs.slack.dev/reference/interaction-payloads/block_actions-payload
+namespace ThorsAnvil::Slack::API::Views
+{
+    struct ViewsInfo;
+    using OptViewsInfo = std::optional<ViewsInfo>;
+};
 namespace ThorsAnvil::Slack::API
 {
 
@@ -34,12 +41,6 @@ struct SlackChannel
 };
 using OptSlackChannel = std::optional<SlackChannel>;
 
-using OptNullString = std::optional<NullString>;
-using OptNullTime   = std::optional<NullTime>;
-using OptNullElText = std::optional<NullElText>;
-using OptNullVecElOption = std::optional<NullVecElOption>;
-using OptNullElOption   = std::optional<NullElOption>;
-
 struct SlackAction
 {
     std::string                         type;               // "checkboxes", "datepicker", "datetimepicker", "radio_buttons", "static_select", "timepicker", "button", "overflow", plain_text_input
@@ -48,13 +49,13 @@ struct SlackAction
     std::string                         block_id;
     std::string                         action_ts;
     // Value Part
-    OptNullString                       selected_date;      // DatePicker      Example: "2025-12-25"
-    OptNullTime                         selected_date_time; // DatetimePicker  Example: 1766732220
-    OptNullString                       selected_time;      // TimePicker      Example: "04:00"
-    OptNullElText                       text;               // Button
-    OptNullString                       value;              // Button
-    OptNullVecElOption                  selected_options;   // Checkboxes
-    OptNullElOption                     selected_option;    // RadioButtons / StaticSelect / Overflow
+    BK::OptString                       selected_date;      // DatePicker      Example: "2025-12-25"
+    BK::OptTime                         selected_date_time; // DatetimePicker  Example: 1766732220
+    BK::OptString                       selected_time;      // TimePicker      Example: "04:00"
+    BK::OptElText                       text;               // Button
+    BK::OptString                       value;              // Button
+    BK::OptVecElOption                  selected_options;   // Checkboxes
+    BK::OptElOption                     selected_option;    // RadioButtons / StaticSelect / Overflow
     // No Event Generated for:                              // EmailTextInput / NumberInput / PlainTextInput / URLTextInput
 };
 using VecSlackActions = std::vector<SlackAction>;

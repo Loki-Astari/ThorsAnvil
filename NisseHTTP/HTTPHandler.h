@@ -34,7 +34,7 @@ class HTTPHandler: public PyntHTTP
         void addPathMatch(RequestVariables& var, Match const& matches);
         void addFormVariables(RequestVariables& var, std::istream& stream);
 
-        bool callUserACtion(std::string const& path, HTTPAction& action, HTTPValidate& val, Match const& matches, Request& request, Response& response);
+        bool callUserAction(std::string const& path, HTTPAction& action, HTTPValidate& val, Match const& matches, Request& request, Response& response);
 };
 
 }

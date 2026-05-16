@@ -89,6 +89,7 @@ struct Message
     OptVecString                reply_users;
     OptBool                     is_locked;
     OptBool                     subscribed;
+    static std::string const& typeName() {static std::string const name{"Event/Message"}; return name;}
     ThorsAnvil_VariantSerializerWithName(ThorsAnvil::Slack::Event::Message, message);
     ThorsAnvil_TypeFieldName(type);
 };

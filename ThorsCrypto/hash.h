@@ -109,11 +109,14 @@ struct Md5
     static constexpr std::size_t digestSize = MD5_DIGEST_LENGTH;
     using DigestStore = DigestStoreBase<MD5_DIGEST_LENGTH>;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     static void hash(DigestStore& src,             DigestStore& dst)   {THOR_MD5(src, MD5_DIGEST_LENGTH, dst);}
     static void hash(std::string_view src,         DigestStore& dst)   {THOR_MD5(reinterpret_cast<Byte const*>(&src[0]), std::size(src), dst);}
     static void hash(std::string const& src,       DigestStore& dst)   {THOR_MD5(reinterpret_cast<Byte const*>(&src[0]), std::size(src), dst);}
     // Use only if you know the destination is large enough!!
     static void hashUnsafe(std::string_view src,   DigestPtr dst)      {THOR_MD5(reinterpret_cast<Byte const*>(&src[0]), std::size(src), dst);}
+#pragma clang diagnostic pop
 };
 struct Sha1
 {

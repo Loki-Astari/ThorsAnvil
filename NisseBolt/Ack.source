@@ -1,0 +1,70 @@
+#include "ThorSerialize/JsonThor.h"
+#include "ThorSerialize/Traits.h"
+
+namespace ThorsAnvil::Nisse::Bolt
+{
+
+
+SlashAck::JsonHeader                    const SlashAck::jsonHeaders;
+ThorsAnvil::Serialize::PrinterConfig    const SlashAck::printerConfig{ThorsAnvil::Serialize::OutputType::Stream};
+
+Ack::Ack(ThorsAnvil::Nisse::HTTP::Response& response)
+    : response(response)
+{}
+
+void Ack::operator()() const
+{
+    response.body(0);
+}
+
+void Ack::operator()(int responseCode) const
+{
+    response.setStatus(responseCode);
+    response.body(0);
+}
+
+struct SlashAckReplyText
+{
+    std::string text;
+};
+ThorsAnvil_MakeTrait(SlashAckReplyText, text);
+
+struct SlashAckReplyBlock
+{
+    ThorsAnvil::Slack::BlockKit::Blocks blocks;
+};
+ThorsAnvil_MakeTrait(SlashAckReplyBlock, blocks);
+
+void SlashAck::operator()(int responseCode, std::string const& message) const
+{
+    response.setStatus(responseCode);
+    response.addHeaders(jsonHeaders);
+    response.body(ThorsAnvil::Nisse::HTTP::Encoding::Chunked)
+        << ThorsAnvil::Serialize::jsonExporter(SlashAckReplyText{message}, printerConfig);
+}
+
+void SlashAck::operator()(int responseCode, ThorsAnvil::Slack::BlockKit::Blocks const& message) const
+{
+    response.setStatus(responseCode);
+    response.addHeaders(jsonHeaders);
+    std::size_t size = ThorsAnvil::Serialize::jsonStreanSize(SlashAckReplyBlock{message});
+    response.body(size)
+        << ThorsAnvil::Serialize::jsonExporter(SlashAckReplyBlock{message}, printerConfig);
+}
+
+void SlashAck::operator()(std::string const& message) const
+{
+    response.addHeaders(jsonHeaders);
+    std::size_t size = ThorsAnvil::Serialize::jsonStreanSize(message);
+    response.body(size)
+        << ThorsAnvil::Serialize::jsonExporter(SlashAckReplyText{message}, printerConfig);
+}
+void SlashAck::operator()(ThorsAnvil::Slack::BlockKit::Blocks const& message) const
+{
+    response.addHeaders(jsonHeaders);
+    std::size_t size = ThorsAnvil::Serialize::jsonStreanSize(SlashAckReplyBlock{message});
+    response.body(size)
+        << ThorsAnvil::Serialize::jsonExporter(SlashAckReplyBlock{message}, printerConfig);
+}
+}
+

@@ -66,7 +66,7 @@ class MugPluginSimple: public MugPlugin
  */
 extern "C"
 {
-    typedef ThorsAnvil::ThorsMug::MugPlugin*(*MugFunc)(char const* config);
+    typedef ThorsAnvil::ThorsMug::MugPlugin*(*MugFunc)(int initdest, char const* config);
 }
 
 }

@@ -499,7 +499,7 @@
 #define LAST_THOR_DECLARE_MEMBER_TYPE(TC, DataType, Forward, Member)
 
 
-#define THOR_MERGE_LABEL_NAME(Pre, P1, P2)        Pre ## P1 ## P2
+#define THOR_MERGE_LABEL_NAME(Pre, P1, P2)        Pre ## P1 ## _ ## P2
 #define THOR_UNIQUE_LABEL(Count, Line)          THOR_MERGE_LABEL_NAME(thorUniqueName, Count, Line)
 #define THOR_UNIQUE_NAME                        THOR_UNIQUE_LABEL(__COUNTER__, __LINE__)
 
