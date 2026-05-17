@@ -10,7 +10,7 @@ namespace ThorsAnvil::Slack
 {
         struct InputValueToString   // Extract a string from a unique ptr (use empty string for null)
         {
-            static std::string constexpr emptyString = "";
+            inline static std::string const emptyString{};
             std::string operator()(std::unique_ptr<std::string> const& ptr)             {if (!ptr) {return emptyString;}return *ptr;}
             std::string operator()(std::unique_ptr<std::time_t> const& ptr)             {if (!ptr) {return emptyString;}return std::to_string(*ptr);}
             std::string operator()(std::unique_ptr<BlockKit::ElOption> const& ptr)      {if (!ptr) {return emptyString;}return ptr->value;}

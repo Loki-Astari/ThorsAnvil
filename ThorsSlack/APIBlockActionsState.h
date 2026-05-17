@@ -162,7 +162,7 @@ struct SlackState
     {
         InputValueToString   converter;
         return converter(getValue<T>(block_id, action_id));
-    };
+    }
 };
 using NullSlackState = std::unique_ptr<SlackState>;
 
