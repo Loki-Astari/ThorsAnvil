@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [10.0.5] - 2026-05-16
+
+### Added
+- NisseBolt library: Slack Bolt-style framework for building Slack bots
+  - Event handlers for all Slack event types
+  - Slash command handling and acknowledgement
+  - View support: `viewPush()`, `viewUpdate()`, modal handling
+  - User action handlers with value extraction
+  - NisseBolt::App framework for bot lifecycle
+
+### Changed
+- Removed ThorsIOUtil dependency from ThorsLogging
+- Updated build tools and Makefile structure
+
 ## [9.1.14] -
 - Improve build tools.
 - Add install scripts for CMake files.
