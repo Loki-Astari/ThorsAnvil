@@ -5,6 +5,7 @@
 #include "API.h"
 #include "SlackBlockKit.h"
 #include "APIBlockActionsState.h"
+#include "APIViewsInfo.h"
 #include <string>
 #include <map>
 #include <vector>

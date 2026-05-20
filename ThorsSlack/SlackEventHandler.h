@@ -5,7 +5,9 @@
 #include "EventCallbackAppMentioned.h"
 #include "ThorSerialize/JsonThor.h"
 #include "ThorsSlackConfig.h"
+#include "SlackClient.h"
 #include "APIViews.h"
+#include "APIChatMessage.h"
 #include "APIBlockActions.h"
 #include "Event.h"
 #include "EventCallback.h"
@@ -97,7 +99,8 @@ struct ActionHandlerRequest
     std::string                                 value;
 };
 using ActionHandler         = std::function<void(ActionHandlerRequest const&)>;
-using ActionHandlerMap      = std::map<std::string, ActionHandler>;
+using FilterHandler         = std::pair<std::string, ActionHandler>;
+using ActionHandlerMap      = std::map<std::string, FilterHandler>;
 
 struct ViewHandlerRequest
 {
@@ -125,6 +128,7 @@ using ViewHandlerMap        = std::map<std::string, View>;
 
 class SlackEventHandler
 {
+        SlackClient&    client;
         std::string     slackSecret;
 
         // For handling Events (all of them)
@@ -142,7 +146,7 @@ class SlackEventHandler
         ViewHandlerMap&                 viewHandlerMap;
 
     public:
-        SlackEventHandler(std::string_view slackSecret, EventHandlerMap const& eventHandlerMap, SlashCommandHandlerMap const& slashCommandHandlerMap, ActionHandlerMap const& actionHandlerMap, ViewHandlerMap& viewHandlerMap);
+        SlackEventHandler(SlackClient& client, std::string_view slackSecret, EventHandlerMap const& eventHandlerMap, SlashCommandHandlerMap const& slashCommandHandlerMap, ActionHandlerMap const& actionHandlerMap, ViewHandlerMap& viewHandlerMap);
 
         // Method to validate Slack message comes from slack.
         bool validateRequest(Request const& request);
@@ -197,6 +201,10 @@ class SlackEventHandler
             private:
                 void handleViewAction(API::Views::ViewSubmission const&, ViewHandlerMap::const_iterator)    {}
                 void handleViewAction(API::Views::ViewClosed const&, ViewHandlerMap::const_iterator);
+
+                // Need some extra work to find the change of state in a checkbox.
+                std::string getCheckBoxValue(API::BlockActions const& userAction, API::SlackAction const& action);
+                BlockKit::VecElOption& getInitialOptions(BlockKit::Block& block, std::string const& action_id);
         };
 
         // Simple Utility helpers.
@@ -231,8 +239,9 @@ class SlackEventHandler
 };
 
 inline
-SlackEventHandler::SlackEventHandler(std::string_view slackSecret, EventHandlerMap const& eventHandlerMap, SlashCommandHandlerMap const& slashCommandHandlerMap, ActionHandlerMap const& actionHandlerMap, ViewHandlerMap& viewHandlerMap)
-    : slackSecret(slackSecret)
+SlackEventHandler::SlackEventHandler(SlackClient& client, std::string_view slackSecret, EventHandlerMap const& eventHandlerMap, SlashCommandHandlerMap const& slashCommandHandlerMap, ActionHandlerMap const& actionHandlerMap, ViewHandlerMap& viewHandlerMap)
+    : client{client}
+    , slackSecret(slackSecret)
     , eventHandlerMap{eventHandlerMap}
     , slashCommandHandlerMap{slashCommandHandlerMap}
     , actionHandlerMap{actionHandlerMap}
@@ -424,8 +433,13 @@ void SlackEventHandler::UserActionCallback::operator()(API::BlockActions const& 
         return;
     }
 
+    std::string const&          filter      = find->second.first;
+    if (!(filter == "" || filter == action.block_id)) {
+        return;
+    }
+
     std::string const&          type        = action.type;
-    ActionHandler const&        handler     = find->second;
+    ActionHandler const&        handler     = find->second.second;
     InputValueToString          ptr2String;
 
     if (type == "datepicker") {
@@ -438,7 +452,7 @@ void SlackEventHandler::UserActionCallback::operator()(API::BlockActions const& 
         handler({request, response, userAction, ptr2String(action.selected_time.value())});
     }
     else if (type == "checkboxes") {
-        handler({request, response, userAction, ptr2String(action.selected_options.value())});
+        handler({request, response, userAction, getCheckBoxValue(userAction, action)});
     }
     else if (type == "radio_buttons") {
         handler({request, response, userAction, ptr2String(action.selected_option.value())});
@@ -460,6 +474,129 @@ void SlackEventHandler::UserActionCallback::operator()(API::BlockActions const& 
     }
 }
 
+inline
+std::string SlackEventHandler::UserActionCallback::getCheckBoxValue(API::BlockActions const& userAction, API::SlackAction const& action)
+{
+    std::unique_ptr<BlockKit::VecElOption> const& ptr2Value = action.selected_options.value();
+    if (!ptr2Value) {
+        ThorsLogError("TodoSlackEventHandler", "handleActionsCheckBox", "XX");
+        return "";
+    }
+    BlockKit::VecElOption const& values = *ptr2Value;
+
+    BK::Blocks blocks = userAction.view.has_value()
+                                ? userAction.view.value().blocks
+                                : userAction.message.value().blocks;
+
+    // Make a copy of the blocks.
+    // We are going to modify this with the new state and update the UI.
+    // This will make sure that the new state matches what the user has clicked.
+
+    // Extract the currently selected options into a set.
+    std::set<std::string>   currentState;
+    for (auto const& option: values) {
+        currentState.insert(option.value);
+    }
+
+    // Extract the previously selected options
+    // We need to search through the event to go find the exact info.
+    std::set<std::string>   initState;
+    std::string const& blockId = userAction.actions.value()[0].block_id;
+    // We are searching fro the block that contains the set of checkboxes.
+    for (auto& block : blocks) {
+        std::string const& theBlockId = std::visit(BlockIdGetter{}, block);
+        if (theBlockId == blockId) {
+            // The initOptions is the value we need to update in the UI.
+            // We need to find this to update it but also extract the initial state.
+            BlockKit::VecElOption& initOption = getInitialOptions(block, userAction.actions.value()[0].action_id);
+
+            // Get the initialy selected options into a set.
+            for (auto const& option: initOption) {
+                initState.insert(option.value);
+            }
+            // Updating the init options.
+            // This will we will write back to the UI below.
+            initOption = values;
+        }
+    }
+    if (userAction.view.has_value()) {
+        API::Views::ViewsInfo const& view = userAction.view.value();
+        plugin.client.validateMessage(ThorsAnvil::Slack::API::Views::Update{.view = {
+                                                                                     .title = view.title,
+                                                                                     .blocks = blocks,
+                                                                                     .close = *view.close,
+                                                                                     .submit = *view.submit,
+                                                                                     .private_metadata = view.private_metadata,
+                                                                                     .callback_id = view.callback_id,
+                                                                                     .clear_on_close = view.clear_on_close,
+                                                                                     .notify_on_close = view.notify_on_close,
+                                                                                     .external_id = view.external_id,
+                                                                                     .submit_disabled = view.submit_disabled
+                                                                                    },
+                                                                            .view_id = userAction.view.value().id
+                                                                           });
+    }
+    else {
+        plugin.client.validateMessage(ThorsAnvil::Slack::API::Chat::Update{.channel = userAction.container.channel_id, .ts = userAction.container.message_ts, .blocks = blocks});
+    }
+
+    // Using the current state and the initial state.
+    // We can now discover which checkbox the user clicked.
+    // A lot of work thanks slack.
+    std::set<std::string>   turnedOn;
+    std::set<std::string>   turnedOff;
+
+    std::set_difference(std::begin(currentState), std::end(currentState), std::begin(initState), std::end(initState),
+                        std::inserter(turnedOn, turnedOn.begin()));
+    std::set_difference(std::begin(initState), std::end(initState), std::begin(currentState), std::end(currentState),
+                        std::inserter(turnedOff, turnedOff.begin()));
+
+
+    // There should only be one change.
+    if (turnedOn.size() + turnedOff.size() != 1) {
+        ThorsLogError("TodoSlackEventHandler", "handleActionsCheckBox", "Change in state is not consistent: ", turnedOn.size(), " ", turnedOff.size());
+    }
+    else {
+        if (turnedOn.size() == 1) {
+            return std::string("+") + (*turnedOn.begin());
+        }
+        if (turnedOff.size() == 1) {
+            return std::string("-") + (*turnedOff.begin());
+        }
+    }
+    return "";
+}
+
+inline
+BlockKit::VecElOption&  SlackEventHandler::UserActionCallback::getInitialOptions(BlockKit::Block& block, std::string const& action_id)
+{
+    static BlockKit::VecElOption nullOption;
+    nullOption.clear();
+
+    if (holds_alternative<BlockKit::Input>(block)) {
+        BlockKit::Input& inputBlock = std::get<BlockKit::Input>(block);
+        BlockKit::Checkboxes& inputCheckBox = std::get<BlockKit::Checkboxes>(inputBlock.element);
+        if (!inputCheckBox.initial_options.has_value()) {
+            inputCheckBox.initial_options = BlockKit::VecElOption{};
+        }
+        return inputCheckBox.initial_options.value();
+    }
+    else if (holds_alternative<BlockKit::Actions>(block)) {
+        BlockKit::Actions& actionsBlock = std::get<BlockKit::Actions>(block);
+        std::vector<BlockKit::ElActive>& actionBlockElements = actionsBlock.elements;
+        for (auto& element: actionBlockElements) {
+            std::string const& actionId = std::visit(ActionIdGetter{}, element);
+            if (action_id == actionId) {
+                BlockKit::Checkboxes& inputCheckBox = std::get<BlockKit::Checkboxes>(element);
+                if (!inputCheckBox.initial_options.has_value()) {
+                    inputCheckBox.initial_options = BlockKit::VecElOption{};
+                }
+                return inputCheckBox.initial_options.value();
+            }
+        }
+    }
+    return nullOption;
+}
 
 }
 

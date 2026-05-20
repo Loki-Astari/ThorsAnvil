@@ -117,7 +117,7 @@ class SlackClient
                             botId = result.user_id;
                         });
         }
-        std::string const& getBotId()   {return botId;}
+        std::string const& getBotId()   const {return botId;}
 
         template<typename T>
         void  sendMessage(T const& message, SuccFunc<typename T::Reply>&& succ = [](typename T::Reply&&){}, FailFunc&& fail = [](API::Error&&){}) const
@@ -143,7 +143,7 @@ class SlackClient
          * You should not be using this unless you are doing some debugging or setting up a new response type
          */
         template<typename T>
-        void  validateMessage(T const& message)
+        void  validateMessage(T const& message) const
         {
             SlackStream             stream;
             sendMessageData(message, stream);
@@ -158,7 +158,7 @@ class SlackClient
             std::cerr << "DONE\n\n";
         }
         template<typename T>
-        bool  sendMessage(T const& message, typename T::Reply& result, bool dumpError = false)
+        bool  sendMessage(T const& message, typename T::Reply& result, bool dumpError = false) const
         {
             bool good = true;
             sendMessage(message, [&result](typename T::Reply&& value){result = std::move(value);}, [&dumpError,&good](API::Error&& value){good = false;if (dumpError){/*DON'T remove*/std::cerr << ThorsAnvil::Serialize::jsonExporter(value) << "\n";}});
