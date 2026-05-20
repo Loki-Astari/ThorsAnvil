@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [10.0.5] - 2026-05-16
+## [10.1.1] - 2026-05-16
+
+### Bug Fix
+- minor bug fixes, needed to support existing apps.
+
+## [10.0.6] - 2026-05-16
 
 ### Added
 - NisseBolt library: Slack Bolt-style framework for building Slack bots
