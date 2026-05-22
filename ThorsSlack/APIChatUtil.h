@@ -4,7 +4,7 @@
 
 #include "ThorsSlackConfig.h"
 #include "APIChat.h"
-#include "SlackBlockKit.h"
+#include "BlockKit.h"
 #include <map>
 
 namespace BK = ThorsAnvil::Slack::BlockKit;

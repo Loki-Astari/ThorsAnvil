@@ -3,7 +3,7 @@
 
 #include "ThorsSlackConfig.h"
 #include "API.h"
-#include "SlackBlockKit.h"
+#include "BlockKit.h"
 #include "Util.h"
 #include <string>
 #include <memory>
@@ -132,6 +132,21 @@ struct URLTextInputValue
 // This set of variants should be kept in sync with the type InputElement.
 using InputValue = std::variant<CheckboxesValue, DatePickerValue, DateTimePickerValue, RadioButtonsValue, StaticSelectValue, TimePickerValue, EmailTextInputValue, NumberInputValue, PlainTextInputValue, /*RichTextInputValue,*/ URLTextInputValue>;
 
+struct InputValueGetter
+{
+    InputValueToString  toString;
+    std::string operator()(CheckboxesValue const& value)        {return toString(value.selected_options);}
+    std::string operator()(DatePickerValue const& value)        {return toString(value.selected_date);}
+    std::string operator()(DateTimePickerValue const& value)    {return toString(value.selected_date_time);}
+    std::string operator()(RadioButtonsValue const& value)      {return toString(value.selected_option);}
+    std::string operator()(StaticSelectValue const& value)      {return toString(value.selected_option);}
+    std::string operator()(TimePickerValue const& value)        {return toString(value.selected_time);}
+    std::string operator()(EmailTextInputValue const& value)    {return toString(value.initial_value);}
+    std::string operator()(NumberInputValue const& value)       {return toString(value.initial_value);}
+    std::string operator()(PlainTextInputValue const& value)    {return toString(value.value);}
+    // std::string operator()(RichTextInputValue const& value)     {return toString(value.);}
+    std::string operator()(URLTextInputValue const& value)      {return toString(value.initial_value);}
+};
 
 // action_id of the "InputElement" object
 // Note The "InputElement" is part of the "Input" object.
@@ -145,23 +160,40 @@ struct SlackState
     template<typename T>
     typename T::ValueReturnType const& getValue(std::string const& block_id, std::string const& action_id) const
     {
-        auto findBlock = values.find(block_id);
-        if (findBlock != std::end(values)) {
-            auto const& actionMap = findBlock->second;
-            auto findAction = actionMap.find(action_id);
-            if (findAction != std::end(actionMap)) {
-                return std::get<typename T::ValueStorageType>(findAction->second).getValue();
-            }
-        }
         static typename T::ValueReturnType nullOption;
-        return nullOption;
+
+        auto findBlock = values.find(block_id);
+        if (findBlock == std::end(values)) {
+            return nullOption;
+        }
+
+        auto const& actionMap = findBlock->second;
+        auto findAction = actionMap.find(action_id);
+        if (findAction == std::end(actionMap)) {
+            return nullOption;
+        }
+
+        return std::get<typename T::ValueStorageType>(findAction->second).getValue();
     }
 
-    template<typename T>
     std::string getStringValue(std::string const& block_id, std::string const& action_id) const
     {
-        InputValueToString   converter;
-        return converter(getValue<T>(block_id, action_id));
+        //InputValueToString   converter;
+        //return converter(getValue<T>(block_id, action_id));
+
+        auto findBlock = values.find(block_id);
+        if (findBlock == std::end(values)) {
+            return "";
+        }
+
+        auto const& actionMap = findBlock->second;
+        auto findAction = actionMap.find(action_id);
+        if (findAction == std::end(actionMap)) {
+            return "";
+        }
+
+        // return std::get<typename T::ValueStorageType>(findAction->second).getValue();
+        return std::visit(InputValueGetter{}, findAction->second);
     }
 };
 using NullSlackState = std::unique_ptr<SlackState>;

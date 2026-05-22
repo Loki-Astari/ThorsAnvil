@@ -4,7 +4,7 @@
 #include "ThorsSlackConfig.h"
 #include <string>
 #include <memory>
-#include "SlackBlockKit.h"
+#include "BlockKit.h"
 
 namespace ThorsAnvil::Slack
 {
