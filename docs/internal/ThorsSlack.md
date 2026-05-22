@@ -21,7 +21,7 @@ ThorsSlack is a header-heavy library that provides type-safe C++ representations
 │                 User Application                  │
 ├──────────────────────────────────────────────────┤
 │                  ThorsSlack                       │
-│   SlackClient · SlackEventHandler · API types     │
+│      Client · EventHandler · API types            │
 ├──────────────────────────────────────────────────┤
 │   ThorsSerializer (JSON) · NisseHTTP (webhooks)   │
 └──────────────────────────────────────────────────┘
@@ -35,9 +35,9 @@ ThorsSlack is a header-heavy library that provides type-safe C++ representations
 
 | File | Purpose |
 |------|---------|
-| `SlackClient.h` | HTTP client for making REST API calls to Slack |
-| `SlackStream.h` | Stream-based communication with Slack APIs |
-| `SlackEventHandler.h` | Webhook event handler for incoming Slack events |
+| `Client.h` | HTTP client for making REST API calls to Slack |
+| `Stream.h` | Stream-based communication with Slack APIs |
+| `EventHandler.h` | Webhook event handler for incoming Slack events |
 | `SlashCommand.h` | Slash command request/response types |
 
 ### REST API Types
@@ -54,7 +54,6 @@ Each `API*.h` file defines request and response types for a group of Slack API e
 | `APIChatStream.h` | Stream-based chat operations |
 | `APIChatUtil.h` | Chat utility types |
 | `APIConversationsHistory.h` | `conversations.history` |
-| `APIDialog.h` | Dialog interactions |
 | `APIPins.h` | `pins.add`, `pins.remove`, `pins.list` |
 | `APIReactions.h` | `reactions.add`, `reactions.remove`, `reactions.get`, `reactions.list` |
 | `APIStar.h` | `stars.add`, `stars.remove`, `stars.list` |
@@ -67,18 +66,18 @@ Each `API*.h` file defines request and response types for a group of Slack API e
 |------|------------|
 | `Event.h` | Base event types and discriminators |
 | `EventCallback.h` | Event callback wrapper |
-| `EventCallbackAppMentioned.h` | App mention events |
-| `EventCallbackMessage.h` | Message events |
-| `EventCallbackPin.h` | Pin add/remove events |
-| `EventCallbackReaction.h` | Reaction add/remove events |
-| `EventCallbackStar.h` | Star add/remove events |
+| `EventAppMentioned.h` | App mention events |
+| `EventMessage.h` | Message events |
+| `EventsPin.h` | Pin add/remove events |
+| `EventsReaction.h` | Reaction add/remove events |
+| `EventsStar.h` | Star add/remove events |
 | `EventURLVerification.h` | URL verification challenge (required by Slack) |
 
 ### UI Types
 
 | File | Purpose |
 |------|---------|
-| `SlackBlockKit.h` | Block Kit UI elements (sections, actions, inputs, etc.) |
+| `BlockKit.h` | Block Kit UI elements (sections, actions, inputs, etc.) |
 
 ---
 
@@ -109,7 +108,7 @@ Slack sends events via HTTP POST webhooks. The event handling uses polymorphic d
 1. Incoming JSON contains a `"type"` field to identify the event type.
 2. ThorsSerializer's polymorphic deserialization reads the type field.
 3. The correct C++ event type is instantiated and populated.
-4. The `SlackEventHandler` dispatches to the appropriate callback.
+4. The `EventHandler` dispatches to the appropriate callback.
 
 ### URL Verification
 
@@ -119,7 +118,7 @@ Slack requires URL verification when setting up event subscriptions. `EventURLVe
 
 ---
 
-## SlackClient
+## Client
 
 Manages authentication tokens and HTTP communication with Slack's API:
 - Constructs HTTP requests with proper headers (`Authorization: Bearer <token>`)
@@ -137,7 +136,7 @@ ThorsSlack is designed to run as a Mug plugin. A typical Slack bot:
 2. Registers POST routes for Slack webhook URLs
 3. In the handler, deserializes the Slack event using ThorsSerializer
 4. Processes the event (e.g., responds to messages)
-5. Uses `SlackClient` to make outbound API calls
+5. Uses `Client` to make outbound API calls
 
 ---
 

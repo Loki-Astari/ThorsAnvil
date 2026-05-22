@@ -35,13 +35,13 @@ Detailed implementation of the Bolt-style Slack bot framework, covering the stan
 │   NBServer · App · Ack · Say · Respond · View     │
 ├──────────────────────────────────────────────────┤
 │                   ThorsSlack                      │
-│   SlackClient · SlackEventHandler · BlockKit      │
+│      Client · EventHandler · BlockKit             │
 ├──────────────────────────────────────────────────┤
 │          NisseHTTP · NisseServer · ThorsSocket     │
 └──────────────────────────────────────────────────┘
 ```
 
-NisseBolt sits between the user's bot logic and the ThorsSlack/Nisse stack. It provides Bolt-style handler registration (similar to Slack's Node.js Bolt framework) while delegating protocol parsing to `SlackEventHandler` and async I/O to `NisseServer`.
+NisseBolt sits between the user's bot logic and the ThorsSlack/Nisse stack. It provides Bolt-style handler registration (similar to Slack's Node.js Bolt framework) while delegating protocol parsing to `EventHandler` and async I/O to `NisseServer`.
 
 ---
 
@@ -49,7 +49,7 @@ NisseBolt sits between the user's bot logic and the ThorsSlack/Nisse stack. It p
 
 ### 1. Standalone Server (`NB::NBServer`)
 
-A self-contained executable. `NBServer` inherits from both `NisseServer` (event loop) and `SlackEventHandler` (Slack protocol). The user constructs it with an `NBConfig`, registers handlers, and calls `run()`.
+A self-contained executable. `NBServer` inherits from both `NisseServer` (event loop) and `EventHandler` (Slack protocol). The user constructs it with an `NBConfig`, registers handlers, and calls `run()`.
 
 ### 2. Mug Plugin (`NisseBolt::App`)
 
@@ -78,28 +78,28 @@ Serializable configuration struct. Deserialized from JSON using `ThorsAnvil_Make
 
 **Files:** `NB/NBServer.h`, `NB/NBServer.cpp`
 
-Dual-inherits `NisseServer` and `Slack::SlackEventHandler`.
+Dual-inherits `NisseServer` and `Slack::EventHandler`.
 
 **Construction sequence:**
 1. Initializes `NisseServer` with 4 worker threads.
-2. Initializes `SlackEventHandler` with the signing secret.
-3. Creates a `SlackClient` with the bot token.
+2. Initializes `EventHandler` with the signing secret.
+3. Creates a `Client` with the bot token.
 4. Calls `registerRoutes()` to mount the four Slack endpoints on the internal `HTTPHandler`.
 5. If `port != 0`, resolves TLS certificates and calls `listen()`.
 
 **Route registration (`registerRoutes`):**
 
-All routes use the same `HTTPValidate` callback that delegates to `SlackEventHandler::validateRequest()` for HMAC signature verification.
+All routes use the same `HTTPValidate` callback that delegates to `EventHandler::validateRequest()` for HMAC signature verification.
 
 | Route | Handler |
 |-------|---------|
-| `POST {basePath}/events` | `SlackEventHandler::handleEvent()` |
-| `POST {basePath}/commands` | `SlackEventHandler::handleSlashCommand()` |
-| `POST {basePath}/actions` | `SlackEventHandler::handleUserActions()` |
+| `POST {basePath}/events` | `EventHandler::handleEvent()` |
+| `POST {basePath}/commands` | `EventHandler::handleSlashCommand()` |
+| `POST {basePath}/actions` | `EventHandler::handleUserActions()` |
 
 **Slash command override:**
 
-`NBServer` overrides `SlackEventHandler::handleSlashWithCommand()` to inject the Bolt dispatch layer:
+`NBServer` overrides `EventHandler::handleSlashWithCommand()` to inject the Bolt dispatch layer:
 1. Looks up the command in `commandHandlers`.
 2. Runs middleware chain; short-circuits on `false`.
 3. Constructs `Ack`, `Respond`, and `Context` objects.
@@ -141,21 +141,22 @@ When `isRegex` is `false`, dispatch checks `event.text.find(substring) != npos`.
 
 | Field | Description |
 |-------|-------------|
-| `slot` | URL prefix for this bot (unique per Mug instance) |
 | `botToken` | Slack bot token |
 | `userToken` | Slack user token |
 | `signingSecret` | HMAC signing secret |
+
+The `slot` (URL prefix) is now passed as a constructor parameter to `App` rather than being part of the config.
 
 ### App
 
 **Files:** `NisseBolt/App.h`, `NisseBolt/App.cpp`
 
-Inherits from `MugPluginSimple`. Owns a `SlackClient`, `SlackEventHandler`, and handler maps for events, slash commands, actions, and views.
+Inherits from `MugPluginSimple`. Owns a `Client`, `EventHandler`, and handler maps for events, slash commands, actions, and views.
 
 **Construction:**
 1. Stores the `slot` for URL prefix routing.
-2. Creates `SlackClient` with bot and user tokens.
-3. Creates `SlackEventHandler` with the signing secret and all handler maps.
+2. Creates `Client` with bot and user tokens.
+3. Creates `EventHandler` with the signing secret and all handler maps.
 4. Calls `addEventHandlers()` to register all known Slack event types.
 
 **`getAction()` returns three routes:**
@@ -189,7 +190,7 @@ Multiple bots can coexist because each occupies a unique `slot` prefix.
 ### Event Messages (App mode)
 
 ```
-Slack webhook POST → SlackEventHandler::handleEvent()
+Slack webhook POST → EventHandler::handleEvent()
   → eventHandlerMap[typeName] → App::handleEventMessage()
     → for each (filter, handler) in messageHandlers:
         if filter(message):
@@ -199,7 +200,7 @@ Slack webhook POST → SlackEventHandler::handleEvent()
 ### Slash Commands (NBServer mode)
 
 ```
-Slack POST /commands → SlackEventHandler::handleSlashCommand()
+Slack POST /commands → EventHandler::handleSlashCommand()
   → NBServer::handleSlashWithCommand() [override]
     → middleware chain
     → commandHandlers[command.command](command, ack, respond, ctx)
@@ -226,11 +227,11 @@ using ErrorHandler    = function<void(exception const&, Context&)>;
 
 ```cpp
 using Filter              = function<bool(Event::Message const&)>;
-using MessageHandler      = function<void(Event::Message const&, Say const&)>;
-using SlashCommandHandler = function<void(SlashAck const&, Response const&, SlashCommand const&)>;
-using ActionHandler       = function<void(Ack const&, Response const&, API::BlockActions const&, string const& value)>;
-using ViewSubmitHandler   = function<void(Ack const&, Response const&, API::Views::ViewSubmission const&)>;
-using ViewClosedHandler   = function<void(Ack const&, Response const&, API::Views::ViewClosed const&)>;
+using MessageRunner       = EventRunner<Event::Message>;
+using SlashCommandRunner  = function<void(Ack const&, Response const&, SlashCommand const&)>;
+using ActionRunner        = function<void(Ack const&, Response const&, API::BlockActions const&, string const& value)>;
+using ViewSubmitRunner    = function<void(Ack const&, Response const&, API::Views::ViewSubmission const&)>;
+using ViewClosedRunner    = function<void(Ack const&, Response const&, API::Views::ViewClosed const&)>;
 ```
 
 ---
@@ -241,16 +242,16 @@ NisseBolt delegates all Slack protocol concerns to the ThorsSlack library:
 
 | Concern | ThorsSlack Class |
 |---------|-----------------|
-| HMAC request verification | `SlackEventHandler::validateRequest()` |
-| Event payload parsing & dispatch | `SlackEventHandler::handleEvent()` |
-| Slash command parsing | `SlackEventHandler::handleSlashCommand()` |
-| Action/view interaction parsing | `SlackEventHandler::handleUserActions()` |
-| REST API calls (chat.postMessage, views.open, etc.) | `SlackClient::sendMessage()` |
-| Block Kit UI types | `SlackBlockKit.h` |
+| HMAC request verification | `EventHandler::validateRequest()` |
+| Event payload parsing & dispatch | `EventHandler::handleEvent()` |
+| Slash command parsing | `EventHandler::handleSlashCommand()` |
+| Action/view interaction parsing | `EventHandler::handleUserActions()` |
+| REST API calls (chat.postMessage, views.open, etc.) | `Client::sendMessage()` |
+| Block Kit UI types | `BlockKit.h` |
 
 ### Say Implementation
 
-`Say` wraps `SlackClient::sendMessage()` to send `chat.postMessage` calls. It auto-populates `channel` and `thread_ts` from the originating event's `Where` struct. Supports plain text and Block Kit messages.
+`Say` wraps `Client::sendMessage()` to send `chat.postMessage` calls. It auto-populates `channel` and `thread_ts` from the originating event's `Where` struct. Supports plain text and Block Kit messages.
 
 ### Ack and SlashAck
 
@@ -258,7 +259,7 @@ NisseBolt delegates all Slack protocol concerns to the ThorsSlack library:
 
 ### View Management (App mode)
 
-`App::viewOpen()` and `App::viewPush()` call `SlackClient::sendMessage()` with `Views::Open` / `Views::Push` payloads and register the returned `view.id` in `viewHandlerMap` for subsequent `view_submission` events. `viewPush()` also tracks `previous_view_id` for view stack navigation.
+`App::viewOpen()` and `App::viewPush()` call `Client::sendMessage()` with `Views::Open` / `Views::Push` payloads and register the returned `view.id` in `viewHandlerMap` for subsequent `view_submission` events. `viewPush()` also tracks `previous_view_id` for view stack navigation.
 
 ---
 
@@ -281,8 +282,8 @@ NisseBolt delegates all Slack protocol concerns to the ThorsSlack library:
 | `App.h` | `App` class, `mugCreateBoltInstance()` template, `THORS_ANVIL_NISSE_BOLT_SERVER_INIT` macro |
 | `App.cpp` | Construction, event handler registration, message/command/action/view dispatch |
 | `AppConfig.h` | `AppConfig` struct with ThorsSerializer traits |
-| `Handlers.h` | Type aliases for all handler function signatures, `AnyEventHandler` variant |
-| `Say.h` / `Say.cpp` | `Say` class: sends messages via `SlackClient` |
+| `Runners.h` | Type aliases for all runner function signatures, `AnyEventRunner` variant |
+| `Say.h` / `Say.cpp` | `Say` class: sends messages via `Client` |
 | `Ack.h` / `Ack.cpp` | `Ack` and `SlashAck`: HTTP response acknowledgement |
 | `Response.h` | `Response` placeholder struct |
 | `View.h` / `View.cpp` | `View` class: modal display + submit/close handlers |
@@ -292,9 +293,9 @@ NisseBolt delegates all Slack protocol concerns to the ThorsSlack library:
 
 | File | Purpose |
 |------|---------|
-| `SlackClient.h` | HTTP client for Slack REST API calls |
-| `SlackEventHandler.h` | HMAC verification, event/command/action dispatch |
-| `SlackBlockKit.h` | Block Kit UI element types |
+| `Client.h` | HTTP client for Slack REST API calls |
+| `EventHandler.h` | HMAC verification, event/command/action dispatch |
+| `BlockKit.h` | Block Kit UI element types |
 | `SlashCommand.h` | Slash command payload types |
 | `API*.h` | Typed Slack API request/response structs |
 | `Event*.h` | Typed event callback payload structs |

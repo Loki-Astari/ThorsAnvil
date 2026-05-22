@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [10.2.1] - 2026-05-22
+
+### Fixed
+- Fixed build for Linux.
+  - Magic_Enum specified as dependency in Makefile.
+
+## [10.2.0] - 2026-05-21
+
+### Breaking Changes (ThorsSlack)
+- Removed `Slack` prefix from header files already in the `Slack` namespace:
+  - `SlackClient.h` → `Client.h`
+  - `SlackEventHandler.h` → `EventHandler.h`
+  - `SlackBlockKit.h` → `BlockKit.h`
+- Renamed `EventCallback*.h` headers to shorter, clearer names:
+  - `EventCallbackMessage.h` → `EventMessage.h`
+  - `EventCallbackAppMentioned.h` → `EventAppMentioned.h`
+  - `EventCallbackChannel.h` → `EventsChannel.h`
+  - And similarly for all other `EventCallback*` headers
+- Removed `APIDialog.h` (superseded by Views API)
+
+### Breaking Changes (NisseBolt)
+- Renamed `Handlers.h` → `Runners.h`; handler type aliases renamed accordingly (e.g. `MessageHandler` → `MessageRunner`, `SlashCommandHandler` → `SlashCommandRunner`)
+
+### Improved
+- Views can now be constructed with Action Handlers directly
+- Moved to value semantics for handler registration
+- Simplified event handler addition
+- Improved CheckBoxes handling
+- Fixed const correctness throughout
+- Optimized binary serialization for `std::map`
+- Simplified `getString()` from input values
+
 ## [10.1.1] - 2026-05-16
 
 ### Bug Fix

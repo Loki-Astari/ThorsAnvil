@@ -123,7 +123,7 @@ If `certRoot` is empty, the server listens on plain HTTP. If `port` is 0, no soc
 
 ## NBServer
 
-The central server class. Inherits from `NisseServer` (async event loop) and `SlackEventHandler` (request signing and payload parsing).
+The central server class. Inherits from `NisseServer` (async event loop) and `EventHandler` (request signing and payload parsing).
 
 ### Construction
 
@@ -322,7 +322,7 @@ respond("Deployment complete.");
 Per-request context providing access to the Slack client and request metadata:
 
 ```cpp
-ctx.client();      // SlackClient for making API calls
+ctx.client();      // Client for making API calls
 ctx.teamId();      // team_id from the request
 ctx.userId();      // user_id from the request
 ctx.channelId();   // channel_id from the request
@@ -391,7 +391,6 @@ The `THORS_ANVIL_NISSE_BOLT_SERVER_INIT` macro exports the `mugCreateInstance` f
 
 ```cpp
 struct AppConfig {
-    std::string slot;           // URL path prefix for this bot's routes
     std::string botToken;       // Slack bot token
     std::string userToken;      // Slack user token
     std::string signingSecret;  // Slack signing secret

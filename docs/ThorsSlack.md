@@ -16,11 +16,11 @@ Type-safe C++ API for the Slack platform. Provides strongly-typed interfaces for
 
 | Header | Purpose |
 |--------|---------|
-| `ThorsSlack/SlackClient.h` | HTTP client for Slack REST API calls |
-| `ThorsSlack/SlackStream.h` | Stream-based Slack communication |
-| `ThorsSlack/SlackEventHandler.h` | Webhook event handler |
+| `ThorsSlack/Client.h` | HTTP client for Slack REST API calls |
+| `ThorsSlack/Stream.h` | Stream-based Slack communication |
+| `ThorsSlack/EventHandler.h` | Webhook event handler |
 | `ThorsSlack/SlashCommand.h` | Slash command support |
-| `ThorsSlack/SlackBlockKit.h` | Block Kit UI elements |
+| `ThorsSlack/BlockKit.h` | Block Kit UI elements |
 | `ThorsSlack/API.h` | Common API types |
 
 ---
@@ -38,7 +38,6 @@ ThorsSlack provides type-safe wrappers for Slack API endpoints. Each module is a
 | `APIChatStream.h` | Stream-based chat |
 | `APIChatUtil.h` | Chat utility types |
 | `APIConversationsHistory.h` | `conversations.history` |
-| `APIDialog.h` | Dialog interactions |
 | `APIPins.h` | `pins.add`, `pins.remove`, `pins.list` |
 | `APIReactions.h` | `reactions.add`, `reactions.remove`, `reactions.get`, `reactions.list` |
 | `APIStar.h` | `stars.add`, `stars.remove`, `stars.list` |
@@ -55,18 +54,18 @@ Handle incoming Slack events via webhook:
 |--------|------------|
 | `Event.h` | Base event types |
 | `EventCallback.h` | Event callback wrapper |
-| `EventCallbackAppMentioned.h` | App mention events |
-| `EventCallbackMessage.h` | Message events |
-| `EventCallbackPin.h` | Pin events |
-| `EventCallbackReaction.h` | Reaction events |
-| `EventCallbackStar.h` | Star events |
+| `EventAppMentioned.h` | App mention events |
+| `EventMessage.h` | Message events |
+| `EventsPin.h` | Pin events |
+| `EventsReaction.h` | Reaction events |
+| `EventsStar.h` | Star events |
 | `EventURLVerification.h` | URL verification challenge |
 
 ---
 
 ## Block Kit
 
-`SlackBlockKit.h` provides C++ types for Slack's Block Kit UI framework, allowing you to build rich message layouts with type safety.
+`BlockKit.h` provides C++ types for Slack's Block Kit UI framework, allowing you to build rich message layouts with type safety.
 
 ---
 
@@ -76,8 +75,8 @@ ThorsSlack is designed to be used as a Mug plugin. Create a `MugPlugin` that use
 
 ```cpp
 #include "ThorsMug/MugPlugin.h"
-#include "ThorsSlack/SlackEventHandler.h"
-#include "ThorsSlack/EventCallbackMessage.h"
+#include "ThorsSlack/EventHandler.h"
+#include "ThorsSlack/EventMessage.h"
 
 class SlackPlugin : public ThorsAnvil::ThorsMug::MugPluginSimple
 {
