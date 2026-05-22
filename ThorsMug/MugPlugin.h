@@ -6,6 +6,7 @@
 #include "NisseHTTP/Request.h"
 #include "NisseHTTP/Response.h"
 #include "NisseHTTP/HTTPHandler.h"
+#include "ThorSerialize/JsonThor.h"
 
 #include <string>
 #include <vector>
@@ -54,6 +55,25 @@ class MugPluginSimple: public MugPlugin
         }
 
         virtual std::vector<Action> getAction() = 0;
+
+    private:
+        // Friend declaration so mugInterface can register robots.
+        template<typename Server, typename ServerConfig>
+        friend ThorsAnvil::ThorsMug::MugPlugin* mugCreateSimpleInstance(int init, char const* configStr);
+
+        // Addig and removing Bots at runtime.
+        template<typename Server, typename ServerConfig>
+        static ThorsAnvil::ThorsMug::MugPlugin* add(ServerConfig&& serverConfig);
+        template<typename Server, typename ServerConfig>
+        static ThorsAnvil::ThorsMug::MugPlugin* remomve(ServerConfig&& serverConfig);
+
+        // Currently active Bots.
+        static std::map<std::string, std::unique_ptr<MugPluginSimple>>& getServerInfo()
+        {
+            static std::map<std::string, std::unique_ptr<MugPluginSimple>>  apps;
+            return apps;
+        }
+
 };
 
 /*
@@ -69,6 +89,58 @@ extern "C"
     typedef ThorsAnvil::ThorsMug::MugPlugin*(*MugFunc)(int initdest, char const* config);
 }
 
+/**
+ * Template functions that need to be in header file
+ */
+template<typename Server, typename ServerConfig>
+MugPlugin* MugPluginSimple::add(ServerConfig&& serverConfig)
+{
+    std::map<std::string, std::unique_ptr<MugPluginSimple>>&    servers = getServerInfo();
+    std::string const& slot = serverConfig.slot;
+    auto find = servers.find(slot);
+    if (find != servers.end() && find->second.get() != nullptr) {
+        // Extracting the pointer here
+        // So I can use it in typeid() without generating a warning message.
+        MugPluginSimple* rawApp = find->second.get();
+        ThorsLogAndThrowError(std::runtime_error, "ThorsAnvil::Nisse::Bolt::App", "add", "Can not load Mug Server this slot >", slot, " is already being used. Current: ", typeid(*rawApp).name(), " New: ", typeid(Server).name());
+    }
+    find->second = std::make_unique<Server>(std::forward<ServerConfig>(serverConfig));
+    return find->second.get();
+}
+
+template<typename Server, typename ServerConfig>
+MugPlugin* MugPluginSimple::remomve(ServerConfig&& serverConfig)
+{
+    std::map<std::string, std::unique_ptr<MugPluginSimple>>&    servers = getServerInfo();
+    auto find = servers.find(serverConfig.slot);
+    if (find != servers.end()) {
+        find->second.reset();
+    }
+    return nullptr;
+}
+
+template<typename Server, typename ServerConfig>
+MugPlugin* mugCreateSimpleInstance(int init, char const* configStr)
+{
+    ServerConfig    config = ThorsAnvil::Serialize::jsonBuilder<ServerConfig>(std::stringstream{configStr});
+    if (init) {
+        return MugPluginSimple::add<Server>(config);
+    }
+    else {
+        return MugPluginSimple::remomve<Server>(config);
+    }
+}
+
+}
+
+/**
+ * Simplify the Bot interface for Mug server
+ **/
+#define THORS_ANVIL_SIMPLE_MUG_SERVER_INIT(Config, Server)                                      \
+                                                                                                \
+extern "C" ThorsAnvil::ThorsMug::MugPlugin* mugCreateInstance(int init, char const* configStr)  \
+{                                                                                               \
+    return ThorsAnvil::ThorsMug::mugCreateSimpleInstance<Server, Config>(init, configStr);      \
 }
 
 #endif

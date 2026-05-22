@@ -2,7 +2,7 @@
 #define THORSANVIL_SLACK_API_H
 
 #include "ThorsSlackConfig.h"
-#include "SlackBlockKit.h"
+#include "BlockKit.h"
 #include "NisseHTTP/Util.h"
 #include "ThorSerialize/Traits.h"
 #include "ThorSerialize/SerUtil.h"

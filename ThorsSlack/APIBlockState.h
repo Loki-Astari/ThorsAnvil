@@ -3,7 +3,7 @@
 
 #include "ThorsSlackConfig.h"
 #include "API.h"
-#include "SlackBlockKit.h"
+#include "BlockKit.h"
 #include "APIBlockActionsState.h"
 #include "APIViews.h"
 #include <string>
