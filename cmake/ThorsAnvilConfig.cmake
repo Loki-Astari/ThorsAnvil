@@ -16,6 +16,8 @@
 #   ThorsAnvil::ThorsStorage      - Columnar file storage
 #   ThorsAnvil::ThorsMongo        - Type-safe MongoDB client
 #   ThorsAnvil::Nisse             - Coroutine-based async HTTP server
+#   ThorsAnvil::ThorsSlack        - Type-safe Slack REST/webhook client (header-only)
+#   ThorsAnvil::NisseBolt         - Slack bot framework built on Nisse
 #
 
 include(CMakeFindDependencyMacro)
@@ -104,6 +106,25 @@ set_target_properties(ThorsAnvil::Nisse PROPERTIES
 )
 
 # ---------------------------------------------------------------------------
+# ThorsSlack (header-only; depends on ThorSerialize, Nisse)
+# ---------------------------------------------------------------------------
+add_library(ThorsAnvil::ThorsSlack INTERFACE IMPORTED)
+set_target_properties(ThorsAnvil::ThorsSlack PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${THORSANVIL_INCLUDE_DIR};${THORSANVIL_INCLUDE_DIR}/ThorsSlack"
+    INTERFACE_LINK_LIBRARIES "ThorsAnvil::ThorSerialize;ThorsAnvil::Nisse"
+)
+
+# ---------------------------------------------------------------------------
+# NisseBolt (depends on ThorsSlack, Nisse, ThorSerialize)
+# ---------------------------------------------------------------------------
+add_library(ThorsAnvil::NisseBolt SHARED IMPORTED)
+set_target_properties(ThorsAnvil::NisseBolt PROPERTIES
+    IMPORTED_LOCATION "${THORSANVIL_LIB_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}NisseBolt${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    INTERFACE_INCLUDE_DIRECTORIES "${THORSANVIL_INCLUDE_DIR};${THORSANVIL_INCLUDE_DIR}/NisseBolt"
+    INTERFACE_LINK_LIBRARIES "ThorsAnvil::ThorsSlack;ThorsAnvil::Nisse;ThorsAnvil::ThorSerialize"
+)
+
+# ---------------------------------------------------------------------------
 # Provide a convenience variable
 # ---------------------------------------------------------------------------
 set(ThorsAnvil_FOUND TRUE)
@@ -116,4 +137,6 @@ set(ThorsAnvil_LIBRARIES
     ThorsAnvil::ThorsStorage
     ThorsAnvil::ThorsMongo
     ThorsAnvil::Nisse
+    ThorsAnvil::ThorsSlack
+    ThorsAnvil::NisseBolt
 )
