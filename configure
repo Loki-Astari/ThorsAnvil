@@ -6285,9 +6285,14 @@ fi
 
     if test "x${with_custom_event}" != "x"
 then :
-  thor_event_lib=${with_custom_event}
+
+            thor_event_lib=${with_custom_event}
+            subconfigure="${subconfigure} --with-custom-event=${with_custom_event}"
+
 else case e in #(
-  e) thor_event_lib=event
+  e)
+            thor_event_lib=event
+
      ;;
 esac
 fi
