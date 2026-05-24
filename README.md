@@ -11,6 +11,8 @@ A set of modern C++20 libraries for writing interactive Web-Services.
 
 This project provides the following libraries:
 
+1. [NisseBolt](https://github.com/Loki-Astari/NisseBolt)  
+   A C++ library for building Slack bots, modeled after the [Slack Bolt for Python](https://slack.dev/bolt-python/) API. Register handlers for messages, commands, actions, and views with the same mental model, but in modern C++20 with automatic serialization and async IO.
 1. [Mug](https://github.com/Loki-Astari/Mug)  
    A simple configurable C++ `NissaServer` that dynamically loads shared libraries that install `NisseHTTP` handlers.
 1. [Nisse](https://github.com/Loki-Astari/Nisse)  
@@ -19,7 +21,7 @@ This project provides the following libraries:
    + **NisseHTTP**  
      Provides HTTP request/response objects exposing the body as an async std::iostream. This allows C++ objects to be streamed directly via a REST interface with no serialization code.
 1. API Supported:
-   + [ThorsSlack](https://github.com/Loki-Astari/Mug/tree/master/src/ThorsSlack)  
+   + [ThorsSlack](https://github.com/Loki-Astari/NisseBolt/tree/master/src/ThorsSlack)  
      Type-safe API to send REST messages to/from Slack.  
      Supports REST Slack API and Slack webhooks via NissaHTTP.  
      Use C++ objects, no serialization code required.
@@ -66,13 +68,11 @@ Can be installed via brew on Mac and Linux
 
 Note: The `configure` script will tell you about any missing dependencies and how to install them.
 
-## Building Conan
+## Installing via Conan
 
-If you have Conan installed, the Conan build processes should work.
+ThorsAnvil is available on [ConanCenter](https://conan.io/center/recipes/thors-anvil):
 
-    > git clone git@github.com:Loki-Astari/ThorsAnvil.git
-    > cd ThorsAnvil
-    > conan build -s compiler.cppstd=20 conanfile.py
+    > conan install --requires="thors-anvil/10.2.2" -s compiler.cppstd=20
 
 ## Header Only
 
@@ -129,6 +129,7 @@ Each target brings in the appropriate include directories and transitive depende
 | `ThorsAnvil::ThorsStorage`      | Columnar file storage                                  |
 | `ThorsAnvil::ThorsMongo`        | Type-safe MongoDB wire protocol client                 |
 | `ThorsAnvil::Nisse`             | Coroutine-based async HTTP server                      |
+| `ThorsAnvil::NisseBolt`         | Slack bot framework (Bolt API for C++)                 |
 
 ## Example
 
