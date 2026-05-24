@@ -87,7 +87,7 @@ Some dependencies you will need to install manually for header-only builds.
     libSnappy   https://github.com/google/snappy
     libZ        https://www.zlib.net/
     
-Note: The header-only version does not include Mug
+Note: The header-only version does not include Mug or NisseBolt
 
 # Using ThorsAnvil In Your Project (CMake)
 

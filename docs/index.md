@@ -67,6 +67,12 @@ git clone --single-branch --branch header-only https://github.com/Loki-Astari/Th
 
 Add the cloned directory to your include path.
 
+### Conan
+
+```bash
+conan install --requires="thors-anvil/10.2.2" -s compiler.cppstd=20
+```
+
 ### From Source
 
 ```bash
