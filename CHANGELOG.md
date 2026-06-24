@@ -4,10 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [10.2.1] - 2026-05-23
+## [11.0.0] - 2026-06-24
 
-### Improved
-- Improved and made documentation and build tools consistent across all projects.
+### Added (ThorsMongo)
+- Allow multiple updates in one statement
+
+### Added (NisseBolt)
+- Added Shortcut handling
+
+### Added (Mug)
+- Added signal handlers for graceful shutdown to improved restart/stop behavior
+
+### Changed (Nisse)
+- Ensure URL paths have leading slash (even if not provided by user)
+- Improved stream handling
+- Fixed `getContentSize()`
+
+### Fixed
+- Fixed SSL integration tests to use local certs instead of Let's Encrypt (ThorsSocket)
 
 ## [10.2.2] - 2026-05-23
 
@@ -49,7 +63,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [10.1.1] - 2026-05-16
 
 ### Bug Fix
-- minor bug fixes, needed to support existing apps.
+- Minor bug fixes, needed to support existing apps.
 
 ## [10.0.6] - 2026-05-16
 
@@ -75,7 +89,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [9.1.7] - 2026-03-22
 
 ### Changed
-- Various updates and improvements
+- Removed Slack from Mug (Mug)
+- Updated build tools
+- Updated logging to be consistent across projects (Nisse)
 
 ## [9.1.5] - 2026-03-09
 
