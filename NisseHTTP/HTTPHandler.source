@@ -147,8 +147,10 @@ void HTTPHandler::remPath(MethodChoice method, std::string const& path)
 NISSE_HEADER_ONLY_INCLUDE
 void HTTPHandler::addPath(MethodChoice method, std::string const& path, HTTPAction&& action, HTTPValidate&& val)
 {
+    std::string index = path.size() != 0 && path[0] == '/' ? path : std::string("/") + path;
+
     pathMatcher.addPath(method,
-                        path,
+                        index,
                         [](PathMatcher::Data& data, Match const& matches, Request& request, Response& response)
                         {
                             return data.parent->callUserAction(data.path, data.action, data.val, matches, request, response);

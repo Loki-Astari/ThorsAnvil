@@ -4,6 +4,7 @@
 #include "ThorsMongoConfig.h"
 #include "ThorSerialize/Traits.h"
 #include "ThorSerialize/BsonPrinter.h"
+#include "ThorSerialize/Serialize.h"
 
 namespace ThorsAnvil::DB::Mongo
 {
@@ -19,7 +20,7 @@ struct LevelSerializer
     static constexpr std::string_view kLinearizable = "linearizable"sv;
     static constexpr std::string_view kSnapshot     = "snapshot"sv;
 
-    static std::size_t getPrintSizeBson(ThorsAnvil::Serialize::BsonPrinter& /*printer*/, Level const& object)
+    static std::size_t getPrintSize(ThorsAnvil::Serialize::PrinterInterface& /*printer*/, Level const& object)
     {
         switch (object)
         {
@@ -31,7 +32,7 @@ struct LevelSerializer
         }
         return 0;
     }
-    static void writeCustom(ThorsAnvil::Serialize::PrinterInterface& printer, Level const& object)
+    static void writeCustom(ThorsAnvil::Serialize::Serializer&, ThorsAnvil::Serialize::PrinterInterface& printer, Level const& object)
     {
         using namespace std::string_literals;
         switch (object)
@@ -43,7 +44,7 @@ struct LevelSerializer
             case Level::Snapshot:       printer.addValue(kSnapshot);    break;
         }
     }
-    static void readCustom(ThorsAnvil::Serialize::ParserInterface& parser, Level& object)
+    static void readCustom(ThorsAnvil::Serialize::DeSerializer&,ThorsAnvil::Serialize::ParserInterface& parser, Level& object)
     {
         std::string value;
         parser.getValue(value);

@@ -1,7 +1,9 @@
 #ifndef THORSANVIL_DB_MONGO_MONGO_UPDATE_H
 #define THORSANVIL_DB_MONGO_MONGO_UPDATE_H
 
+#include "ThorSerialize/Traits.h"
 #include "ThorsMongoConfig.h"
+#include "MongoActions.h"
 #include "ThorsMongoCommon.h"
 #include <iterator>
 
@@ -97,6 +99,12 @@ struct Inc
     Inc(CType init): $inc(init)     {}
     T                   $inc;
 };
+template<typename... A>
+struct Inc<Actions<A...>>
+{
+    Inc(A&&... arg): $inc{std::move(arg)...}    {}
+    Actions<A...>       $inc;
+};
 template<typename T>
 using IncParam = std::uint32_t;
 
@@ -111,6 +119,12 @@ struct Min
     using CType = ConstructorType<T>;
     Min(CType init): $min(init)     {}
     T                   $min;
+};
+template<typename... A>
+struct Min<Actions<A...>>
+{
+    Min(A&&... arg): $min{std::move(arg)...}    {}
+    Actions<A...>       $min;
 };
 template<typename T>
 using MinParam = T;
@@ -127,6 +141,12 @@ struct Max
     Max(CType init): $max(init)     {}
     T                   $max;
 };
+template<typename... A>
+struct Max<Actions<A...>>
+{
+    Max(A&&... arg): $max{std::move(arg)...}    {}
+    Actions<A...>       $max;
+};
 template<typename T>
 using MaxParam = T;
 
@@ -141,6 +161,12 @@ struct Mul
     using CType = ConstructorType<T>;
     Mul(CType init): $mul(init)     {}
     T                   $mul;
+};
+template<typename... A>
+struct Mul<Actions<A...>>
+{
+    Mul(A&&... arg): $mul{std::move(arg)...}    {}
+    Actions<A...>       $mul;
 };
 template<typename T>
 using MulParam = std::uint32_t;
@@ -157,6 +183,12 @@ struct Rename
     Rename(CType init): $rename(init)     {}
     T           $rename;
 };
+template<typename... A>
+struct Rename<Actions<A...>>
+{
+    Rename(A&&... arg): $rename{std::move(arg)...}    {}
+    Actions<A...>       $rename;
+};
 template<typename T>
 using RenameParam = std::string;
 
@@ -171,6 +203,12 @@ struct Set
     using CType = ConstructorType<T>;
     Set(CType init): $set(std::move(init))     {}
     T           $set;
+};
+template<typename... A>
+struct Set<Actions<A...>>
+{
+    Set(A&&... arg): $set{std::move(arg)...}    {}
+    Actions<A...>       $set;
 };
 template<typename T>
 using SetParam = T;
@@ -187,6 +225,12 @@ struct SetOnInsert
     SetOnInsert(CType init): $setOnInsert(std::move(init))     {}
     T           $setOnInsert;
 };
+template<typename... A>
+struct SetOnInsert<Actions<A...>>
+{
+    SetOnInsert(A&&... arg): $setOnInsert{std::move(arg)...}    {}
+    Actions<A...>       $setOnInsert;
+};
 template<typename T>
 using SetOnInsertParam = T;
 
@@ -201,6 +245,12 @@ struct Unset
     using CType = void;
     Unset(): $unset(std::string("")) {}
     T  $unset;
+};
+template<typename... A>
+struct Unset<Actions<A...>>
+{
+    Unset(A&&... arg): $unset{std::move(arg)...}    {}
+    Actions<A...>       $unset;
 };
 template<typename T>
 using UnsetParam = std::string;
@@ -221,6 +271,12 @@ struct AddToSet
     using CType = ConstructorType<T>;
     AddToSet(CType init): $addToSet(std::move(init)) {}
     T           $addToSet;
+};
+template<typename... A>
+struct AddToSet<Actions<A...>>
+{
+    AddToSet(A&&... arg): $addToSet{std::move(arg)...}    {}
+    Actions<A...>       $addToSet;
 };
 template<typename T>
 using AddToSetParam = typename T::value_type;
@@ -271,6 +327,12 @@ struct Pull
     Pull(CType init): $pull(std::move(init)) {}
     T           $pull;
 };
+template<typename... A>
+struct Pull<Actions<A...>>
+{
+    Pull(A&&... arg): $pull{std::move(arg)...}    {}
+    Actions<A...>           $pull;
+};
 template<typename T>
 using PullParam = typename T::value_type;
 
@@ -285,6 +347,12 @@ struct Push
     using CType = ConstructorType<T>;
     Push(CType init): $push(std::move(init)) {}
     T           $push;
+};
+template<typename... A>
+struct Push<Actions<A...>>
+{
+    Push(A&&... arg): $push{std::move(arg)...}    {}
+    Actions<A...>           $push;
 };
 template<typename T>
 using PushParam = typename T::value_type;
@@ -301,6 +369,12 @@ struct PullAll
     PullAll(CType init): $pullAll(std::move(init)) {}
     T             $pullAll;
 };
+template<typename... A>
+struct PullAll<Actions<A...>>
+{
+    PullAll(A&&... arg): $pullAll{std::move(arg)...}    {}
+    Actions<A...>           $pullAll;
+};
 template<typename T>
 using PullAllParam = std::vector<typename T::value_type>;
 
@@ -315,6 +389,12 @@ struct Each
     using CType = T;
     Each(CType init): $each(std::move(init)) {}
     T          $each;
+};
+template<typename... A>
+struct Each<Actions<A...>>
+{
+    Each(A&&... arg): $each{std::move(arg)...}    {}
+    Actions<A...>           $each;
 };
 template<typename T>
 using EachParam = std::vector<typename T::value_type>;

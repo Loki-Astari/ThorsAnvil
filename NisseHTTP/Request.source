@@ -173,9 +173,9 @@ Method Request::findMethod(std::string_view method)
 }
 
 NISSE_HEADER_ONLY_INCLUDE
-std::string_view Request::preloadStreamIntoBuffer() const
+std::string_view Request::preloadStreamIntoBuffer(bool force) const
 {
-    return input.preloadStreamIntoBuffer();
+    return input.preloadStreamIntoBuffer(force);
 }
 
 NISSE_HEADER_ONLY_INCLUDE

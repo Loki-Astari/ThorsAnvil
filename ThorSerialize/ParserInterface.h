@@ -136,12 +136,14 @@ class ParserInterface
         ParserInterface(std::string_view const& str, ParserConfig const& config)
             : config(config)
             , input(str)
-            , pushBack(ParserToken::Error)
+            , pushBack1(ParserToken::Error)
+            , pushBack2(ParserToken::Error)
         {}
         ParserInterface(std::istream& stream, ParserConfig const& config)
             : config(config)
             , input(&stream)
-            , pushBack(ParserToken::Error)
+            , pushBack1(ParserToken::Error)
+            , pushBack2(ParserToken::Error)
         {}
         virtual ~ParserInterface() {}
         virtual FormatType       formatType()            = 0;
@@ -217,6 +219,16 @@ class ParserInterface
                 std::streampos operator()(StringInput& input)     const {return input.tellg();}
             };
             return std::visit(GetPos{}, input);
+        }
+        void            seekg(std::streampos pos)
+        {
+            struct SetPos
+            {
+                std::streampos pos;
+                void operator()(std::istream* input)    const {input->seekg(pos);}
+                void operator()(StringInput& input)     const {input.seekg(pos);}
+            };
+            return std::visit(SetPos{pos}, input);
         }
         int             get()
         {
@@ -333,7 +345,8 @@ class ParserInterface
         using DataInputStream = std::variant<std::istream*, StringInput>;
 
         DataInputStream input;
-        ParserToken     pushBack;
+        ParserToken     pushBack1;
+        ParserToken     pushBack2;
         std::map<std::intmax_t, std::any>     savedSharedPtr;
         void    ignoreTheValue();
         void    ignoreTheMap();

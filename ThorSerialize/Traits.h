@@ -94,9 +94,9 @@
  *
  *          struct SerializableType
  *          {
- *              static std::size_t getPrintSizeBson(BsonPrinter& printer, Type const& object);
- *              static void writeCustom(PrinterInterface& printer, Type const& object);
- *              static void readCustom(ParserInterface& parser, Type& object);
+ *              static std::size_t getPrintSize(BsonPrinter& printer, Type const& object);
+ *              static void writeCustom(Serializer& parent, PrinterInterface& printer, T const& object);
+ *              static void readCustom(DeSerializer& parent, ParserInterface& parser, T& object)
  *          };
  *
  * Sometimes you can not use the key names you want (they are reserved words or contain
@@ -159,7 +159,7 @@
  *
  *                  // generic version we simply stream the integer value.
  *                  static constexpr std::size_t sizeOfID = 12;
- *                  virtual  std::size_t getPrintSizeBson(ThorsAnvil::Serialize::BsonPrinter& printer, ID const& object) override
+ *                  virtual  std::size_t getPrintSize(ThorsAnvil::Serialize::PrinterInterface& printer, ID const& object) override
  *                  {
  *                      return sizeOfID;
  *                  }
@@ -736,19 +736,7 @@ class Traits<DataType>                                                  \
     static std::size_t getPrintSize(PrinterInterface& printer, DataType const& object, bool)\
     {                                                                   \
         SerializingType info;                                           \
-        switch (printer.formatType())                                   \
-        {                                                               \
-            case FormatType::Bson:  return info.getPrintSizeBson(dynamic_cast<BsonPrinter&>(printer), object);\
-            case FormatType::Json:  /* Fall Through */                  \
-            case FormatType::Yaml:  /* Fall Through */                  \
-            default:                                                    \
-            {                                                           \
-                ThorsLogAndThrowError(std::runtime_error,               \
-                                      "ThorsAnvil::Serialize::Traits<DataType>",   \
-                                      "getPrintSize",                   \
-                                      "Should not get here");           \
-            }                                                           \
-        }                                                               \
+        return info.getPrintSize(printer, object);                      \
     }                                                                   \
 };                                                                      \
 }                                                                       \

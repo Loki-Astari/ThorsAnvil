@@ -2,6 +2,7 @@
 #define THORSANVIL_DB_MONGO_MONGO_UTIL_H
 
 #include "ThorsMongoConfig.h"
+#include "MongoActions.h"
 
 #include "ThorSerialize/Traits.h"
 #include "ThorSerialize/MongoUtility.h"
@@ -67,6 +68,16 @@ ThorsAnvil_Template_MakeTrait(1,                                                
         >                                                                                           \
     >                                                                                               \
 >
+
+#define ThorsMongo_UpdateFromAccessSpec(Action, ...)                                          \
+::ThorsAnvil::DB::Mongo::QueryOp:: Action < ::ThorsAnvil::DB::Mongo::QueryOp::Actions<__VA_ARGS__>>
+
+
+#define ThorsMongo_ActionSpec(Action, TypeName, ...)                                                        \
+    ::ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__) ::Access<                    \
+        ::ThorsAnvil::DB::Mongo::QueryOp::Action ## Param<                                            \
+            typename ThorsAnvil::FieldAccess:: THORMONGO_NAME(TypeName, 0, __VA_ARGS__)::TypeOperat \
+        >>
 
 // Used For Push     [Each / Position / Slice / Sort
 //          AddToSet [Each / Position / Slice / Sort ]

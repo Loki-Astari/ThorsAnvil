@@ -12,7 +12,7 @@ namespace ThorsAnvil::Serialize
 {
 
 template<typename T>
-void DefaultCustomSerializer<T>::writeCustom(PrinterInterface& printer, T const& object) const
+void DefaultCustomSerializer<T>::writeCustomOld(PrinterInterface& printer, T const& object) const
 {
     switch (printer.formatType())
     {
@@ -32,14 +32,14 @@ void DefaultCustomSerializer<T>::writeCustom(PrinterInterface& printer, T const&
         {
             ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize::DefaultCustomSerializer<T>",
-                                  "writeCustom",
+                                  "writeCustomOld",
                                   "Unsupported Format. Should never reach this");
         }
     }
 }
 
 template<typename T>
-void DefaultCustomSerializer<T>::readCustom(ParserInterface& parser, T& object) const
+void DefaultCustomSerializer<T>::readCustomOld(ParserInterface& parser, T& object) const
 {
     switch (parser.formatType())
     {
@@ -57,7 +57,7 @@ void DefaultCustomSerializer<T>::readCustom(ParserInterface& parser, T& object) 
         {
             ThorsLogAndThrowError(std::runtime_error,
                                   "ThorsAnvil::Serialize::DefaultCustomSerializer<T>",
-                                  "readCustom",
+                                  "readCustomOld",
                                   "Unsupported Format. Should never reach this");
         }
     }
@@ -105,6 +105,16 @@ void DefaultCustomSerializer<T>::readYaml(YamlParser& /*parser*/, T& /*object*/)
 
 template<typename T>
 std::size_t DefaultCustomSerializer<T>::getPrintSizeBson(BsonPrinter& /*printer*/, T const& /*object*/) const
+{
+    ThorsLogAndThrowError(std::runtime_error,
+                          "ThorsAnvil::Serialize::DefaultCustomSerializer", "getPrintSizeBson",
+                          "Using an unimplemented translation:\n",
+                          "This means you are a streaming a type you have marked with the macro: ThorsAnvil_MakeTraitCustomSerialize.\n",
+                          "But have not implemented the getPrintSizeBson() method on the SerializationClass");
+}
+
+template<typename T>
+std::size_t DefaultCustomSerializer<T>::getPrintSizeJson(PrinterInterface& /*printer*/, T const& /*object*/) const
 {
     ThorsLogAndThrowError(std::runtime_error,
                           "ThorsAnvil::Serialize::DefaultCustomSerializer", "getPrintSizeBson",

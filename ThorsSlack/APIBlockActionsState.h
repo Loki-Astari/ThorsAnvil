@@ -26,6 +26,17 @@ struct SlackTeam
     std::string                         domain;
 };
 
+struct SlackChannel
+{
+    std::string                         id;
+    std::string                         name;
+};
+using OptSlackChannel = std::optional<SlackChannel>;
+
+struct SlackEnterprise
+{};
+using PtrSlackEnterprise = SlackEnterprise*;
+using OptPtrSlackEnterprise = std::optional<PtrSlackEnterprise>;
 
 using NullVecElOption   = std::unique_ptr<BK::VecElOption>;
 using NullElText        = std::unique_ptr<BK::ElText>;
@@ -202,6 +213,8 @@ using NullSlackState = std::unique_ptr<SlackState>;
 
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::SlackUser, id, username, name, team_id);
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::SlackTeam, id, domain);
+ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::SlackChannel, id, name);
+ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::SlackEnterprise);
 
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::CheckboxesValue, selected_options);         //
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::DatePickerValue, selected_date);

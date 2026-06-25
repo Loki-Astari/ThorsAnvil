@@ -37,7 +37,7 @@ class StreamBufInput: public std::streambuf
         StreamBufInput(StreamBufInput const&)                   = delete;
         StreamBufInput& operator=(StreamBufInput const&)        = delete;
 
-        std::string_view preloadStreamIntoBuffer();
+        std::string_view preloadStreamIntoBuffer(bool forceNextChunk);
 
         void swap(StreamBufInput& other) noexcept;
         friend void swap(StreamBufInput& lhs, StreamBufInput& rhs)   {lhs.swap(rhs);}
@@ -53,7 +53,6 @@ class StreamBufInput: public std::streambuf
     private:
         void checkBuffer();
         void getNextChunk();
-        void preloadStreamIntoBufferNow();
         std::streamsize         currentPosition() const {return processed + (gptr() - eback());}
 
 };
@@ -79,9 +78,9 @@ class StreamInput: public std::istream
             rdbuf(&buffer);
             clear();
         }
-        std::string_view preloadStreamIntoBuffer()
+        std::string_view preloadStreamIntoBuffer(bool forceNextChunk = false)
         {
-            return buffer.preloadStreamIntoBuffer();
+            return buffer.preloadStreamIntoBuffer(forceNextChunk);
         }
 };
 

@@ -35,6 +35,9 @@ ClientResponse::ClientResponse(std::istream& stream)
             auto colon = std::min(std::size(line), line.find(':'));
             auto value = colon == std::size(line) ? colon : line.find_first_not_of(" ", colon + 1);
 
+            std::transform(std::begin(line), std::end(line), std::begin(line),
+                   [](unsigned char c){ return std::tolower(c); });
+
             headers.insert_or_assign(line.substr(0, colon), line.substr(value, line.size() - value - 1));
         }
     }
@@ -51,11 +54,15 @@ void ClientResponse::print(std::ostream& stream) const
 }
 
 NISSE_HEADER_ONLY_INCLUDE
-std::size_t ClientResponse::getContentSize() const
+BodyEncoding ClientResponse::getContentSize() const
 {
     auto find = headers.find("content-length");
     if (find != std::end(headers)) {
         return std::stoi(find->second);
+    }
+    find = headers.find("transfer-encoding");
+    if (find != std::end(headers)) {
+        return Encoding::Chunked;
     }
     return 0;
 }

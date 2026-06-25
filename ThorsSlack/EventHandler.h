@@ -9,6 +9,7 @@
 #include "APIViews.h"
 #include "APIChatMessage.h"
 #include "APIBlockActions.h"
+#include "APIShortCut.h"
 #include "Event.h"
 #include "EventCallback.h"
 #include "SlashCommand.h"
@@ -40,7 +41,7 @@ namespace ThorsAnvil::Slack
 using ThorsAnvil::Nisse::HTTP::Request;
 using ThorsAnvil::Nisse::HTTP::Response;
 
-using EventObject = std::variant<API::BlockActions, API::Views::ViewSubmission, API::Views::ViewClosed>;
+using EventObject = std::variant<API::BlockActions, API::Views::ViewSubmission, API::Views::ViewClosed, API::ShortCut, API::MessageAction>;
 using CmdEvent  = std::variant<API::Views::ViewSubmission const*>;
 
 template<typename T>
@@ -90,6 +91,15 @@ struct SlashCommandRequest
 };
 using SlashCommandHandler    = std::function<void(SlashCommandRequest const&)>;
 using SlashCommandHandlerMap = std::map<std::string, SlashCommandHandler>;
+
+struct ShortcutRequest
+{
+    ThorsAnvil::Nisse::HTTP::Request const&     request;
+    ThorsAnvil::Nisse::HTTP::Response&          response;
+    API::ShortCutMessage const&                 shortcut;
+};
+using ShortcutHandler        = std::function<void(ShortcutRequest const&)>;
+using ShortcutHandlerMap     = std::map<std::string, ShortcutHandler>;
 
 struct ActionHandlerRequest
 {
@@ -145,8 +155,11 @@ class EventHandler
         // Unlike the handlers above which are in the control of their owners.
         ViewHandlerMap&                 viewHandlerMap;
 
+        // ShortCut handler
+        ShortcutHandlerMap const&       shortcutHandlerMap;
+
     public:
-        EventHandler(Client& client, std::string_view slackSecret, EventFunctionMap const& eventHandlerMap, SlashCommandHandlerMap const& slashCommandHandlerMap, ActionHandlerMap const& actionHandlerMap, ViewHandlerMap& viewHandlerMap);
+        EventHandler(Client& client, std::string_view slackSecret, EventFunctionMap const& eventHandlerMap, SlashCommandHandlerMap const& slashCommandHandlerMap, ActionHandlerMap const& actionHandlerMap, ViewHandlerMap& viewHandlerMap, ShortcutHandlerMap const& shortcutHandlerMap);
 
         // Method to validate Slack message comes from slack.
         bool validateRequest(Request const& request);
@@ -198,9 +211,12 @@ class EventHandler
             void operator()(T const& viewAction);
             // Handles the interaction of individual components.
             void operator()(API::BlockActions const& userAction);
+            void operator()(API::ShortCut const& userAction);
+            void operator()(API::MessageAction const& userAction);
             private:
                 void handleViewAction(API::Views::ViewSubmission const&, ViewHandlerMap::const_iterator)    {}
                 void handleViewAction(API::Views::ViewClosed const&, ViewHandlerMap::const_iterator);
+                void handleShortCut(API::ShortCutMessage const&);
 
                 // Need some extra work to find the change of state in a checkbox.
                 std::string getCheckBoxValue(API::BlockActions const& userAction, API::SlackAction const& action);
@@ -239,13 +255,14 @@ class EventHandler
 };
 
 inline
-EventHandler::EventHandler(Client& client, std::string_view slackSecret, EventFunctionMap const& eventHandlerMap, SlashCommandHandlerMap const& slashCommandHandlerMap, ActionHandlerMap const& actionHandlerMap, ViewHandlerMap& viewHandlerMap)
+EventHandler::EventHandler(Client& client, std::string_view slackSecret, EventFunctionMap const& eventHandlerMap, SlashCommandHandlerMap const& slashCommandHandlerMap, ActionHandlerMap const& actionHandlerMap, ViewHandlerMap& viewHandlerMap, ShortcutHandlerMap const& shortcutHandlerMap)
     : client{client}
     , slackSecret(slackSecret)
     , eventHandlerMap{eventHandlerMap}
     , slashCommandHandlerMap{slashCommandHandlerMap}
     , actionHandlerMap{actionHandlerMap}
     , viewHandlerMap{viewHandlerMap}
+    , shortcutHandlerMap{shortcutHandlerMap}
 {}
 
 inline
@@ -269,7 +286,7 @@ bool EventHandler::validateRequest(Request const& request)
 {
     std::string const&  sig = request.variables()["x-slack-signature"];
     std::string const&  timestampStr = request.variables()["x-slack-request-timestamp"];
-    std::int32_t        timestamp;
+    std::int32_t        timestamp = 0;
     auto                first = &timestampStr[0];
     auto                last = first + timestampStr.size();
     auto                convertResult = std::from_chars(first, last, timestamp);
@@ -290,7 +307,7 @@ bool EventHandler::validateRequest(Request const& request)
         hmac.appendData(timestampStr);
         hmac.appendData(":"s);
 
-        std::string_view    body = request.preloadStreamIntoBuffer();
+        std::string_view    body = request.preloadStreamIntoBuffer(true);
         hmac.appendData(body);
     }
     std::string exp{sig.c_str() + versionEnd + 1, sig.size() - versionEnd - 1};
@@ -470,8 +487,23 @@ void EventHandler::UserActionCallback::operator()(API::BlockActions const& userA
         handler({request, response, userAction, ptr2String(action.value.value())});
     }
     else {
-        ThorsLogError("ThorsAnvil::Slack::EventHandler::UserActionCallback", "operator()", "Unknown Action: ", request.variables()["payload"]);
+        ThorsLogError("ThorsAnvil::Slack::EventHandler::UserActionCallback", "operator(BlockAction)", "Unknown Action: ", request.variables()["payload"]);
     }
+}
+// Handles the interaction of individual components.
+inline void EventHandler::UserActionCallback::operator()(API::ShortCut const& userAction)       {handleShortCut(userAction);}
+inline void EventHandler::UserActionCallback::operator()(API::MessageAction const& userAction)  {handleShortCut(userAction);}
+
+inline
+void EventHandler::UserActionCallback::handleShortCut(API::ShortCutMessage const& userAction)
+{
+    ThorsLogTrack("ThorsAnvil::Slack::EventHandler::UserActionCallback", "operator()(ShortCut)", "Message Recieved:");
+    auto find = plugin.shortcutHandlerMap.find(userAction.callback_id);
+    if (find == std::end(plugin.shortcutHandlerMap)) {
+        ThorsLogError("ThorsAnvil::Slack::EventHandler::UserActionCallback", "operator(ShortCut)", "Unknown Action: ", request.variables()["payload"]);
+        return;
+    }
+    find->second({request, response, userAction});
 }
 
 inline

@@ -97,7 +97,9 @@ MugPlugin* MugPluginSimple::add(ServerConfig&& serverConfig)
 {
     std::map<std::string, std::unique_ptr<MugPluginSimple>>&    servers = getServerInfo();
     std::string const& slot = serverConfig.slot;
-    auto find = servers.find(slot);
+    // Try and find. Insert if it is not there.
+    auto insert = servers.try_emplace(slot);
+    auto find = std::get<0>(insert);
     if (find != servers.end() && find->second.get() != nullptr) {
         // Extracting the pointer here
         // So I can use it in typeid() without generating a warning message.

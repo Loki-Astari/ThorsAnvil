@@ -82,21 +82,35 @@ class Client
             }
         }
         template<typename T>
-        std::string getEventType(Nisse::StreamInput& input, bool& hit) const
+        std::string getEventType(Nisse::StreamInput& input) const
         {
-            if (hit) {
-                return "";
-            }
-            hit = true;
             std::string_view    body = input.preloadStreamIntoBuffer();
-            if (body.find(R"("ok":false)") != std::string_view::npos) {
-                ThorsLogInfo("ThorsAnvil::Slack::Client", "getEventType", "Found: Error");
-                return "ThorsAnvil::Slack::API::Error";
+            std::size_t         offset = 0;
+            while (true)
+            {
+                if (body.find(R"("ok":false)", offset) != std::string_view::npos) {
+                    ThorsLogInfo("ThorsAnvil::Slack::Client", "getEventType", "Found: Error");
+                    return "ThorsAnvil::Slack::API::Error";
+                }
+                if (body.find(R"("ok":true)", offset) != std::string_view::npos) {
+                    ThorsLogInfo("ThorsAnvil::Slack::Client", "getEventType", "Found: Result: ", T::polyMorphicSerializerName());
+                    return T::polyMorphicSerializerName();
+                }
+
+                // Info not in the buffer. Force more data into the buffer.
+                std::size_t oldSize = std::size(body);
+
+                // The -10 is to account for the search string being split across a chunk boundary.
+                offset = (oldSize > 10) ? oldSize - 10 : 0;
+
+                // Force the stream to load more data from socket
+                body = input.preloadStreamIntoBuffer(true);
+                if (std::size(body) == oldSize) {
+                    // No more data
+                    break;
+                }
             }
-            if (body.find(R"("ok":true)") != std::string_view::npos) {
-                ThorsLogInfo("ThorsAnvil::Slack::Client", "getEventType", "Found: Result: ", T::polyMorphicSerializerName());
-                return T::polyMorphicSerializerName();
-            }
+
             ThorsLogTrack("ThorsAnvil::Slack::Client", "getEventType", "Found: Fallback object members");
             return "";
         }
@@ -132,8 +146,7 @@ class Client
             Nisse::ClientResponse   response(stream);
             Nisse::StreamInput      input(stream, response.getContentSize());
             OutputType              reply;
-            bool hit = false;
-            input >> Ser::jsonImporter(reply, Ser::ParserConfig{}.setIdentifyDynamicClass([&](Ser::DataInputStream&){return getEventType<ResultType>(input, hit);}));
+            input >> Ser::jsonImporter(reply, Ser::ParserConfig{}.setIdentifyDynamicClass([&](Ser::DataInputStream&){return getEventType<ResultType>(input);}));
             ThorsLogTrackWithData(reply, "ThorsAnvil::Slack::Client", "sendMessage", "Response:");
 
             std::visit(VisitResult<ResultType>{std::move(succ), std::move(fail)}, reply);

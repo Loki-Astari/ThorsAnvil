@@ -24,17 +24,6 @@ struct SlackContainer
     bool                                is_ephemeral;
 };
 
-struct SlackEnterprise
-{};
-using PtrSlackEnterprise = SlackEnterprise*;
-using OptPtrSlackEnterprise = std::optional<PtrSlackEnterprise>;
-
-struct SlackChannel
-{
-    std::string                         id;
-    std::string                         name;
-};
-using OptSlackChannel = std::optional<SlackChannel>;
 
 using OptNullString = std::optional<NullString>;
 using OptNullTime   = std::optional<NullTime>;
@@ -96,8 +85,6 @@ struct BlockActions
 }
 
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::SlackContainer, type, message_ts, channel_id, is_ephemeral);
-ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::SlackEnterprise);
-ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::SlackChannel, id, name);
 
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::SlackAction, type, action_id, block_id, action_ts, selected_date, selected_date_time, selected_time, text, value, selected_options, selected_option);
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::BlockActions, trigger_id, user, team, container, api_app_id, enterprise, is_enterprise_install, channel, message, view, actions, state, token, response_url, hash, function_data, interactivity, bot_access_token);

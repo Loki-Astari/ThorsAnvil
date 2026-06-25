@@ -108,7 +108,7 @@
 
 /* Disable test that require the Mongo server to support the OP_QUERY command
    */
-#define THOR_DISABLE_TEST_WITH_MONGO_QUERY 1
+#define THOR_DISABLE_TEST_WITH_MONGO_QUERY 0
 
 /* mongosh DB for testing */
 #define THOR_TESTING_MONGO_DB "test"

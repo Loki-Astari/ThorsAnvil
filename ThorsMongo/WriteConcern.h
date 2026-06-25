@@ -42,13 +42,13 @@ class RequestAcknowledgment
 
 struct RequestAcknowledgmentSerializer
 {
-    static std::size_t getPrintSizeBson(ThorsAnvil::Serialize::BsonPrinter& /*printer*/, RequestAcknowledgment const& object)
+    static std::size_t getPrintSize(ThorsAnvil::Serialize::PrinterInterface& /*printer*/, RequestAcknowledgment const& object)
     {
         return (object.option == RequestAcknowledgment::WOpt::Specific)
             ? 4         // int 32 value.
             : 4 + 9;    // The string "majority" encoded size (4) + 9 characters.
     }
-    static void writeCustom(ThorsAnvil::Serialize::PrinterInterface& printer, RequestAcknowledgment const& object)
+    static void writeCustom(ThorsAnvil::Serialize::Serializer&, ThorsAnvil::Serialize::PrinterInterface& printer, RequestAcknowledgment const& object)
     {
         if (object.option == RequestAcknowledgment::WOpt::Specific)
         {
@@ -60,7 +60,7 @@ struct RequestAcknowledgmentSerializer
             printer.addValue("majority"s);
         }
     }
-    static void readCustom(ThorsAnvil::Serialize::ParserInterface& parser, RequestAcknowledgment& object)
+    static void readCustom(ThorsAnvil::Serialize::DeSerializer&, ThorsAnvil::Serialize::ParserInterface& parser, RequestAcknowledgment& object)
     {
         std::string_view rawValue = parser.getRawValue();
         if (rawValue.size() > 0 && rawValue[0] == '"')

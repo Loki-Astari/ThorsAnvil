@@ -8,9 +8,11 @@ namespace ThorsAnvil::Serialize
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 ParserToken ParserInterface::getToken()
 {
-    if (pushBack != ParserToken::Error)
-    {
-        return std::exchange(pushBack, ParserToken::Error);
+    if (pushBack2 != ParserToken::Error) {
+        return std::exchange(pushBack2, ParserToken::Error);
+    }
+    if (pushBack1 != ParserToken::Error) {
+        return std::exchange(pushBack1, ParserToken::Error);
     }
     return this->getNextToken();
 }
@@ -18,16 +20,20 @@ ParserToken ParserInterface::getToken()
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
 void ParserInterface::pushBackToken(ParserToken token)
 {
+    if (pushBack1 == ParserToken::Error) {
+        pushBack1 = token;
+        return;
+    }
+    if (pushBack2 == ParserToken::Error) {
+        pushBack2 = token;
+        return;
+    }
 #if defined(VALIDATE_EXTRA_PUSH_BACK_TOKEN)
-    if (pushBack != ParserToken::Error)
-    {
-        ThorsLogAndThrowError(std::runtime_error,
+    ThorsLogAndThrowError(std::runtime_error,
                               "ThorsAnvil::Serialize::ParserInterface",
                               "pushBackToken",
                               "Push only allows for single push back. More than one token has been pushed back between reads.");
-    }
 #endif
-    pushBack    = token;
 }
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE

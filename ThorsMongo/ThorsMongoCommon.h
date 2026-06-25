@@ -290,7 +290,7 @@ struct ModifyResult: public CmdReplyBase
 class SerializeSort
 {
     public:
-        static std::size_t getPrintSizeBson(ThorsAnvil::Serialize::PrinterInterface&, Sort const& object)
+        static std::size_t getPrintSize(ThorsAnvil::Serialize::PrinterInterface&, Sort const& object)
         {
             std::size_t size = 4 + 1; // Size + end marker
             for (auto const& value: object.sort)
@@ -300,10 +300,9 @@ class SerializeSort
             }
             return size;
         }
-        static void writeCustom(ThorsAnvil::Serialize::PrinterInterface& printer, Sort const& object)
+        static void writeCustom(ThorsAnvil::Serialize::Serializer&, ThorsAnvil::Serialize::PrinterInterface& printer, Sort const& object)
         {
-            printer.openMap(getPrintSizeBson
-            (printer, object));
+            printer.openMap(getPrintSize(printer, object));
             for (auto const& value: object.sort)
             {
                 printer.addKey(value.first);
@@ -311,7 +310,7 @@ class SerializeSort
             }
             printer.closeMap();
         }
-        static void readCustom(ThorsAnvil::Serialize::ParserInterface& parser, Sort& object);
+        static void readCustom(ThorsAnvil::Serialize::DeSerializer&, ThorsAnvil::Serialize::ParserInterface& parser, Sort& object);
 };
 
 class SerializeProjection: public ThorsAnvil::Serialize::DefaultCustomSerializer<Projection>

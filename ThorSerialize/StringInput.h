@@ -67,6 +67,10 @@ struct StringInput
         {
             return position;
         }
+        void seekg(std::streampos pos)
+        {
+            position = pos;
+        }
         int get()
         {
             return good && position < data.size() ? data[position++] : EOF;
