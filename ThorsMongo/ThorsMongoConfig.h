@@ -65,7 +65,7 @@
 #define LT_OBJDIR ".libs/"
 
 /* "Get mongosh version into #define. That way we can turn off some tests" */
-/* #undef MONGO_MAJOR_VERSION */
+#define MONGO_MAJOR_VERSION 8
 
 /* Check for older build tools and use simpler code with old tools */
 #define NO_STD_SUPPORT_FROM_CHAR_DOUBLE 1

@@ -169,15 +169,18 @@ struct Range
             rangeData = std::exchange(move.rangeData, nullptr);
             return *this;
         }
-        CursorIterator<R, T> begin()         {return CursorIterator<R, T>{*rangeData, cursorhasData()};}
-        CursorIterator<R, T> end()           {return CursorIterator<R, T>{*rangeData, false};}
-        CursorIterator<R, const T> begin()   const {return CursorIterator<R, const T>{*rangeData, cursorhasData()};}
-        CursorIterator<R, const T> end()     const {return CursorIterator<R, const T>{*rangeData, false};}
+        CursorIterator<R, T> begin()                {return CursorIterator<R, T>{*rangeData, cursorhasData()};}
+        CursorIterator<R, T> end()                  {return CursorIterator<R, T>{*rangeData, false};}
+        CursorIterator<R, const T> begin()  const   {return CursorIterator<R, const T>{*rangeData, cursorhasData()};}
+        CursorIterator<R, const T> end()    const   {return CursorIterator<R, const T>{*rangeData, false};}
 
-        bool isOk()                     const   {return static_cast<bool>(*rangeData);}
-        std::string getHRErrorMessage() const   {return rangeData->getHRErrorMessage();}
+        bool        empty()                 const   {return cursorhasData();}
+        std::size_t size()                  const   {return (!rangeData->ok) ? 0 : rangeData->size();}
 
-        operator bool()                 const   {return isOk();}
+        bool        isOk()                  const   {return static_cast<bool>(*rangeData);}
+        std::string getHRErrorMessage()     const   {return rangeData->getHRErrorMessage();}
+
+        operator bool()                     const   {return isOk();}
         friend std::ostream& operator<<(std::ostream& str, Range<R> const& data)    {return str << data.getHRErrorMessage();}
 
     private:

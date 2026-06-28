@@ -30,7 +30,8 @@ namespace ThorsAnvil::DB::Mongo::QueryOp
         {
             std::string_view actual = ThorsAnvil::Serialize::Override<B>::nameOverride(name);
             sizeOfValue += printer.getSizeMember(actual);
-            sizeOfValue += printer.getSizeValue(value);
+            //sizeOfValue += printer.getSizeValue(value);
+            sizeOfValue += ThorsAnvil::Serialize::Traits<M>::getPrintSize(printer, value, false);
         }
 
         template<typename M>

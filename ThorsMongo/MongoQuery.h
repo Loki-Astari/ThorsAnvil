@@ -173,50 +173,44 @@ struct Nin
  *          https://www.mongodb.com/docs/manual/reference/operator/query/nor/
  *          https://www.mongodb.com/docs/manual/reference/operator/query/not/
  */
-template<typename LHS, typename RHS>
+template<typename... Args>
 struct And
 {
     using Query = bool;
-    using LP = ConstructorType<LHS>;
-    using RP = ConstructorType<RHS>;
-    using CType = std::pair<LP, RP>;
-    And(CType init)
-        : $and(std::move(init.first), std::move(init.second))
+    using CType = std::tuple<Args...>;
+    And(CType&& init)
+        : $and(std::move(init))
     {}
-    And(LP lhs, RP rhs)
-        : $and(std::move(lhs), std::move(rhs))
+    And(ConstructorType<Args>... args)
+        : $and(std::move(args)...)
     {}
-    std::tuple<LHS, RHS> $and;
+    std::tuple<Args...> $and;
 };
-template<typename LHS, typename RHS>
+template<typename... Args>
 struct Or
 {
     using Query = bool;
-    using LP = ConstructorType<LHS>;
-    using RP = ConstructorType<RHS>;
-    using CType = std::pair<LP, RP>;
-    Or(CType init)
-        : $or(std::move(init.first), std::move(init.second))
+    using CType = std::tuple<Args...>;
+    Or(CType&& init)
+        : $or(std::move(init))
     {}
-    Or(LP lhs, RP rhs)
-        : $or(std::move(lhs), std::move(rhs))
+    Or(ConstructorType<Args>... args)
+        : $or(std::move(args)...)
     {}
-    std::tuple<LHS, RHS>  $or;
+    std::tuple<Args...>  $or;
 };
-template<typename LHS, typename RHS>
+template<typename... Args>
 struct Nor
 {
     using Query = bool;
-    using LP = ConstructorType<LHS>;
-    using RP = ConstructorType<RHS>;
-    using CType = std::pair<LP, RP>;
-    Nor(CType init)
-        : $nor(std::move(init.first), std::move(init.second))
+    using CType = std::tuple<Args...>;
+    Nor(CType&& init)
+        : $nor(std::move(init))
     {}
-    Nor(LP lhs, RP rhs)
-        : $nor(std::move(lhs), std::move(rhs))
+    Nor(ConstructorType<Args>... args)
+        : $nor(std::move(args)...)
     {}
-    std::tuple<LHS, RHS> $nor;
+    std::tuple<Args...> $nor;
 };
 template<typename T>
 struct Not
@@ -458,9 +452,9 @@ ThorsAnvil_Template_MakeTrait(1, ThorsAnvil::DB::Mongo::QueryOp::Lt,        $lt)
 ThorsAnvil_Template_MakeTrait(1, ThorsAnvil::DB::Mongo::QueryOp::Lte,       $lte);
 ThorsAnvil_Template_MakeTrait(1, ThorsAnvil::DB::Mongo::QueryOp::In,        $in);
 ThorsAnvil_Template_MakeTrait(1, ThorsAnvil::DB::Mongo::QueryOp::Nin,       $nin);
-ThorsAnvil_Template_MakeTrait(2, ThorsAnvil::DB::Mongo::QueryOp::And,       $and);
-ThorsAnvil_Template_MakeTrait(2, ThorsAnvil::DB::Mongo::QueryOp::Or,        $or);
-ThorsAnvil_Template_MakeTrait(2, ThorsAnvil::DB::Mongo::QueryOp::Nor,       $nor);
+ThorsAnvil_TemplatePack_MakeTrait(ThorsAnvil::DB::Mongo::QueryOp::And,      $and);
+ThorsAnvil_TemplatePack_MakeTrait(ThorsAnvil::DB::Mongo::QueryOp::Or,       $or);
+ThorsAnvil_TemplatePack_MakeTrait(ThorsAnvil::DB::Mongo::QueryOp::Nor,      $nor);
 ThorsAnvil_Template_MakeTrait(1, ThorsAnvil::DB::Mongo::QueryOp::Not,       $not);
 ThorsAnvil_Template_MakeTrait(1, ThorsAnvil::DB::Mongo::QueryOp::Exists,    $exists);
 ThorsAnvil_Template_MakeTrait(1, ThorsAnvil::DB::Mongo::QueryOp::Type,      $type);

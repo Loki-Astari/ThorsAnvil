@@ -9,6 +9,7 @@
  *      ThorsAnvil_MakeTrait(DataType, ...)
  *      ThorsAnvil_ExpandTrait(ParentType, DataType, ...)
  *      ThorsAnvil_Template_MakeTrait(TemplateParameterCount, DataType, ...)
+ *      ThorsAnvil_TemplatePack_MakeTrait(DataType, ...)
  *      ThorsAnvil_Template_ExpandTrait(TemplateParameterCount, ParentType, DataType, ...)
  *
  *      ThorsAnvil_PointerAllocator(DataType, Action)
@@ -324,6 +325,7 @@
 #define REP_OF_N(Act, TC, P1, Count, ...)   REP_OF_N_(Act, TC, P1, Count, __VA_ARGS__)
 #define REP_OF_N_(Act, TC, P1, Count, ...)  REP_OF_ ## Count(Act, TC, P1, __VA_ARGS__)
 
+#define REP_OF_PACK(Act, TC, P1, P2, ...)   PACK_ ## Act(TC, P1)
 #define REP_OF_43(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_42(Act, TC, P1, __VA_ARGS__)
 #define REP_OF_42(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_41(Act, TC, P1, __VA_ARGS__)
 #define REP_OF_41(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_40(Act, TC, P1, __VA_ARGS__)
@@ -372,6 +374,7 @@
 #define ALT_REP_OF_N(Act, E, P, S, Count)  ALT_REP_OF_N_(Act, E, P, S, Count)
 #define ALT_REP_OF_N_(Act, E, P, S, Count) ALT_REP_OF_ ## Count(Act, E, P, S)
 
+#define ALT_REP_OF_PACK(Act, E, P, S)   PACK_ ## Act(E, PACK)
 #define ALT_REP_OF_43(Act, E, P, S)     P ALT_EXPAND(Act, E, 43), ALT_REP_OF_42(Act,  ,  , S)
 #define ALT_REP_OF_42(Act, E, P, S)     P ALT_EXPAND(Act, E, 42), ALT_REP_OF_41(Act,  ,  , S)
 #define ALT_REP_OF_41(Act, E, P, S)     P ALT_EXPAND(Act, E, 41), ALT_REP_OF_40(Act,  ,  , S)
@@ -421,6 +424,7 @@
 #define REP_CMD_OF_N(Act, TC, P1, Forward, Count, ...)   REP_CMD_OF_N_(Act, TC, P1, Forward, Count, __VA_ARGS__)
 #define REP_CMD_OF_N_(Act, TC, P1, Forward, Count, ...)  REP_CMD_OF_ ## Count(Act, TC, P1, Forward, __VA_ARGS__)
 
+#define REP_CMD_OF_PACK(Act, TC, P1, Forward, P2, ...)   PACK_ ## Act(TC, P1, Forward ,P2)
 #define REP_CMD_OF_43(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_42(Act, TC, P1, P2, __VA_ARGS__)
 #define REP_CMD_OF_42(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_41(Act, TC, P1, P2, __VA_ARGS__)
 #define REP_CMD_OF_41(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_40(Act, TC, P1, P2, __VA_ARGS__)
@@ -490,8 +494,11 @@
 #define THOR_TYPE_INT_VALUE_FAKE(Id)            EXPAND_(ThorsAnvil::Serialize::Fake ## Id)
 #define THOR_CHECK_ASSERT(Ex, Id)
 #define LAST_THOR_TYPENAMEPARAMACTION(Ex, Id)
+#define PACK_THOR_TYPENAMEPARAMACTION(Ex, Id)   typename... Args
 #define LAST_THOR_TYPENAMEVALUEACTION(Ex, Id)
+#define PACK_THOR_TYPENAMEVALUEACTION(Ex, Id)   <Args...>
 #define LAST_THOR_TYPE_INT_VALUE(Ex, Id)
+#define PACK_THOR_TYPE_INT_VALUE(Ex, Id)        <Args...>
 #define LAST_THOR_CHECK_ASSERT(Ex, Id)          DO_ASSERT(Ex)
 
 #define THOR_BUILD_NAME(Pre, Name)              EXPAND_(Pre ## Name)
@@ -518,6 +525,7 @@
 // TODO
 #define DO_ASSERT_WITH_TEMPLATE(DataType, TF, Count)            EXPAND(DO_ASSERT_WITH_TEMPLATE_CHECK_ ## Count, DataType, TF, Count)
 
+#define DO_ASSERT_WITH_TEMPLATE_CHECK_PACK(DataType, TF, Count)
 #define DO_ASSERT_WITH_TEMPLATE_CHECK_00(DataType, TF, Count)   DO_ASSERT_WITH_TEMPLATE_WORKING(DataType, TF, Count)
 #define DO_ASSERT_WITH_TEMPLATE_CHECK_1(DataType, TF, Count)
 #define DO_ASSERT_WITH_TEMPLATE_CHECK_2(DataType, TF, Count)
@@ -643,6 +651,11 @@ static_assert(true, "")
 
 #define ThorsAnvil_Template_MakeTrait(Count, ...)                       \
     ThorsAnvil_MakeTrait_Base( , Map, , , Count, __VA_ARGS__, 1);       \
+    static_assert(true, "")
+
+
+#define ThorsAnvil_TemplatePack_MakeTrait(...)                          \
+    ThorsAnvil_MakeTrait_Base( , Map, , , PACK, __VA_ARGS__, 1);        \
     static_assert(true, "")
 
 #define ThorsAnvil_TTemplate_MakeTrait(Count, ...)                      \
