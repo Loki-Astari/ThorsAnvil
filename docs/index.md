@@ -70,7 +70,7 @@ Add the cloned directory to your include path.
 ### Conan
 
 ```bash
-conan install --requires="thors-anvil/10.2.2" -s compiler.cppstd=20
+conan install --requires="thors-anvil/11.0.5" -s compiler.cppstd=20
 ```
 
 ### From Source

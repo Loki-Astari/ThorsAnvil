@@ -72,7 +72,7 @@ Note: The `configure` script will tell you about any missing dependencies and ho
 
 ThorsAnvil is available on [ConanCenter](https://conan.io/center/recipes/thors-anvil):
 
-    > conan install --requires="thors-anvil/10.2.2" -s compiler.cppstd=20
+    > conan install --requires="thors-anvil/11.0.5" -s compiler.cppstd=20
 
 ## Header Only
 
