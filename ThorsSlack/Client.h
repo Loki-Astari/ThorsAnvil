@@ -50,9 +50,11 @@ struct VisitResult
 
 class Client
 {
-    Nisse::HeaderResponse   botHeaders;
-    Nisse::HeaderResponse   userHeaders;
-    std::string             botId;
+    private:
+        Nisse::HeaderResponse   botHeaders;
+        Nisse::HeaderResponse   userHeaders;
+        std::string             botId;
+
     private:
         template<typename T>
         void sendMessageData(T const& message, Stream& stream) const
@@ -81,8 +83,9 @@ class Client
                 post.body(size) << Ser::jsonExporter(message, Ser::PrinterConfig{Ser::OutputType::Stream});
             }
         }
+    public:
         template<typename T>
-        std::string getEventType(Nisse::StreamInput& input) const
+        static std::string getEventType(Nisse::StreamInput& input)
         {
             std::string_view    body = input.preloadStreamIntoBuffer();
             std::size_t         offset = 0;
@@ -114,7 +117,7 @@ class Client
             ThorsLogTrack("ThorsAnvil::Slack::Client", "getEventType", "Found: Fallback object members");
             return "";
         }
-    public:
+
         Client(std::string const& botToken, std::string const& userToken)
         {
             botHeaders.add("Connection", "close");

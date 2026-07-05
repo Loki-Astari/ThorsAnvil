@@ -493,9 +493,9 @@ IOData SSocketClient::readFromStream(char* buffer, std::size_t size)
         secureSocketInfo.checkConnectionOK(errorCode);
         switch (errorCode)
         {
-            case SSL_ERROR_NONE:                return {0, true, false};
-            case SSL_ERROR_ZERO_RETURN:         return {0, false,false};
-            case SSL_ERROR_WANT_READ:           return {0, true, true};
+            case SSL_ERROR_NONE:                ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::SSocketClient", "readFromStream", "Read: 0: SSL_ERROR_NONE");        return {0, true, false};
+            case SSL_ERROR_ZERO_RETURN:         ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::SSocketClient", "readFromStream", "Read: 0: SSL_ERROR_ZERO_RETURN"); return {0, false,false};
+            case SSL_ERROR_WANT_READ:           ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::SSocketClient", "readFromStream", "Read: 0: SSL_ERROR_WANT_READ");   return {0, true, true};
             case SSL_ERROR_WANT_WRITE:          [[fallthrough]];
             case SSL_ERROR_WANT_CONNECT:        [[fallthrough]];
             case SSL_ERROR_WANT_ACCEPT:         [[fallthrough]];
@@ -528,6 +528,7 @@ IOData SSocketClient::readFromStream(char* buffer, std::size_t size)
             }
         }
     }
+    ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::SSocketClient", "readFromStream", "Read: ", ret);
     return {static_cast<std::size_t>(ret), true, false};
 }
 
@@ -543,9 +544,9 @@ IOData SSocketClient::writeToStream(char const* buffer, std::size_t size)
         secureSocketInfo.checkConnectionOK(errorCode);
         switch (errorCode)
         {
-            case SSL_ERROR_NONE:                return {0, true, false};
-            case SSL_ERROR_ZERO_RETURN:         return {0, false, false};
-            case SSL_ERROR_WANT_WRITE:          return {0, true, true};
+            case SSL_ERROR_NONE:                ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::SSocketClient", "writeToStream", "Wrote: 0 SSL_ERROR_NONE");         return {0, true, false};
+            case SSL_ERROR_ZERO_RETURN:         ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::SSocketClient", "writeToStream", "Wrote: 0 SSL_ERROR_ZERO_RETURN");  return {0, false, false};
+            case SSL_ERROR_WANT_WRITE:          ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::SSocketClient", "writeToStream", "Wrote: 0 SSL_ERROR_WANT_WRITE");   return {0, true, true};
             case SSL_ERROR_WANT_READ:           [[fallthrough]];
             case SSL_ERROR_WANT_CONNECT:        [[fallthrough]];
             case SSL_ERROR_WANT_ACCEPT:         [[fallthrough]];
@@ -578,6 +579,7 @@ IOData SSocketClient::writeToStream(char const* buffer, std::size_t size)
             }
         }
     }
+    ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::SSocketClient", "writeToStream", "Wrote: ", ret);
     return {static_cast<std::size_t>(ret), true, false};
 }
 

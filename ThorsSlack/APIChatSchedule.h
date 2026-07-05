@@ -100,7 +100,7 @@ struct ScheduledMessageReply
     std::string                 scheduled_message_id;
     std::string                 channel;
     std::time_t                 post_at;
-    Message                     message;
+    Event::Message              message;
     ThorsAnvil_VariantSerializer(ThorsAnvil::Slack::API::Chat::ScheduledMessageReply);
 };
 

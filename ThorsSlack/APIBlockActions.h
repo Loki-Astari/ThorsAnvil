@@ -63,7 +63,7 @@ struct BlockActions
     OptPtrSlackEnterprise               enterprise;         // The enterprise the installed app is part of, if the app is either workspace-installed on an org, or org-installed.
     OptBool                             is_enterprise_install;
     OptSlackChannel                     channel;            // The channel where this block action took place.
-    API::OptMessage                     message;            // The message where this block action took place, if the block was contained in a message.
+    Event::OptMessage                   message;            // The message where this block action took place, if the block was contained in a message.
     API::Views::OptViewsInfo            view;               // The view where this block action took place, if the block was contained in a view.
     OptVecSlackActions                  actions;            // Contains data from the specific interactive component that was used. App surfaces can contain blocks with multiple interactive components, and each of those components can have multiple values selected by users.
     NullSlackState                      state;              // A property including all stateful elements, not just input blocks

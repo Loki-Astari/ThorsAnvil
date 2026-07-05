@@ -4,6 +4,7 @@
 
 #include "ThorsSlackConfig.h"
 #include "API.h"
+#include "EventMessage.h"
 
 namespace ThorsAnvil::Slack::API::Reactions
 {
@@ -163,7 +164,7 @@ struct GetReply
 {
     bool                        ok      = false;
     std::string                 type;
-    API::Message                message;
+    Event::Message              message;
     std::string                 channel;
     ThorsAnvil_VariantSerializer(ThorsAnvil::Slack::API::Reaction::GetReply);
 };

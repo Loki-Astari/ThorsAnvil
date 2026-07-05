@@ -3,6 +3,7 @@
 
 #include "ThorsSlackConfig.h"
 #include "BlockKit.h"
+#include "EventMessage.h"
 #include "NisseHTTP/Util.h"
 #include "ThorSerialize/Traits.h"
 #include "ThorSerialize/SerUtil.h"
@@ -36,61 +37,6 @@ struct Cursor
 };
 using OptCursor = std::optional<Cursor>;
 
-struct BotIcon
-{
-    std::string                 image_36;
-    std::string                 image_48;
-    std::string                 image_72;
-};
-
-struct BotProfile
-{
-    std::string                 id;
-    std::string                 app_id;
-    std::string                 user_id;
-    std::string                 name;
-    BotIcon                     icons;
-    bool                        deleted;
-    std::time_t                 updated;
-    std::string                 team_id;
-};
-using OptBotProfile = std::optional<BotProfile>;
-
-struct Reaction
-{
-    std::string                 name;
-    VecString                   users;
-    int                         count;
-};
-using VecReaction = std::vector<Reaction>;
-using OptVecReaction = std::optional<VecReaction>;
-
-struct Message
-{
-    std::string                 user;
-    std::string                 type;
-    std::string                 ts;
-    OptString                   client_msg_id;
-    OptString                   bot_id;
-    OptString                   app_id;
-    std::string                 text;
-    std::string                 team;
-    OptString                   thread_ts;
-    OptInt                      reply_count;
-    OptInt                      reply_users_count;
-    OptString                   latest_reply;
-    OptVecString                reply_users;
-    OptBool                     is_locked;
-    OptBool                     subscribed;
-    OptBotProfile               bot_profile;
-    BlockKit::Blocks            blocks;
-    OptVecString                pinned_to;
-    OptString                   permalink;
-    OptVecReaction              reactions;
-};
-using OptMessage = std::optional<Message>;
-using VecMessage = std::vector<Message>;
-
 struct ResponseMetaData
 {
     VecString                   messages;
@@ -103,7 +49,7 @@ struct Item
     OptTime                     created;
     OptString                   created_by;
     std::string                 channel;
-    API::Message                message;
+    Event::Message              message;
 };
 using VecItems = std::vector<Item>;
 
@@ -202,10 +148,6 @@ std::string buildQueryA(T const& val)
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Cursor, next_cursor);
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Item, type, created, created_by, channel, message);
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::ListReply, ok, items, response_metadata);
-ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::BotIcon, image_36, image_48, image_72);
-ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::BotProfile, id, app_id, user_id, name, icons, deleted, updated, team_id);
-ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Reaction, name, users, count);
-ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Message, user, type, ts, client_msg_id, bot_id, app_id, text, team, thread_ts, reply_count, reply_users_count, latest_reply, reply_users, is_locked, subscribed, bot_profile, blocks, pinned_to, permalink, reactions);
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::ResponseMetaData, messages);
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::OK, ok);
 ThorsAnvil_MakeTrait(ThorsAnvil::Slack::API::Error, ok, error, needed, provided, errors, warning, warnings, response_metadata);

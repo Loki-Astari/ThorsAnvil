@@ -174,7 +174,7 @@ struct Range
         CursorIterator<R, const T> begin()  const   {return CursorIterator<R, const T>{*rangeData, cursorhasData()};}
         CursorIterator<R, const T> end()    const   {return CursorIterator<R, const T>{*rangeData, false};}
 
-        bool        empty()                 const   {return cursorhasData();}
+        bool        empty()                 const   {return !cursorhasData();}
         std::size_t size()                  const   {return (!rangeData->ok) ? 0 : rangeData->size();}
 
         bool        isOk()                  const   {return static_cast<bool>(*rangeData);}

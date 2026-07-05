@@ -47,6 +47,7 @@ struct FileComment
     std::string                 user;
     std::time_t                 created;
 };
+using OptFileComment = std::optional<FileComment>;
 
 struct FileChange
 {
