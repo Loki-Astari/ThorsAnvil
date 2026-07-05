@@ -86,7 +86,7 @@ struct ShortCutMessage
     std::string             trigger_id;     // A temporary ID generated for the interaction in your app. This value can be used to open modals.
     std::string             response_url;   // A temporary webhook that can be used to send messages in response to interactions. This field will only be included for message shortcuts. If you want to send messages in response to global shortcuts, read this guide.
     SlackUser               user;           // The user who initiated the shortcut.
-    Message                 message;        // The message that the user initiated the shortcut from. This field will only be included for message shortcuts. This will include the full structure of the message.
+    Event::Message          message;        // The message that the user initiated the shortcut from. This field will only be included for message shortcuts. This will include the full structure of the message.
     SlackChannel            channel;        // The channel that the source message was located in. This field will only be included for message shortcuts.
     SlackTeam               team;           // The workspace (what we used to call a team) that the shortcut was initiated in.
     std::string             token;          // A deprecated verification token feature. You should validate the request payload, however, and the best way to do so is to use the signing secret provided to your app.

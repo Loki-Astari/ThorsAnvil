@@ -65,7 +65,7 @@ struct StopStreamReply
     bool                        ok      = false;
     std::string                 channel;
     std::string                 ts;
-    Message                     message;
+    Event::Message              message;
     ThorsAnvil_VariantSerializer(ThorsAnvil::Slack::API::Chat::StopStreamReply);
 };
 
