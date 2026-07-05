@@ -6,6 +6,7 @@
 
 .claude
 .clangd
+.prompt-history/
 
 unittest
 coverage/
