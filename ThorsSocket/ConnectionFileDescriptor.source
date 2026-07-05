@@ -18,6 +18,7 @@ IOData FileDescriptor::readFromStream(char* buffer, std::size_t size)
 {
     ssize_t chunkRead = ::read(getReadFD(), buffer, size);
     if (chunkRead == 0) {
+        ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::FileDescriptor", "readFromStream", "Read: 0");
         return {0, false, false};
     }
     if (chunkRead == -1)
@@ -64,6 +65,7 @@ IOData FileDescriptor::readFromStream(char* buffer, std::size_t size)
                 );
         }
     }
+    ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::FileDescriptor", "readFromStream", "Read: ", chunkRead);
     return {static_cast<std::size_t>(chunkRead), true, false};
 }
 
@@ -122,6 +124,7 @@ IOData FileDescriptor::writeToStream(char const* buffer, std::size_t size)
                 );
         }
     }
+    ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::FileDescriptor", "writeToStream", "Wrote: ", chunkWritten);
     return {static_cast<std::size_t>(chunkWritten), true, false};
 }
 }

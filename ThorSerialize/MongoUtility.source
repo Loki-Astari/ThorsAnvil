@@ -17,9 +17,10 @@ ObjectID::ObjectID(std::int32_t timestamp, std::int64_t random, std::int32_t cou
 {}
 
 THORS_SERIALIZER_HEADER_ONLY_INCLUDE
-ObjectID::ObjectID(std::string const& idStr)
+ObjectID::ObjectID(std::string_view idStr)
 {
-    std::stringstream idStrStream(idStr);
+    // TODO: In C++26 we can get rid of the copy.
+    std::istringstream idStrStream{std::string{idStr}};
     idStrStream >> (*this);
 }
 

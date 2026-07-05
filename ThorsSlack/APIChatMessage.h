@@ -3,6 +3,7 @@
 
 
 #include "ThorsSlackConfig.h"
+#include "EventMessage.h"
 #include "APIChat.h"
 
 namespace ThorsAnvil::Slack::API::Chat
@@ -140,7 +141,7 @@ struct POSTMessageReply
     bool                        ok      = false;
     std::string                 channel;
     std::string                 ts;
-    Message                     message;
+    Event::Message              message;
     ThorsAnvil_VariantSerializer(ThorsAnvil::Slack::API::Chat::POSTMessageReply);
 };
 
@@ -165,7 +166,7 @@ struct UpdateReply
     std::string                 channel;
     std::string                 ts;
     std::string                 text;
-    Message                     message;
+    Event::Message              message;
     ThorsAnvil_VariantSerializer(ThorsAnvil::Slack::API::Chat::UpdateReply);
 };
 

@@ -167,7 +167,19 @@ void EventHandler::eventAction(int fd, EventType type)
 {
     try
     {
-        ThorsLogTrace("ThorsAnvil::Nisse::Server::EventHandler", "eventAction", "Event callback", fd);
+        // Don't Log here.
+        //      ThorsLogTrace("ThorsAnvil::Nisse::Server::EventHandler", "eventAction", "Event callback", fd);
+        //  The std::visit() will call one of the handlers below
+        //      * handleServerEvent
+        //      * handleStreamEvent
+        //      * handleLinkStreamEvent
+        //      * handleStreamEvent
+        //      * handlePipeEvent
+        //      * handleTimerEvent
+        //      etc....
+        //      Each of these handlers has their own logger.
+        //      So doint it here doubles the amount of logging.
+        //          Also: Timer events happen a lot. So they are marked as only logging Fine rather than Trace.
         // getStoreData() potentially may throw.
         // That is why we have a try catch block here.
         // We don't want to allow exceptions to propagate back to the libEvent loop.
@@ -232,7 +244,7 @@ void EventHandler::handlePipeStreamEvent(SharedFD& info, int fd, EventType type)
 NISSE_HEADER_ONLY_INCLUDE
 void EventHandler::handleTimerEvent(TimerData& info, int timerId, EventType /*type*/)
 {
-    ThorsLogTrace("ThorsAnvil::Nisse::Server::EventHandler", "handleTimerEvent", "Timer Activated");
+    ThorsLogFine("ThorsAnvil::Nisse::Server::EventHandler", "handleTimerEvent", "Timer Activated");
     info.timerAction->handleRequest(timerId);
 }
 
@@ -331,7 +343,7 @@ void EventHandler::addJob(CoRoutine& work, int fd)
 NISSE_HEADER_ONLY_INCLUDE
 void EventHandler::controlTimerAction()
 {
-    ThorsMessage(8, "EventHandler", "controlTimerAction", "Checking state of connections");
+    ThorsLogFine("EventHandler", "controlTimerAction", "Checking state of connections");
     if (stopping) {
         ThorsLogInfo("ThorsAnvil::Nisse::Server::EventHandler", "controlTimerAction", "Checking up on soft stop. Connection Count: ", store.getOpenConnections());
         if (store.getOpenConnections() == 0) {

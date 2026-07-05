@@ -322,6 +322,7 @@ IOData SocketClient::readFromStream(char* buffer, std::size_t size)
 {
     int chunkRead = ::recv(socketInfo.getFD(), buffer, size, 0);
     if (chunkRead == 0) {
+        ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::SocketClient", "readFromStream", "Read: 0");
         return {0, false, false};
     }
     if (chunkRead == SOCKET_ERROR)
@@ -369,6 +370,7 @@ IOData SocketClient::readFromStream(char* buffer, std::size_t size)
             }
         }
     }
+    ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::SocketClient", "readFromStream", "Read: ", chunkRead);
     return {static_cast<std::size_t>(chunkRead), true, false};
 }
 
@@ -425,6 +427,7 @@ IOData SocketClient::writeToStream(char const* buffer, std::size_t size)
             }
         }
     }
+    ThorsLogLowLevel("ThorsAnvil::ThorsSocket::ConnectionType::SocketClient", "writeToStream", "Wrote: ", chunkWritten);
     return {static_cast<std::size_t>(chunkWritten), true, false};
 }
 

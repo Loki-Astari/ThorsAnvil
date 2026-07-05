@@ -2,6 +2,7 @@
 #define THORSANVIL_SLACK_API_CONVERSATION_HISTORY_H
 
 #include "ThorsSlackConfig.h"
+#include "EventMessage.h"
 #include "API.h"
 
 namespace ThorsAnvil::Slack::API::Conversation
@@ -64,7 +65,7 @@ struct HistoryReply
     bool                ok          = false;
     std::string         latest;
     std::string         oldest;
-    VecMessage          messages;
+    Event::VecMessage   messages;
     bool                has_more;
     bool                is_limited;
     int                 pin_count;

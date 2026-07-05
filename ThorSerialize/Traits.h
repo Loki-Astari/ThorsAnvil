@@ -295,8 +295,8 @@
  * Macros for counting the number of arguments
  * Currently set up for a max of 20.
  */
-#define NUM_ARGS(...)          NUM_ARGS_(0, __VA_ARGS__, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 00, Ignore)
-#define NUM_ARGS_(Zero, One, I1, I2, I3, I4 ,I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, I16, I17, I18, I19, I20, I21, I22, I23, I24, I25, I26, I27, I28, I29, I30, I31, I32, I33, I34, I35, I36, I37, I38, I39, I40, I41, I42, I43, A, ...)  A
+#define NUM_ARGS(...)          NUM_ARGS_(0, __VA_ARGS__, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 00, Ignore)
+#define NUM_ARGS_(Zero, One, I1, I2, I3, I4 ,I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, I16, I17, I18, I19, I20, I21, I22, I23, I24, I25, I26, I27, I28, I29, I30, I31, I32, I33, I34, I35, I36, I37, I38, I39, I40, I41, I42, I43, I44, I45, I46, I47, I48, A, ...)  A
 
 /*
  * Macros to quote the parameter
@@ -326,6 +326,11 @@
 #define REP_OF_N_(Act, TC, P1, Count, ...)  REP_OF_ ## Count(Act, TC, P1, __VA_ARGS__)
 
 #define REP_OF_PACK(Act, TC, P1, P2, ...)   PACK_ ## Act(TC, P1)
+#define REP_OF_48(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_47(Act, TC, P1, __VA_ARGS__)
+#define REP_OF_47(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_46(Act, TC, P1, __VA_ARGS__)
+#define REP_OF_46(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_45(Act, TC, P1, __VA_ARGS__)
+#define REP_OF_45(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_44(Act, TC, P1, __VA_ARGS__)
+#define REP_OF_44(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_43(Act, TC, P1, __VA_ARGS__)
 #define REP_OF_43(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_42(Act, TC, P1, __VA_ARGS__)
 #define REP_OF_42(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_41(Act, TC, P1, __VA_ARGS__)
 #define REP_OF_41(Act, TC, P1, P2, ...)     EXPAND(Act, TC, P1 ,P2), REP_OF_40(Act, TC, P1, __VA_ARGS__)
@@ -375,6 +380,11 @@
 #define ALT_REP_OF_N_(Act, E, P, S, Count) ALT_REP_OF_ ## Count(Act, E, P, S)
 
 #define ALT_REP_OF_PACK(Act, E, P, S)   PACK_ ## Act(E, PACK)
+#define ALT_REP_OF_48(Act, E, P, S)     P ALT_EXPAND(Act, E, 48), ALT_REP_OF_47(Act,  ,  , S)
+#define ALT_REP_OF_47(Act, E, P, S)     P ALT_EXPAND(Act, E, 47), ALT_REP_OF_46(Act,  ,  , S)
+#define ALT_REP_OF_46(Act, E, P, S)     P ALT_EXPAND(Act, E, 46), ALT_REP_OF_45(Act,  ,  , S)
+#define ALT_REP_OF_45(Act, E, P, S)     P ALT_EXPAND(Act, E, 45), ALT_REP_OF_44(Act,  ,  , S)
+#define ALT_REP_OF_44(Act, E, P, S)     P ALT_EXPAND(Act, E, 44), ALT_REP_OF_43(Act,  ,  , S)
 #define ALT_REP_OF_43(Act, E, P, S)     P ALT_EXPAND(Act, E, 43), ALT_REP_OF_42(Act,  ,  , S)
 #define ALT_REP_OF_42(Act, E, P, S)     P ALT_EXPAND(Act, E, 42), ALT_REP_OF_41(Act,  ,  , S)
 #define ALT_REP_OF_41(Act, E, P, S)     P ALT_EXPAND(Act, E, 41), ALT_REP_OF_40(Act,  ,  , S)
@@ -425,6 +435,11 @@
 #define REP_CMD_OF_N_(Act, TC, P1, Forward, Count, ...)  REP_CMD_OF_ ## Count(Act, TC, P1, Forward, __VA_ARGS__)
 
 #define REP_CMD_OF_PACK(Act, TC, P1, Forward, P2, ...)   PACK_ ## Act(TC, P1, Forward ,P2)
+#define REP_CMD_OF_48(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_47(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_47(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_46(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_46(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_45(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_45(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_44(Act, TC, P1, P2, __VA_ARGS__)
+#define REP_CMD_OF_44(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_43(Act, TC, P1, P2, __VA_ARGS__)
 #define REP_CMD_OF_43(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_42(Act, TC, P1, P2, __VA_ARGS__)
 #define REP_CMD_OF_42(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_41(Act, TC, P1, P2, __VA_ARGS__)
 #define REP_CMD_OF_41(Act, TC, P1, Forward, P2, ...)     Act(TC, P1, Forward ,P2)  REP_CMD_OF_40(Act, TC, P1, P2, __VA_ARGS__)
