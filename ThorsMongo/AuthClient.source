@@ -1,4 +1,7 @@
 
+#ifdef __linux__
+#include <fstream>
+#endif
 #if !defined(__WINNT__)
 #include <sys/utsname.h>
 #endif
@@ -30,55 +33,7 @@ Driver::Driver()
 THORS_MONGO_HEADER_ONLY_INCLUDE
 OS::OS()
 {
-#ifdef __WINNT__
-    // TODO This is wrong figure out correct values.
-    // Fix: test/HandShakeTest.cpp: TEST(HandShakeTest, CreateOS) Currently  Line 83
-    type         = "MSYS_NT";       // uname -s | awk -F- '{print $1}'
-    name         = "Msys";          // unmae -o
-    architecture = "x86_64";        // uname -m
-    version      = "3.4.7.x86_64";  // uname -r
-#else
-    using UtsName = struct utsname;
-    UtsName  buffer;
-    int result = uname(&buffer);
-    if (result != 0)
-    {
-        type = "unknown";
-        return;
-    }
-    type         = buffer.sysname;
-    architecture = buffer.machine;
-    version      = buffer.release;
-#if defined(__APPLE__)
-    FILE* fp = popen("sw_vers -productName", "r");
-#elif defined(__linux__)
-    FILE* fp = popen("lsb_release -a", "r");
-#endif
-    if (fp == nullptr)
-    {
-        ThorsLogAndThrowFatal(std::runtime_error, "ThorsAnvil::DB::Mongo::OS", "OS", "Can not get OS Information");
-    }
-    char pBuffer[100];
-    std::string nameBuilder;
-    while (fgets(pBuffer, sizeof(pBuffer), fp) != NULL)
-    {
-#if defined(__APPLE__)
-
-        nameBuilder += pBuffer;
-#elif defined(__linux__)
-        char pValue[100];
-        if (sscanf(pBuffer, " Distributor ID: %s", pValue) == 1)
-        {
-            nameBuilder = pValue;
-        }
-#endif
-    }
-    if (nameBuilder[nameBuilder.size() -1] == '\n')
-    {
-        nameBuilder.resize(nameBuilder.size() -1);
-    }
-    name = nameBuilder;
-#endif
+    getOS();
 
     if (name && name.value() == "") {
         name.reset();
@@ -90,6 +45,100 @@ OS::OS()
         version.reset();
     }
 }
+
+#ifdef __WINNT__
+THORS_MONGO_HEADER_ONLY_INCLUDE
+void OS::getOS/*Win*/()
+{
+    // TODO This is wrong figure out correct values.
+    // Fix: test/HandShakeTest.cpp: TEST(HandShakeTest, CreateOS) Currently  Line 83
+    type         = "MSYS_NT";       // uname -s | awk -F- '{print $1}'
+    name         = "Msys";          // unmae -o
+    architecture = "x86_64";        // uname -m
+    version      = "3.4.7.x86_64";  // uname -r
+}
+#endif
+#ifdef __APPLE__
+THORS_MONGO_HEADER_ONLY_INCLUDE
+void OS::getOS/*Apple*/()
+{
+    using UtsName = struct utsname;
+    UtsName  buffer;
+    int result = uname(&buffer);
+    if (result != 0)
+    {
+        type = "unknown";
+        return;
+    }
+    type         = buffer.sysname;
+    architecture = buffer.machine;
+    version      = buffer.release;
+    FILE* fp = popen("sw_vers -productName", "r");
+    if (fp == nullptr)
+    {
+        ThorsLogAndThrowFatal(std::runtime_error, "ThorsAnvil::DB::Mongo::OS", "OS", "Can not get OS Information");
+    }
+    char pBuffer[100];
+    std::string nameBuilder;
+    while (fgets(pBuffer, sizeof(pBuffer), fp) != NULL)
+    {
+        nameBuilder += pBuffer;
+    }
+    if (nameBuilder[nameBuilder.size() -1] == '\n')
+    {
+        nameBuilder.resize(nameBuilder.size() -1);
+    }
+    name = nameBuilder;
+}
+#endif
+#ifdef __linux__
+THORS_MONGO_HEADER_ONLY_INCLUDE
+void OS::getOS/*Linux*/()
+{
+    using UtsName = struct utsname;
+    UtsName  buffer;
+    int result = uname(&buffer);
+    if (result != 0)
+    {
+        type = "unknown";
+        return;
+    }
+    type         = buffer.sysname;
+    architecture = buffer.machine;
+    version      = buffer.release;
+
+    std::ifstream osRelease("/etc/os-release");
+    if (!osRelease) {
+        osRelease.open("/usr/lib/os-release");
+    }
+    std::string line;
+    while (std::getline(osRelease, line))
+    {
+        // Prefer NAME=, but ID= is a fine fallback.
+        std::string_view view(line);
+        if (view.starts_with("NAME=\""))
+        {
+            view.remove_prefix(5);
+            if (view.size() >= 2 && view.front() == '"' && view.back() == '"')
+            {
+                view.remove_prefix(1);
+                view.remove_suffix(1);
+            }
+            name = std::string(view);
+            break;
+        }
+        if (view.starts_with("ID="))
+        {
+            view.remove_prefix(3);
+            name = std::string(view);
+            break;
+        }
+    }
+    if (!name || name.value() == "") {
+        name = "linux";
+    }
+}
+#endif
 
 /*
  * The name of the application.

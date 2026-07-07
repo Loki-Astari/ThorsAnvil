@@ -62,6 +62,7 @@ struct OS
     std::optional<std::string>  version;
 
     OS();
+    void getOS();
 };
 
 struct Application
