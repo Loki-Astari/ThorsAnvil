@@ -1,6 +1,0 @@
-#!/bin/bash
-
-if command -v apt-get ; then
-    echo 'sudo apt-get update -y && sudo apt-get install lsb-release -y && sudo apt-get clean all'
-fi
-
