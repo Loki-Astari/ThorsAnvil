@@ -31,3 +31,6 @@
 [submodule "third/NisseBolt"]
 	path = third/NisseBolt
 	url = ../../Loki-Astari/NisseBolt.git
+[submodule "third/NisseMCP"]
+	path = third/NisseMCP
+	url = ../../Loki-Astari/NisseMCP.git
